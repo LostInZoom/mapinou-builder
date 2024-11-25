@@ -1,0 +1,13 @@
+@use "../../node_modules/ol/ol.css";
+
+#map {
+    position: absolute;
+    top: 0;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+}
+  
+.ol-zoom {
+    display: none;
+}
