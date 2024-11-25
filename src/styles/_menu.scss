@@ -15,7 +15,7 @@
     height: 100%;
     width: 100%;
     display: flex;
-    transition: transform .2s ease-out;
+    transition: transform .3s ease-in-out;
 }
 
 .menu-container {
@@ -60,13 +60,22 @@
     z-index: 10;
 }
 
-.button-home {
+#button-home {
     margin: 10px;
+    height: 20px;
+    width: 20px;
 
-    & > img {
-        color: #AB7C94;
+    padding: 10px;
+    border-radius: 50%;
+    background: map.get($map: colors.$default, $key: "main");
+
+    cursor: pointer;
+
+    & > svg {
+        color: white;
         height: 20px;
         width: 20px;
+        pointer-events: none;
     }
     
 }

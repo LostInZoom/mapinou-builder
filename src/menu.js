@@ -1,8 +1,8 @@
 import Basemap from './map.js';
-import { makeElement } from './utils/dom.js';
+import { makeDiv, addSVG } from './utils/dom.js';
 
 function initialize() {
-    let target = makeElement('', '', 'application');
+    let target = makeDiv('application');
     document.body.append(target);
 
     let application = new Application(target);
@@ -11,15 +11,15 @@ function initialize() {
 class Application {
     constructor(parent) {
         this.parent = parent;
-        this.container = makeElement('', '', 'container');
-        this.home = makeElement('menu-container', '', 'home');
-        this.game = makeElement('menu-container', '', 'game');
+        this.container = makeDiv('container');
+        this.home = makeDiv('home', 'menu-container');
+        this.game = makeDiv('game', 'menu-container');
         this.buttons = [];
 
-        this.homebutton = makeElement('button-home button-game button', "<object type='image/svg+xml' data='./src/img/home.svg' class='button-home'>home</object>");
-        
-        // `<img src='./src/img/home.svg' />`);
-        
+        this.homebutton = makeDiv('button-home', 'button-game button');
+        addSVG(this.homebutton, './src/img/home.svg');
+        this.homebutton.addEventListener('click', this.menu);
+
         this.game.append(this.homebutton);
 
         this.#addButton('Start', this.home, this.play);
@@ -35,8 +35,12 @@ class Application {
         e.target.parentNode.parentNode.style.transform = 'translateX(-100%)'
     }
 
+    menu(e) {
+        e.target.parentNode.parentNode.style.transform = 'translateX(0%)'
+    }
+
     #addButton(content, parent, listener) {
-        let b = makeElement('button-menu button', content);
+        let b = makeDiv('', 'button-menu button', content);
         
         if (typeof listener !== 'undefined') {
             b.addEventListener('click', listener);

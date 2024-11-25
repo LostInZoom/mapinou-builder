@@ -4,13 +4,13 @@ import TileLayer from 'ol/layer/Tile.js';
 import WMTS from 'ol/source/WMTS.js';
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 
-import { makeElement } from './utils/dom';
+import { makeDiv } from './utils/dom';
 
 class Basemap {
     constructor(parent) {
         this.parent = parent;
         this.index = 'map';
-        this.target = makeElement('olmap', '', this.index);
+        this.target = makeDiv(this.index, 'olmap');
         this.parent.append(this.target);
 
         this.view = new View({

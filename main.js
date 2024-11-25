@@ -4,4 +4,6 @@ import './src/map.js';
 
 import initialize from './src/menu.js';
 
-initialize();
+window.addEventListener('DOMContentLoaded', function(e) {
+    initialize();
+});
