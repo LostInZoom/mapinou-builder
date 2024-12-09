@@ -4,6 +4,8 @@ import TileLayer from 'ol/layer/Tile.js';
 import WMTS from 'ol/source/WMTS.js';
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 
+import proj4 from 'proj4';
+
 import { makeDiv } from './utils/dom';
 
 class Basemap {
@@ -12,11 +14,7 @@ class Basemap {
         this.index = 'map';
         this.target = makeDiv(this.index, 'olmap');
         this.parent.append(this.target);
-
-        this.view = new View({
-            center: [ 300967, 5646393 ],
-            zoom: 16
-        });
+        this.view = new View();
 
         this.baselayer = new TileLayer({
             preload: 'Infinity',
@@ -47,6 +45,19 @@ class Basemap {
             view: this.view,
         });
     }
+
+    setCenter(center) {
+        this.view.setCenter(center);
+    }
+
+    setZoom(zoom) {
+        this.view.setZoom(zoom);
+    }
 };
 
+function project(epsg1, epsg2, coordinates) {
+    return proj4(proj4.defs('EPSG:' + epsg1), proj4.defs('EPSG:' + epsg2), coordinates);
+}
+
+export { project }
 export default Basemap
