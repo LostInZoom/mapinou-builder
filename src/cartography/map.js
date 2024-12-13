@@ -3,18 +3,53 @@ import View from 'ol/View.js';
 import TileLayer from 'ol/layer/Tile.js';
 import WMTS from 'ol/source/WMTS.js';
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
+import VectorLayer from 'ol/layer/Vector.js';
+import VectorSource from 'ol/source/Vector.js';
+import { Feature } from 'ol';
+import { Point } from 'ol/geom.js';
+import {
+    Circle as CircleStyle,
+    Fill,
+    Stroke,
+    Style,
+} from 'ol/style.js';
 
 import proj4 from 'proj4';
 
-import { makeDiv } from './utils/dom';
+import { makeDiv } from '../utils/dom';
 
 class Basemap {
-    constructor(parent) {
-        this.parent = parent;
+    constructor(application) {
+        this.parent = application.gamenode;
+        this.application = application;
         this.index = 'map';
         this.target = makeDiv(this.index, 'olmap');
         this.parent.append(this.target);
         this.view = new View();
+        this.player = new Feature({
+            type: 'player',
+            geometry: null,
+        });
+        this.styles = {
+            'player': new Style({
+                image: new CircleStyle({
+                    radius: 7,
+                    fill: new Fill({
+                        color: this.application.colors[this.application.theme]['main']
+                    }),
+                    stroke: new Stroke({
+                        color: 'white',
+                        width: 2,
+                    }),
+                }),
+            }),
+            'route': new Style({
+                    stroke: new Stroke({
+                    width: 6,
+                    color: [100, 100, 100, 0.5],
+                }),
+            })
+        };
 
         this.baselayer = new TileLayer({
             preload: 'Infinity',
@@ -53,7 +88,25 @@ class Basemap {
     setZoom(zoom) {
         this.view.setZoom(zoom);
     }
+
+    setPlayer(position) {
+        this.player.setGeometry(new Point(position));
+        const playerLayer = new VectorLayer({
+            source: new VectorSource({
+                features: [ this.player ],
+            }),
+            style: this.styles['player'],
+            zIndex: 50,
+        });
+
+        this.map.addLayer(playerLayer);
+    }
+
+    updatePlayer(position) {
+        this.player.setGeometry(new Point(position));
+    }
 };
+
 
 function project(epsg1, epsg2, coordinates) {
     return proj4(proj4.defs('EPSG:' + epsg1), proj4.defs('EPSG:' + epsg2), coordinates);

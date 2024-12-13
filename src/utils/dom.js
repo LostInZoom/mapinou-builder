@@ -26,4 +26,32 @@ function addSVG(target, url) {
     ajaxGet(url, (svg) => { target.innerHTML = svg; });
 }
 
-export { makeDiv, addSVG }
+/**
+ * Retrieve the SCSS color variables.
+ * @param  {String} themes The themes to retrieve the colors from.
+ * @return {Object}        Css colors.
+ */
+function getCSSColors(...themes) {
+    let colors = {};
+    for (let i = 0; i < themes.length; i++) {
+        let theme = themes[i];
+        let colorDiv = makeDiv(theme + '-theme', null, 'css-theme');
+        document.body.append(colorDiv);
+        let bodyBeforeContent = window.getComputedStyle(colorDiv, ':before').content || '';
+        colors[themes[i]] = JSON.parse(JSON.parse(bodyBeforeContent.replace(/,\}/, '}')));
+        colorDiv.remove();
+    }
+    return colors;
+}
+
+/**
+ * Remove element from the DOM.
+ * @param {DOMElement} args The DOM Elements to remove.
+ */
+function remove(...args) {
+    for (let i = 0; i < args.length; i++) {
+        args[i].remove();
+    }
+}
+
+export { makeDiv, addSVG, getCSSColors, remove }
