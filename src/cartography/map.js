@@ -6,7 +6,7 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 import VectorLayer from 'ol/layer/Vector.js';
 import VectorSource from 'ol/source/Vector.js';
 import { Feature } from 'ol';
-import { Point } from 'ol/geom.js';
+import { Point, LineString } from 'ol/geom.js';
 import {
     Circle as CircleStyle,
     Fill,
@@ -26,10 +26,7 @@ class Basemap {
         this.target = makeDiv(this.index, 'olmap');
         this.parent.append(this.target);
         this.view = new View();
-        this.player = new Feature({
-            type: 'player',
-            geometry: null,
-        });
+
         this.styles = {
             'player': new Style({
                 image: new CircleStyle({
@@ -43,13 +40,31 @@ class Basemap {
                     }),
                 }),
             }),
-            'route': new Style({
+            'path': new Style({
                     stroke: new Stroke({
                     width: 6,
-                    color: [100, 100, 100, 0.5],
+                    color: this.application.colors[this.application.theme]['main-transparent'],
                 }),
             })
         };
+        
+        this.player = new Feature({ type: 'player' });
+        this.playerLayer = new VectorLayer({
+            source: new VectorSource({
+                features: [ this.player ],
+            }),
+            style: this.styles['player'],
+            zIndex: 50,
+        });
+
+        this.path = new Feature({ type: 'path' });
+        this.pathLayer = new VectorLayer({
+            source: new VectorSource({
+                features: [ this.path ],
+            }),
+            style: this.styles['path'],
+            zIndex: 10,
+        });
 
         this.baselayer = new TileLayer({
             preload: 'Infinity',
@@ -76,9 +91,10 @@ class Basemap {
 
         this.map = new Map({
             target: this.index,
-            layers: [ this.baselayer ],
+            layers: [ this.playerLayer, this.pathLayer, this.baselayer ],
             view: this.view,
         });
+
     }
 
     setCenter(center) {
@@ -91,19 +107,10 @@ class Basemap {
 
     setPlayer(position) {
         this.player.setGeometry(new Point(position));
-        const playerLayer = new VectorLayer({
-            source: new VectorSource({
-                features: [ this.player ],
-            }),
-            style: this.styles['player'],
-            zIndex: 50,
-        });
-
-        this.map.addLayer(playerLayer);
     }
 
-    updatePlayer(position) {
-        this.player.setGeometry(new Point(position));
+    setPath(vertexes) {
+        this.path.setGeometry(new LineString(vertexes));
     }
 };
 
