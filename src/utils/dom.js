@@ -54,4 +54,14 @@ function remove(...args) {
     }
 }
 
-export { makeDiv, addSVG, getCSSColors, remove }
+/**
+ * Remove all elements inside the DOM element.
+ * @param {DOMElement} element The DOM Elements to clear.
+ */
+function clearElement(element) {
+    for (let i = 0; i < element.children.length; i++) {
+        element.childNodes[i].remove();
+    }
+}
+
+export { clearElement, makeDiv, addSVG, getCSSColors, remove }

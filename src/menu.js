@@ -1,22 +1,5 @@
-import Basemap from './cartography/map.js';
 import Game from './game.js';
-import Router from './cartography/routing.js';
 import { makeDiv, addSVG, getCSSColors } from './utils/dom.js';
-
-import VectorLayer from 'ol/layer/Vector.js';
-import VectorSource from 'ol/source/Vector.js';
-import { Feature } from 'ol';
-import { Point, LineString } from 'ol/geom.js';
-import {
-    Circle as CircleStyle,
-    Fill,
-    Stroke,
-    Style,
-} from 'ol/style.js';
-import {getVectorContext} from 'ol/render.js';
-
-import { ajaxGet } from './utils/ajax.js';
-import { project } from './cartography/map.js';
 
 function initialize() {
     let target = makeDiv('application');
@@ -27,26 +10,23 @@ function initialize() {
 class Application {
     constructor(parent) {
         this.parent = parent;
+        this.game;
         this.theme = 'default';
         this.colors = getCSSColors(this.theme);
         this.container = makeDiv('container');
-        this.loader = makeDiv('loading-container');
         this.homenode = makeDiv('home', 'menu-container');
         this.gamenode = makeDiv('game', 'menu-container');
         this.buttons = [];
+        this.continueButton;
 
-        this.homebutton = makeDiv('button-home', 'button-game button');
-        addSVG(this.homebutton, './src/img/home.svg');
-        this.homebutton.addEventListener('click', (e) => {
-            this.container.style.transform = 'translateX(0%)'
-        })
-
-        this.gamenode.append(this.loader, this.homebutton);
-
-        let start = this.addButton('Start', this.homenode);
+        let start = this.addButton('New Game', this.homenode);
         start.addEventListener('click', (e) => {
+            if (this.game !== undefined) {
+                this.game.destroy();
+            }
             this.game = new Game(this);
             this.container.style.transform = 'translateX(-100%)'
+           
         })
 
         let home = this.addButton('Tutorial', this.homenode);
@@ -56,11 +36,27 @@ class Application {
         this.parent.append(this.container);
     }
 
-    addButton(content, parent) {
+    addButton(content, parent, start=false) {
         let b = makeDiv('', 'button-menu button', content);
-        parent.append(b);
-        this.buttons.push(b);
+        if (start) {
+            parent.insertBefore(b, parent.firstChild)
+            this.buttons.unshift(b);
+        } else {
+            parent.append(b);
+            this.buttons.push(b);
+        }
         return b
+    }
+
+    addContinueButton() {
+        if (this.continueButton === undefined) {
+            let b = makeDiv('button-continue', 'button-menu button', 'Continue');
+            b.addEventListener('click', (e) => {
+                this.container.style.transform = 'translateX(-100%)'
+            });
+            this.homenode.append(b);
+            this.continueButton = b;
+        }
     }
 }
 

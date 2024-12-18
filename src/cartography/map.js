@@ -16,6 +16,7 @@ import {
 
 import proj4 from 'proj4';
 
+import { buffer } from './analysis';
 import { makeDiv } from '../utils/dom';
 
 class Basemap {
@@ -23,8 +24,8 @@ class Basemap {
         this.parent = application.gamenode;
         this.application = application;
         this.index = 'map';
-        this.target = makeDiv(this.index, 'olmap');
-        this.parent.append(this.target);
+        this.div = makeDiv(this.index, 'olmap');
+        this.parent.append(this.div);
         this.view = new View();
 
         this.styles = {
@@ -32,7 +33,7 @@ class Basemap {
                 image: new CircleStyle({
                     radius: 7,
                     fill: new Fill({
-                        color: this.application.colors[this.application.theme]['main']
+                        color: this.application.colors[this.application.theme]['player']
                     }),
                     stroke: new Stroke({
                         color: 'white',
@@ -40,10 +41,43 @@ class Basemap {
                     }),
                 }),
             }),
-            'path': new Style({
+            'target': new Style({
+                image: new CircleStyle({
+                    radius: 7,
+                    fill: new Fill({
+                        color: this.application.colors[this.application.theme]['target']
+                    }),
                     stroke: new Stroke({
+                        color: 'white',
+                        width: 2,
+                    }),
+                }),
+            }),
+            'pitfalls': new Style({
+                image: new CircleStyle({
+                    radius: 7,
+                    fill: new Fill({
+                        color: this.application.colors[this.application.theme]['pitfalls']
+                    }),
+                    stroke: new Stroke({
+                        color: 'white',
+                        width: 2,
+                    }),
+                }),
+            }),
+            'pitfallsArea': new Style({
+                fill: new Fill({
+                    color: this.application.colors[this.application.theme]['pitfalls-transparent']
+                }),
+                stroke: new Stroke({
+                    color: this.application.colors[this.application.theme]['pitfalls'],
+                    width: 3,
+                }),
+            }),
+            'path': new Style({
+                stroke: new Stroke({
                     width: 6,
-                    color: this.application.colors[this.application.theme]['main-transparent'],
+                    color: this.application.colors[this.application.theme]['player-transparent'],
                 }),
             })
         };
@@ -55,6 +89,30 @@ class Basemap {
             }),
             style: this.styles['player'],
             zIndex: 50,
+        });
+
+        this.target = new Feature({ type: 'target' });
+        this.targetLayer = new VectorLayer({
+            source: new VectorSource({
+                features: [ this.target ],
+            }),
+            style: this.styles['target'],
+            zIndex: 51,
+        });
+
+        this.pitfalls = [];
+        this.pitfallsLayer = new VectorLayer({
+            source: new VectorSource({}),
+            style: this.styles['pitfalls'],
+            maxZoom: 12,
+            zIndex: 49,
+        });
+
+        this.pitfallsAreaLayer = new VectorLayer({
+            source: new VectorSource({}),
+            style: this.styles['pitfallsArea'],
+            minZoom: 12,
+            zIndex: 48,
         });
 
         this.path = new Feature({ type: 'path' });
@@ -91,7 +149,14 @@ class Basemap {
 
         this.map = new Map({
             target: this.index,
-            layers: [ this.playerLayer, this.pathLayer, this.baselayer ],
+            layers: [
+                this.playerLayer,
+                this.pathLayer,
+                this.targetLayer,
+                this.pitfallsLayer,
+                this.pitfallsAreaLayer,
+                this.baselayer,
+            ],
             view: this.view,
         });
 
@@ -109,8 +174,27 @@ class Basemap {
         this.player.setGeometry(new Point(position));
     }
 
+    setTarget(position) {
+        this.target.setGeometry(new Point(position));
+    }
+
     setPath(vertexes) {
         this.path.setGeometry(new LineString(vertexes));
+    }
+
+    addPitfall(coordinates) {
+        let pitfall = new Feature({
+            type: 'pitfalls',
+            geometry: new Point(coordinates)
+        });
+        this.pitfalls.push(pitfall);
+        this.pitfallsLayer.getSource().addFeature(pitfall);
+
+        let area = new Feature({
+            type: 'pitfallsArea',
+            geometry: buffer(coordinates, 500)
+        });
+        this.pitfallsAreaLayer.getSource().addFeature(area);
     }
 };
 

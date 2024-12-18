@@ -4,34 +4,79 @@ import { LineString } from "ol/geom";
 import Basemap from "./cartography/map";
 import Router from "./cartography/routing";
 import { project } from "./cartography/map";
+import { makeDiv, addSVG, clearElement } from "./utils/dom";
 
+/**
+ * Create a new game.
+ */
 class Game {
     constructor(app) {
-        this.position = [ 405076.6, 5721729.6 ];
+        this.app = app;
+        this.position = [ 270845.15, 5904541.30 ];
+        this.player = [ 396377.1, 5701254.9 ];
         this.target = [ 416553.587, 5708562.378 ];
-        this.zoom = 15;
+        this.pitfalls = [
+            [ 399537.1, 5699198.9 ],
+            [ 399416.53, 5703120.31 ],
+            [ 402172.7, 5700144.5 ],
+            [ 404291.06, 5700146.56 ],
+            [ 407776.7, 5703492.8 ],
+            [ 411222.6, 5703538.6 ],
+            [ 415029.6, 5707542.2 ],
+        ]
+
+        this.zoom = 5;
         this.zoomMovement = 14;
 
-        this.basemap = new Basemap(app);
+        this.basemap = new Basemap(this.app);
         this.basemap.setCenter(this.position);
         this.basemap.setZoom(this.zoom);
 
         // Place the player on the map
-        this.basemap.setPlayer(this.position);
+        this.basemap.setPlayer(this.player);
+        this.basemap.setTarget(this.target);
 
         // The speed in km/h of the movement on the map
         this.speed = 5000;
 
-        this.router = new Router(this.basemap, this.position);
+        this.router = new Router(this.basemap, this.player);
         this.allowMovement(this);
+        this.activatePitfalls(this);
+
+        // Create the loading screen
+        this.loader = makeDiv('loading-container');
+        // Create the home button to return to the main menu
+        this.homebutton = makeDiv('button-home', 'button-game button');
+        addSVG(this.homebutton, './src/img/home.svg');
+        // Return to the main menu by translating the whole ui
+        this.homebutton.addEventListener('click', (e) => {
+            this.app.container.style.transform = 'translateX(0%)'
+        });
+        this.app.gamenode.append(this.loader, this.homebutton);
+
+        // Wait fot the translating animation to add the continue button on the main menu
+        setTimeout(() => {
+            this.app.addContinueButton();
+        }, 300)
     }
 
-    /*
-    * This method activate a listener on the map click that allows
-    * the player to move.
-    */
+    /**
+     * This method activates the pitfalls.
+     * i.e. the obstacles the player must avoid to complete the game.
+     */
+    activatePitfalls(game) {
+        for (let i = 0; i < game.pitfalls.length; i++) {
+            game.basemap.addPitfall(game.pitfalls[i]);
+        }
+    }
+
+    /**
+     * This method activate a listener on the map click that allows
+     * the player to move.
+     */
     allowMovement(game) {
         let movement = game.basemap.map.on('click', (e) => {
+            // Allow movement only if the zoom level is high enough
             if (game.basemap.view.getZoom() >= game.zoomMovement) {
                 // Remove the listener while the animation is playing
                 unByKey(movement);
@@ -111,12 +156,18 @@ class Game {
                             console.log('end');
                         }
                     }
-
                     basemap.pathLayer.on('postrender', animatePlayer);
                     basemap.map.render();
                 });
             }
         });
+    }
+
+    destroy() {
+        this.app.gamenode.remove();
+        this.app.game = undefined;
+        this.app.gamenode = makeDiv('game', 'menu-container');
+        this.app.container.append(this.app.gamenode);
     }
 }
 
