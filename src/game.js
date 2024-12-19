@@ -5,6 +5,7 @@ import Basemap from "./cartography/map";
 import Router from "./cartography/routing";
 import { project } from "./cartography/map";
 import { makeDiv, addSVG, clearElement } from "./utils/dom";
+import { getVectorContext } from "ol/render";
 
 /**
  * Create a new game.
@@ -27,6 +28,9 @@ class Game {
 
         this.zoom = 5;
         this.zoomMovement = 14;
+        this.mode;
+        if (this.zoom >= this.zoomMovement) { this.mode = 'routing'; }
+        else { this.mode = 'navigation'; }
 
         this.basemap = new Basemap(this.app);
         this.basemap.setCenter(this.position);
@@ -52,12 +56,31 @@ class Game {
         this.homebutton.addEventListener('click', (e) => {
             this.app.container.style.transform = 'translateX(0%)'
         });
-        this.app.gamenode.append(this.loader, this.homebutton);
+
+        this.modebutton = makeDiv('mode-indicator', 'button-game');
+        if (this.zoom < this.zoomMovement) { addSVG(this.modebutton, './src/img/compass.svg'); }
+        else { addSVG(this.modebutton, './src/img/routing.svg'); }
+
+        this.basemap.map.on('moveend', (e) => {
+            let zoom = this.basemap.view.getZoom();
+            if (zoom >= this.zoomMovement && this.mode === 'navigation') {
+                this.modebutton.innerHTML = '';
+                addSVG(this.modebutton, './src/img/routing.svg');
+                this.mode = 'routing';
+            }
+            else if (zoom < this.zoomMovement && this.mode === 'routing') {
+                this.modebutton.innerHTML = '';
+                addSVG(this.modebutton, './src/img/compass.svg');
+                this.mode = 'navigation';
+            }
+        });
+        
+        this.app.gamenode.append(this.loader, this.homebutton, this.modebutton);
 
         // Wait fot the translating animation to add the continue button on the main menu
         setTimeout(() => {
             this.app.addContinueButton();
-        }, 300)
+        }, 300);
     }
 
     /**
@@ -90,10 +113,6 @@ class Game {
                     const basemap = game.basemap;
                     const router = game.router;
 
-                    let pathGeometry = game.basemap.path.getGeometry();
-                    let first = false;
-                    if (pathGeometry === undefined) { first = true; }
-
                     // Retrieve the vertexes composing the calculated route
                     const vertexes = [];
                     const nodes = result.geometry.coordinates;
@@ -102,16 +121,7 @@ class Game {
                     }
 
                     let destination = vertexes[vertexes.length - 1]
-                    let growingVertexes, finalVertexes;
-                    if (first) {
-                        growingVertexes = [ vertexes[0] ];
-                        finalVertexes = vertexes;
-                    } else {
-                        growingVertexes = pathGeometry.getCoordinates();
-                        growingVertexes.pop();
-                        finalVertexes = growingVertexes.concat(vertexes);
-                    }
-
+                    
                     // Create the path line and calculate its length
                     const line = new LineString(vertexes);
                     const length = line.getLength();
@@ -120,11 +130,16 @@ class Game {
                     let distance = 0;
 
                     // Get the speed in meters/second
-                    const speed = game.speed / 3.6;              
+                    const speed = game.speed / 3.6;
+                    const position = basemap.player.getGeometry().clone();
+
+                    let path = game.basemap.path.getGeometry();
+                    if (path !== undefined) { path = path.clone(); }
 
                     function animatePlayer(event) {
                         // Get the current time
                         const time = event.frameState.time;
+                        const context = getVectorContext(event);
                         // Calculate the elapsed time in seconds
                         const elapsed = (time - lastTime) / 1000;
                         // Calculate the distance traveled depending on the elapsed time and the speed
@@ -136,28 +151,48 @@ class Game {
                         if (distance < length) {
                             // Calculate the position of the point along the route line
                             let newPosition = line.getCoordinateAt(distance / length);
-                            // Add the position to the growing vertexes and redraw the path
-                            growingVertexes.push(newPosition);
-                            game.basemap.setPath(growingVertexes);
-                            // Update the player position
-                            basemap.setPlayer(newPosition);
+                        
+                            if (path === undefined) { path = new LineString([ vertexes[0], newPosition ]); }
+                            else { path.appendCoordinate(newPosition); }
+
+                            context.setStyle(basemap.styles['path']);
+                            context.drawGeometry(path);
+
+                            position.setCoordinates(newPosition);
+                            context.setStyle(basemap.styles['player']);
+                            context.drawGeometry(position);
+
                             // Render the map to trigger the listener
                             basemap.map.render();
                         }
                         // Here, the journey is over
                         else {
+                            // Redraw on context to avoid flickering
+                            context.setStyle(basemap.styles['path']);
+                            context.drawGeometry(path);
+                            context.setStyle(basemap.styles['player']);
+                            context.drawGeometry(position);
+
+                            // Removing the render listener
+                            basemap.player.setGeometry(position);
+                            basemap.path.setGeometry(path);
+
+                            // game.basemap.setPath(finalVertexes);
+                            router.setPosition(destination);
+
                             // Removing the render listener
                             basemap.pathLayer.un('postrender', animatePlayer);
-                            game.basemap.setPath(finalVertexes);
-                            router.setPosition(destination);
-                            basemap.setPlayer(destination);
+
                             // Reactivate movement on the map
                             game.allowMovement(game);
                             console.log('end');
                         }
                     }
+
+                    basemap.player.setGeometry(null);
+                    basemap.path.setGeometry(null);
                     basemap.pathLayer.on('postrender', animatePlayer);
-                    basemap.map.render();
+                    // basemap.map.render();
                 });
             }
         });
