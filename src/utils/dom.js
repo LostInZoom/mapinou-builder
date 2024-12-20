@@ -18,6 +18,61 @@ function makeDiv(id=null, c=null, html=null, parent=null) {
 }
 
 /**
+ * Check if the given element has the class.
+ * @param  {DOMElement} e Element to check.
+ * @param  {String} c     Class to check.
+ */
+function hasClass(e, c) {
+    if (e.classList)
+        return e.classList.contains(c)
+    else
+        return !!e.c.match(new RegExp('(\\s|^)' + c + '(\\s|$)'))
+};
+
+/**
+ * Remove the given class from a given element.
+ * @param  {DOMElement} e Element to remove the class from.
+ * @param  {String} c     Class to remove.
+ */
+function removeClass(e, c) {
+    if (e.classList)
+        e.classList.remove(c)
+    else if (hasClass(e, c)) {
+        var reg = new RegExp('(\\s|^)' + c + '(\\s|$)')
+        e.c = el.c.replace(reg, ' ')
+    }
+};
+
+/**
+ * Remove the given class from a list of given elements.
+ * @param  {Array} e   Elements to remove the class from.
+ * @param  {String} c  Class to remove.
+ */
+function removeClassList(e, c) {
+    for (let i = 0; i < e.length; ++i) { removeClass(e[i], c) }
+};
+
+/**
+ * Add the given class to a given element.
+ * @param  {DOMElement} e Element to add the class to.
+ * @param  {String} c     Class to add.
+ */
+function addClass(e, c) {
+    if (e.classList)
+        e.classList.add(c)
+    else if (!hasClass(e, c)) e.c += " " + c
+};
+
+/**
+ * Add the given class to a list of given elements.
+ * @param  {Array} e   Elements to add the class to.
+ * @param  {String} c  Class to add.
+ */
+function addClassList(e, c) {
+    for (let i = 0; i < e.length; ++i) { addClass(e[i], c) }
+};
+
+/**
  * Adds an svg as the inner HTML of the target div.
  * @param  {DOMElement} target Target to place the svg.
  * @param  {String}            SVG file url.
@@ -64,4 +119,7 @@ function clearElement(element) {
     }
 }
 
-export { clearElement, makeDiv, addSVG, getCSSColors, remove }
+export {
+    makeDiv, hasClass, addClass, removeClass, addClassList, removeClassList,
+    clearElement, addSVG, getCSSColors, remove
+}

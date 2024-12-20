@@ -23,4 +23,20 @@ function buffer(coordinates, size) {
     return new Polygon([v]);
 }
 
-export { buffer }
+/**
+ * Return true if position1 and position2 are within a given distance in meters.
+ * @param {array} position1 Coordinates of first position.
+ * @param {array} position2 Coordinates of second position.
+ * @param {number} distance Distance in meters.
+ * @return {boolean}        true if both position are within a given distance from each other.
+ */
+function within(position1, position2, distance) {
+    let c1 = project('3857', '4326', position1);
+    let c2 = project('3857', '4326', position2);
+    let d = turf.distance(turf.point(c1), turf.point(c2), { units: "meters" });
+    
+    if (d > distance) { return false; }
+    else { return true; }
+}
+
+export { buffer, within }

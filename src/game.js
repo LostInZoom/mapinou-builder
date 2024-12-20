@@ -4,8 +4,9 @@ import { LineString } from "ol/geom";
 import Basemap from "./cartography/map";
 import Router from "./cartography/routing";
 import { project } from "./cartography/map";
-import { makeDiv, addSVG, clearElement } from "./utils/dom";
+import { makeDiv, addSVG, addClass, removeClass, hasClass } from "./utils/dom";
 import { getVectorContext } from "ol/render";
+import { within } from "./cartography/analysis";
 
 /**
  * Create a new game.
@@ -44,7 +45,7 @@ class Game {
         this.speed = 5000;
 
         this.router = new Router(this.basemap, this.player);
-        this.allowMovement(this);
+        this.activateMovement(this);
         this.activatePitfalls(this);
 
         // Create the loading screen
@@ -74,13 +75,40 @@ class Game {
                 this.mode = 'navigation';
             }
         });
+
+        this.hint = `
+            You are in a hamlet called La Colombière.<br><br>
+            It is located in the west of Lyon, between Saint-Etienne and Clermond-Ferrand in the Parc Naturel Régional du Livradois-Forez.<br><br>
+            The hamlet is in the west of the town of Ambert, between St-Amant-Roche-Savine and St-Germain-l'Herm.<br><br>
+            It is southwest of Fournols, near the waterbodies of Étangs de la Colombière.<br><br>
+            Click on your position to continue.
+        `
+        this.hintcontainer = makeDiv('hint-container', 'active');
+        this.hintbutton = makeDiv('hint-button', null, 'Find your position');
+        this.hintcontent = makeDiv('hint-content');
+        this.hinttext = makeDiv('hint-text', null, this.hint);
+        this.hintcontent.append(this.hinttext);
+        this.hintcontainer.append(this.hintbutton, this.hintcontent);
+
+        this.hintbutton.addEventListener('click', (e) => {
+            if (hasClass(this.hintcontainer, 'active')) { removeClass(this.hintcontainer, 'active'); }
+            else { addClass(this.hintcontainer, 'active'); }
+        });
         
-        this.app.gamenode.append(this.loader, this.homebutton, this.modebutton);
+        this.app.gamenode.append(this.loader, this.homebutton, this.modebutton, this.hintcontainer);
 
         // Wait fot the translating animation to add the continue button on the main menu
         setTimeout(() => {
             this.app.addContinueButton();
         }, 300);
+    }
+
+    /**
+     * Activates the phase 1 of the game:
+     * The player must find its position on the map given a textual description
+     */
+    phase1(game) {
+
     }
 
     /**
@@ -97,7 +125,7 @@ class Game {
      * This method activate a listener on the map click that allows
      * the player to move.
      */
-    allowMovement(game) {
+    activateMovement(game) {
         let movement = game.basemap.map.on('click', (e) => {
             // Allow movement only if the zoom level is high enough
             if (game.basemap.view.getZoom() >= game.zoomMovement) {
@@ -151,6 +179,13 @@ class Game {
                         if (distance < length) {
                             // Calculate the position of the point along the route line
                             let newPosition = line.getCoordinateAt(distance / length);
+
+                            let isWithin = false;
+                            for (let i = 0; i < game.pitfalls.length; i++) {
+                                if (within(newPosition, game.pitfalls[i], 500)) {
+                                    isWithin = true;
+                                }
+                            }
                         
                             if (path === undefined) { path = new LineString([ vertexes[0], newPosition ]); }
                             else { path.appendCoordinate(newPosition); }
@@ -184,7 +219,7 @@ class Game {
                             basemap.pathLayer.un('postrender', animatePlayer);
 
                             // Reactivate movement on the map
-                            game.allowMovement(game);
+                            game.activateMovement(game);
                             console.log('end');
                         }
                     }
@@ -192,7 +227,6 @@ class Game {
                     basemap.player.setGeometry(null);
                     basemap.path.setGeometry(null);
                     basemap.pathLayer.on('postrender', animatePlayer);
-                    // basemap.map.render();
                 });
             }
         });

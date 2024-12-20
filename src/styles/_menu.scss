@@ -116,3 +116,46 @@
 .button {
     // box-shadow: 0 0 3px darkslategray;
 }
+
+#hint-container {
+    position: absolute;
+    bottom: 0;
+    height: 80%;
+    width: 100%;
+    z-index: 10;
+
+    display: flex;
+    flex-direction: column;
+
+    transform: translateY(calc(100% - 25px));
+    transition: transform .3s ease-in-out;
+    &.active {
+        transform: translateY(0);
+    }
+}
+
+#hint-button {
+    flex-shrink: 0;
+    margin: 0 auto;
+    width: 100%;
+    height: 28px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+
+    padding: 0 6px;
+
+    color: map.get($map: colors.$default, $key: "text");
+    background: map.get($map: colors.$default, $key: "main-light");
+}
+
+#hint-content {
+    background-color: map.get($map: colors.$default, $key: "main");
+    height: 100%;
+}
+
+#hint-text {
+    padding: 10%;
+    color: white;
+}
