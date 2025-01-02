@@ -24,6 +24,19 @@ function buffer(coordinates, size) {
 }
 
 /**
+ * Return the coordinates of the middle point between the two provided positions.
+ * @param {array} position1 Coordinates of first position.
+ * @param {array} position2 Coordinates of second position.
+ * @return {array}          Coordinates of the middle position.
+ */
+function middle(position1, position2) {
+    let x1, y1, x2, y2;
+    [ x1, y1 ] = position1;
+    [ x2, y2 ] = position2;
+    return [ (x1 + x2) / 2, (y1 + y2) / 2 ];
+}
+
+/**
  * Return true if position1 and position2 are within a given distance in meters.
  * @param {array} position1 Coordinates of first position.
  * @param {array} position2 Coordinates of second position.
@@ -39,4 +52,4 @@ function within(position1, position2, distance) {
     else { return true; }
 }
 
-export { buffer, within }
+export { buffer, middle, within }

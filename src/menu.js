@@ -29,8 +29,8 @@ class Application {
            
         })
 
-        let home = this.addButton('Tutorial', this.homenode);
-        let options = this.addButton('Options', this.homenode);
+        // let home = this.addButton('Tutorial', this.homenode);
+        // let options = this.addButton('Options', this.homenode);
 
         this.container.append(this.homenode, this.gamenode);
         this.parent.append(this.container);

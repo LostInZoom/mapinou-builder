@@ -6,7 +6,8 @@ import Router from "./cartography/routing";
 import { project } from "./cartography/map";
 import { makeDiv, addSVG, addClass, removeClass, hasClass } from "./utils/dom";
 import { getVectorContext } from "ol/render";
-import { within } from "./cartography/analysis";
+import { middle, within } from "./cartography/analysis";
+import { center } from "@turf/turf";
 
 /**
  * Create a new game.
@@ -17,6 +18,15 @@ class Game {
         this.position = [ 270845.15, 5904541.30 ];
         this.player = [ 396377.1, 5701254.9 ];
         this.target = [ 416553.587, 5708562.378 ];
+        // The tolerance in meters allowed to find the point in phase 1
+        this.findTolerance = 500;
+        // The tolerance in meters to validate the target
+        this.targetTolerance = 20;
+        // The tolerance in meters allowed around the pitfalls
+        this.pitfallTolerance = 500;
+        
+        // The speed in km/h of the movement on the map
+        this.speed = 5000;
         this.pitfalls = [
             [ 399537.1, 5699198.9 ],
             [ 399416.53, 5703120.31 ],
@@ -25,6 +35,11 @@ class Game {
             [ 407776.7, 5703492.8 ],
             [ 411222.6, 5703538.6 ],
             [ 415029.6, 5707542.2 ],
+            [ 402876.1, 5707401.3 ],
+            [ 404785.3, 5711359.4 ],
+            [ 405730.7, 5706364.3 ],
+            [ 411794.4, 5707942.2 ],
+            [ 409265.0, 5709098.6 ],
         ]
 
         this.zoom = 5;
@@ -37,16 +52,11 @@ class Game {
         this.basemap.setCenter(this.position);
         this.basemap.setZoom(this.zoom);
 
-        // Place the player on the map
-        this.basemap.setPlayer(this.player);
-        this.basemap.setTarget(this.target);
-
-        // The speed in km/h of the movement on the map
-        this.speed = 5000;
+        // DEBUG
+        this.basemap.setCenter(this.player);
+        this.basemap.setZoom(15);
 
         this.router = new Router(this.basemap, this.player);
-        this.activateMovement(this);
-        this.activatePitfalls(this);
 
         // Create the loading screen
         this.loader = makeDiv('loading-container');
@@ -76,17 +86,12 @@ class Game {
             }
         });
 
-        this.hint = `
-            You are in a hamlet called La Colombière.<br><br>
-            It is located in the west of Lyon, between Saint-Etienne and Clermond-Ferrand in the Parc Naturel Régional du Livradois-Forez.<br><br>
-            The hamlet is in the west of the town of Ambert, between St-Amant-Roche-Savine and St-Germain-l'Herm.<br><br>
-            It is southwest of Fournols, near the waterbodies of Étangs de la Colombière.<br><br>
-            Click on your position to continue.
-        `
+        this.hint = ''
+        this.objective = ''
         this.hintcontainer = makeDiv('hint-container', 'active');
-        this.hintbutton = makeDiv('hint-button', null, 'Find your position');
+        this.hintbutton = makeDiv('hint-button');
         this.hintcontent = makeDiv('hint-content');
-        this.hinttext = makeDiv('hint-text', null, this.hint);
+        this.hinttext = makeDiv('hint-text');
         this.hintcontent.append(this.hinttext);
         this.hintcontainer.append(this.hintbutton, this.hintcontent);
 
@@ -101,6 +106,8 @@ class Game {
         setTimeout(() => {
             this.app.addContinueButton();
         }, 300);
+
+        this.phase1(this);
     }
 
     /**
@@ -108,7 +115,61 @@ class Game {
      * The player must find its position on the map given a textual description
      */
     phase1(game) {
+        this.hint = `
+            You are in a hamlet called La Colombière.<br><br>
+            It is located in the west of Lyon, between Saint-Etienne and Clermond-Ferrand in the Parc Naturel Régional du Livradois-Forez.<br><br>
+            The hamlet is in the west of the town of Ambert, between St-Amant-Roche-Savine and St-Germain-l'Herm.<br><br>
+            It is southwest of Fournols, near the waterbodies of Étangs de la Colombière.<br><br>
+            Double click on your position to continue.
+        `
+        this.hinttext.innerHTML = this.hint;
+        this.objective = 'Find your position'
+        this.hintbutton.innerHTML = this.objective;
 
+        let finder = game.basemap.map.on('dblclick', (e) => {
+            // Remove the listener while the animation is playing
+            unByKey(finder);
+
+            let target = game.basemap.map.getEventCoordinate(event);
+            if (within(target, game.player, game.findTolerance)) {
+                game.phase2(game);
+            } else {
+                game.phase1(game);
+            }
+        });
+    }
+
+    /**
+     * Activates the phase 2 of the game:
+     * The player must travel to the destination while avoiding pitfalls to win.
+     */
+    phase2(game) {
+        // Place the player on the map
+        game.basemap.setPlayer(game.player);
+        game.basemap.setTarget(game.target);
+        game.activateMovement(game);
+        game.activatePitfalls(game);
+
+        game.basemap.view.animate({
+            // Set the new center as the middle point between the player and the target
+            center: middle(game.player, game.target),
+            zoom: game.basemap.getZoomForData(),
+        }, () => {
+            // game.basemap.map.render();
+            
+            this.hint = `
+                Congratulations, you found yourself on the map!<br><br>
+                Now, travel to your destination as fast as possible and avoid the pitfalls on the way,
+                crossing their area of influence will make you lose.<br><br>
+                You can only move at higher zoom level, so you need to navigate the map to get closer to your
+                destination while avoiding pitfalls on the way. The indicator in the top right corner indicates
+                if you can move or not.
+            `
+            this.hinttext.innerHTML = this.hint;
+            this.objective = 'Travel to your destination'
+            this.hintbutton.innerHTML = this.objective;
+            if (!hasClass(this.hintcontainer, 'active')) { addClass(this.hintcontainer, 'active'); }
+        });
     }
 
     /**
@@ -182,7 +243,7 @@ class Game {
 
                             let isWithin = false;
                             for (let i = 0; i < game.pitfalls.length; i++) {
-                                if (within(newPosition, game.pitfalls[i], 500)) {
+                                if (within(newPosition, game.pitfalls[i], this.pitfallTolerance)) {
                                     isWithin = true;
                                 }
                             }

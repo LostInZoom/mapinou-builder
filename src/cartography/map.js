@@ -5,7 +5,9 @@ import WMTS from 'ol/source/WMTS.js';
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 import VectorLayer from 'ol/layer/Vector.js';
 import VectorSource from 'ol/source/Vector.js';
+import { extend } from 'ol/extent';
 import { Feature } from 'ol';
+import { defaults } from 'ol/interaction/defaults';
 import { Point, LineString } from 'ol/geom.js';
 import {
     Circle as CircleStyle,
@@ -158,6 +160,17 @@ class Basemap {
                 this.baselayer,
             ],
             view: this.view,
+            interactions: new defaults({
+                altShiftDragRotate: false,
+                doubleClickZoom: false,
+                keyboard: false,
+                // mouseWheelZoom: false,
+                shiftDragZoom: false,
+                // dragPan: false,
+                pinchRotate: false,
+                // pinchZoom: false,
+                pointerInteraction: true,
+            })
         });
 
     }
@@ -195,6 +208,16 @@ class Basemap {
             geometry: buffer(coordinates, 500)
         });
         this.pitfallsAreaLayer.getSource().addFeature(area);
+    }
+
+    getZoomForData() {
+        let extent1 = this.playerLayer.getSource().getExtent();
+        let extent2 = this.targetLayer.getSource().getExtent();
+        let extent3 = this.pitfallsAreaLayer.getSource().getExtent();
+        let extent = extend(extent1, extend(extent2, extent3));
+        let res = this.view.getResolutionForExtent(extent, this.map.getSize());
+        let zoom = this.view.getZoomForResolution(res);
+        return Math.floor(zoom);
     }
 };
 
