@@ -4,7 +4,7 @@ import { LineString } from "ol/geom";
 import Basemap from "./cartography/map";
 import Router from "./cartography/routing";
 import { project } from "./cartography/map";
-import { makeDiv, addSVG, addClass, removeClass, hasClass } from "./utils/dom";
+import { makeDiv, addSVG, addClass, removeClass, hasClass, activate, wait } from "./utils/dom";
 import { getVectorContext } from "ol/render";
 import { middle, within } from "./cartography/analysis";
 import { center } from "@turf/turf";
@@ -53,8 +53,8 @@ class Game {
         this.basemap.setZoom(this.zoom);
 
         // DEBUG
-        this.basemap.setCenter(this.player);
-        this.basemap.setZoom(15);
+        // this.basemap.setCenter(this.player);
+        // this.basemap.setZoom(15);
 
         this.router = new Router(this.basemap, this.player);
 
@@ -147,8 +147,8 @@ class Game {
         // Place the player on the map
         game.basemap.setPlayer(game.player);
         game.basemap.setTarget(game.target);
-        game.activateMovement(game);
         game.activatePitfalls(game);
+        game.activateMovement(game);
 
         game.basemap.view.animate({
             // Set the new center as the middle point between the player and the target
@@ -226,6 +226,28 @@ class Game {
                     if (path !== undefined) { path = path.clone(); }
 
                     function animatePlayer(event) {
+                        function stopAnimation(context, end, status) {
+                            // Redraw on context to avoid flickering
+                            context.setStyle(basemap.styles['path']);
+                            context.drawGeometry(path);
+                            context.setStyle(basemap.styles['player']);
+                            context.drawGeometry(position);
+
+                            basemap.player.setGeometry(position);
+                            basemap.path.setGeometry(path);
+
+                            router.setPosition(destination);
+
+                            // Removing the render listener
+                            basemap.pathLayer.un('postrender', animatePlayer);
+                            console.log('end');
+
+                            if (end) {
+                                game.over(status);
+                            }
+                            else { game.activateMovement(game); }
+                        }
+
                         // Get the current time
                         const time = event.frameState.time;
                         const context = getVectorContext(event);
@@ -241,13 +263,17 @@ class Game {
                             // Calculate the position of the point along the route line
                             let newPosition = line.getCoordinateAt(distance / length);
 
-                            let isWithin = false;
+                            let lose = false;
                             for (let i = 0; i < game.pitfalls.length; i++) {
-                                if (within(newPosition, game.pitfalls[i], this.pitfallTolerance)) {
-                                    isWithin = true;
+                                if (within(newPosition, game.pitfalls[i], game.pitfallTolerance)) {
+                                    lose = true;
+                                    break
                                 }
                             }
-                        
+
+                            let win = false;
+                            if (within(newPosition, game.target, game.targetTolerance)) { win = true; }
+
                             if (path === undefined) { path = new LineString([ vertexes[0], newPosition ]); }
                             else { path.appendCoordinate(newPosition); }
 
@@ -260,28 +286,13 @@ class Game {
 
                             // Render the map to trigger the listener
                             basemap.map.render();
+
+                            if (lose) { stopAnimation(context, true, 'lose'); }
+                            if (win) { stopAnimation(context, true, 'win'); }
                         }
                         // Here, the journey is over
                         else {
-                            // Redraw on context to avoid flickering
-                            context.setStyle(basemap.styles['path']);
-                            context.drawGeometry(path);
-                            context.setStyle(basemap.styles['player']);
-                            context.drawGeometry(position);
-
-                            // Removing the render listener
-                            basemap.player.setGeometry(position);
-                            basemap.path.setGeometry(path);
-
-                            // game.basemap.setPath(finalVertexes);
-                            router.setPosition(destination);
-
-                            // Removing the render listener
-                            basemap.pathLayer.un('postrender', animatePlayer);
-
-                            // Reactivate movement on the map
-                            game.activateMovement(game);
-                            console.log('end');
+                            stopAnimation(context, false, null);
                         }
                     }
 
@@ -290,6 +301,42 @@ class Game {
                     basemap.pathLayer.on('postrender', animatePlayer);
                 });
             }
+        });
+    }
+
+    /**
+     * This method ends the current game. (Game over)
+     */
+    over(status) {
+        let game = this;
+
+        let text;
+        if (status === 'win') {
+            text = 'Congratulation, you reached the target!'
+        } else {
+            text = 'Game over.<br>Look before you leap!'
+        }
+
+        // Create the loading screen
+        let mask = makeDiv(null, 'mask');
+        let container = makeDiv(null, 'window-container');
+        let content = makeDiv(null, 'content-over', text);
+        let button = makeDiv(null, 'button button-over', 'Menu');
+
+        container.append(content, button);
+        mask.append(container);
+        game.app.gamenode.append(mask);
+
+        wait(10, () => {
+            activate(container);
+            let returnMenu = button.addEventListener('click', (e) => {
+                button.removeEventListener('click', returnMenu);
+                game.app.removeContinueButton();
+                game.app.container.style.transform = 'translateX(0%)'
+                wait(300, () => {
+                    game.destroy();
+                });
+            });
         });
     }
 

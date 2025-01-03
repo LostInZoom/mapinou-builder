@@ -73,6 +73,18 @@ function addClassList(e, c) {
 };
 
 /**
+ * Activate the element.
+ * @param  {DOMElement} e   Element to activate.
+ */
+function activate(e) { addClass(e, 'active'); }
+
+/**
+ * Deactivate the element.
+ * @param  {DOMElement} e   Element to deactivate.
+ */
+function deactivate(e) { removeClass(e, 'active'); }
+
+/**
  * Adds an svg as the inner HTML of the target div.
  * @param  {DOMElement} target Target to place the svg.
  * @param  {String}            SVG file url.
@@ -119,7 +131,17 @@ function clearElement(element) {
     }
 }
 
+/**
+ * Wrapper around setTimeout for better readability
+ * @param {duration} number   The duration to wait.
+ * @param {function} callback The function to execute after waiting.
+ */
+function wait(duration, callback) {
+    setTimeout(callback, duration);
+};
+
 export {
     makeDiv, hasClass, addClass, removeClass, addClassList, removeClassList,
-    clearElement, addSVG, getCSSColors, remove
+    activate, deactivate,
+    clearElement, addSVG, getCSSColors, remove, wait
 }

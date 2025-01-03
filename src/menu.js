@@ -58,6 +58,13 @@ class Application {
             this.continueButton = b;
         }
     }
+
+    removeContinueButton() {
+        if (this.continueButton !== undefined) {
+            this.continueButton.remove();
+            this.continueButton = undefined;
+        }
+    }
 }
 
 export default initialize
