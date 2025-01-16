@@ -1,6 +1,6 @@
 import * as turf from "@turf/turf";
-import { Polygon } from "ol/geom";
-import { project } from "./map";
+import { Polygon } from "ol/geom.js";
+import { project } from "./map.js";
 
 /**
  * Calculate a buffer around the given coordinates.

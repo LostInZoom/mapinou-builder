@@ -1,11 +1,5 @@
 import Game from './game.js';
-import { makeDiv, addSVG, getCSSColors } from './utils/dom.js';
-
-function initialize() {
-    let target = makeDiv('application');
-    document.body.append(target);
-    new Application(target);
-}
+import { makeDiv, getCSSColors } from '../utils/dom.js';
 
 class Application {
     constructor(parent) {
@@ -67,4 +61,4 @@ class Application {
     }
 }
 
-export default initialize
+export { Application }

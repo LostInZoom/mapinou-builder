@@ -1,18 +1,35 @@
 {
   "name": "cartogame",
   "version": "1.0.0",
+  "description": "A game about cartographic navigation.",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "dev": "parcel ./src/index.html --out-dir ./.dist",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server-debug": "nodemon --inspect server.js"
+  },
+  "keywords": [
+    "game",
+    "cartography"
+  ],
+  "author": "jberli",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@turf/turf": "^7.2.0",
+    "ol": "^10.3.1",
+    "proj4": "^2.15.0"
   },
   "devDependencies": {
-    "vite": "^5.4.11"
+    "@parcel/transformer-sass": "^2.13.3",
+    "parcel-bundler": "^1.12.5",
+    "parcel-plugin-clean-dist": "^0.0.6",
+    "parcel-plugin-static-files-copy": "^2.6.0"
   },
-  "dependencies": {
-    "@turf/turf": "^7.1.0",
-    "ol": "latest",
-    "proj4": "^2.15.0",
-    "sass": "^1.81.0"
+  "staticFiles": {
+    "staticPath": [
+      "./assets"
+    ],
+    "watcherGlob": "**"
   }
 }

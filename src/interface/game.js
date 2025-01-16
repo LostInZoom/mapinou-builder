@@ -1,13 +1,12 @@
-import { unByKey } from "ol/Observable";
-import { LineString } from "ol/geom";
+import { unByKey } from "ol/Observable.js";
+import { LineString } from "ol/geom.js";
+import { getVectorContext } from "ol/render.js";
 
-import Basemap from "./cartography/map";
-import Router from "./cartography/routing";
-import { project } from "./cartography/map";
-import { makeDiv, addSVG, addClass, removeClass, hasClass, activate, wait } from "./utils/dom";
-import { getVectorContext } from "ol/render";
-import { middle, within } from "./cartography/analysis";
-import { center } from "@turf/turf";
+import Basemap from "../cartography/map.js";
+import Router from "../cartography/routing.js";
+import { project } from "../cartography/map.js";
+import { makeDiv, addSVG, addClass, removeClass, hasClass, activate, wait } from "../utils/dom.js";
+import { middle, within } from "../cartography/analysis.js";
 
 /**
  * Create a new game.
@@ -62,26 +61,26 @@ class Game {
         this.loader = makeDiv('loading-container');
         // Create the home button to return to the main menu
         this.homebutton = makeDiv('button-home', 'button-game button');
-        addSVG(this.homebutton, './src/img/home.svg');
+        addSVG(this.homebutton, './img/home.svg');
         // Return to the main menu by translating the whole ui
         this.homebutton.addEventListener('click', (e) => {
             this.app.container.style.transform = 'translateX(0%)'
         });
 
         this.modebutton = makeDiv('mode-indicator', 'button-game');
-        if (this.zoom < this.zoomMovement) { addSVG(this.modebutton, './src/img/compass.svg'); }
-        else { addSVG(this.modebutton, './src/img/routing.svg'); }
+        if (this.zoom < this.zoomMovement) { addSVG(this.modebutton, './img/compass.svg'); }
+        else { addSVG(this.modebutton, './img/routing.svg'); }
 
         this.basemap.map.on('moveend', (e) => {
             let zoom = this.basemap.view.getZoom();
             if (zoom >= this.zoomMovement && this.mode === 'navigation') {
                 this.modebutton.innerHTML = '';
-                addSVG(this.modebutton, './src/img/routing.svg');
+                addSVG(this.modebutton, './img/routing.svg');
                 this.mode = 'routing';
             }
             else if (zoom < this.zoomMovement && this.mode === 'routing') {
                 this.modebutton.innerHTML = '';
-                addSVG(this.modebutton, './src/img/compass.svg');
+                addSVG(this.modebutton, './img/compass.svg');
                 this.mode = 'navigation';
             }
         });

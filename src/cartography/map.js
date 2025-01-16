@@ -5,9 +5,9 @@ import WMTS from 'ol/source/WMTS.js';
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 import VectorLayer from 'ol/layer/Vector.js';
 import VectorSource from 'ol/source/Vector.js';
-import { extend } from 'ol/extent';
+import { extend } from 'ol/extent.js';
 import { Feature } from 'ol';
-import { defaults } from 'ol/interaction/defaults';
+import { defaults } from 'ol/interaction/defaults.js';
 import { Point, LineString } from 'ol/geom.js';
 import {
     Circle as CircleStyle,
@@ -18,8 +18,8 @@ import {
 
 import proj4 from 'proj4';
 
-import { buffer } from './analysis';
-import { makeDiv } from '../utils/dom';
+import { buffer } from './analysis.js';
+import { makeDiv } from '../utils/dom.js';
 
 class Basemap {
     constructor(application) {

@@ -3,8 +3,8 @@
  * Classes and functions related to the routing fonctionalities within the game.
  */
 
-import { ajaxGet } from "../utils/ajax";
-import { project } from "./map";
+import { ajaxGet } from "../utils/ajax.js";
+import { project } from "./map.js";
 
 class Router {
     constructor(map, position) {
