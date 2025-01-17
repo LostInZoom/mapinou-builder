@@ -26,6 +26,7 @@
     "parcel": "^2.13.3",
     "parcel-plugin-clean-dist": "^0.0.6",
     "parcel-plugin-static-files-copy": "^2.6.0",
-    "sass": "^1.83.4"
+    "sass": "^1.83.4",
+    "svgo": "^3.3.2"
   }
 }

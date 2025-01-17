@@ -1,10 +1,6 @@
-# git
-.gitignore
-
 # parcel
 .parcel-cache
 dist
-
 
 # Node
 node_modules
