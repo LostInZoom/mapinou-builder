@@ -4,7 +4,7 @@
     "description": "Progressive Web App example to be used in conjuction with the article in LogRocket",
     "icons": [
         {
-        "src": "/../images/cartogame-512x512.png",
+        "src": "./img/cartogame-512x512.png",
         "sizes": "512x512",
         "type": "image/png"
         }

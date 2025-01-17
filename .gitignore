@@ -2,8 +2,9 @@
 .gitignore
 
 # parcel
-.dist
-.cache
+.parcel-cache
+dist
+
 
 # Node
 node_modules

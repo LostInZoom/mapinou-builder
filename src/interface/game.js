@@ -61,26 +61,26 @@ class Game {
         this.loader = makeDiv('loading-container');
         // Create the home button to return to the main menu
         this.homebutton = makeDiv('button-home', 'button-game button');
-        addSVG(this.homebutton, './img/home.svg');
+        addSVG(this.homebutton, new URL('../img/home.svg', import.meta.url));
         // Return to the main menu by translating the whole ui
         this.homebutton.addEventListener('click', (e) => {
             this.app.container.style.transform = 'translateX(0%)'
         });
 
         this.modebutton = makeDiv('mode-indicator', 'button-game');
-        if (this.zoom < this.zoomMovement) { addSVG(this.modebutton, './img/compass.svg'); }
-        else { addSVG(this.modebutton, './img/routing.svg'); }
+        if (this.zoom < this.zoomMovement) { addSVG(this.modebutton, new URL('../img/compass.svg', import.meta.url)); }
+        else { addSVG(this.modebutton, new URL('../img/routing.svg', import.meta.url)); }
 
         this.basemap.map.on('moveend', (e) => {
             let zoom = this.basemap.view.getZoom();
             if (zoom >= this.zoomMovement && this.mode === 'navigation') {
                 this.modebutton.innerHTML = '';
-                addSVG(this.modebutton, './img/routing.svg');
+                addSVG(this.modebutton, new URL('../img/routing.svg', import.meta.url));
                 this.mode = 'routing';
             }
             else if (zoom < this.zoomMovement && this.mode === 'routing') {
                 this.modebutton.innerHTML = '';
-                addSVG(this.modebutton, './img/compass.svg');
+                addSVG(this.modebutton, new URL('../img/compass.svg', import.meta.url));
                 this.mode = 'navigation';
             }
         });

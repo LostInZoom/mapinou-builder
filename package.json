@@ -2,34 +2,30 @@
   "name": "cartogame",
   "version": "1.0.0",
   "description": "A game about cartographic navigation.",
-  "main": "index.js",
+  "author": "jberli",
+  "license": "GPL-3.0-or-later",
+  "source": "src/index.html",
   "type": "module",
   "scripts": {
-    "dev": "parcel ./src/index.html --out-dir ./.dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "server-debug": "nodemon --inspect server.js"
+    "dev": "parcel",
+    "build": "parcel build"
   },
   "keywords": [
     "game",
     "cartography"
   ],
-  "author": "jberli",
-  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@turf/turf": "^7.2.0",
     "ol": "^10.3.1",
     "proj4": "^2.15.0"
   },
   "devDependencies": {
+    "@parcel/packager-raw-url": "^2.13.3",
     "@parcel/transformer-sass": "^2.13.3",
-    "parcel-bundler": "^1.12.5",
+    "@parcel/transformer-webmanifest": "^2.13.3",
+    "parcel": "^2.13.3",
     "parcel-plugin-clean-dist": "^0.0.6",
-    "parcel-plugin-static-files-copy": "^2.6.0"
-  },
-  "staticFiles": {
-    "staticPath": [
-      "./assets"
-    ],
-    "watcherGlob": "**"
+    "parcel-plugin-static-files-copy": "^2.6.0",
+    "sass": "^1.83.4"
   }
 }
