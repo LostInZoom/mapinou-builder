@@ -4,11 +4,15 @@
   "description": "A game about cartographic navigation.",
   "author": "jberli",
   "license": "GPL-3.0-or-later",
-  "source": "src/index.html",
+  "source": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "parcel",
-    "build": "parcel build"
+    "build-watch": "parcel watch ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
+    "start-watch": "nodemon server/index.js",
+    "dev": "concurrently --kill-others \"npm run start-watch\" \"npm run build-watch\"",
+    "build": "parcel build ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
+    "start": "npm run build && node server/index.js",
+    "deploy": "node server/index.js"
   },
   "keywords": [
     "game",
@@ -23,6 +27,9 @@
     "@parcel/packager-raw-url": "^2.13.3",
     "@parcel/transformer-sass": "^2.13.3",
     "@parcel/transformer-webmanifest": "^2.13.3",
+    "concurrently": "^9.1.2",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9",
     "parcel": "^2.13.3",
     "parcel-plugin-clean-dist": "^0.0.6",
     "parcel-plugin-static-files-copy": "^2.6.0",
