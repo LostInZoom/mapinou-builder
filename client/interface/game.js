@@ -52,8 +52,8 @@ class Game {
         this.basemap.setZoom(this.zoom);
 
         // DEBUG
-        // this.basemap.setCenter(this.player);
-        // this.basemap.setZoom(15);
+        this.basemap.setCenter(this.player);
+        this.basemap.setZoom(15);
 
         this.router = new Router(this.basemap, this.player);
 

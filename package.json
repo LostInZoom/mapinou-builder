@@ -12,7 +12,8 @@
     "dev": "concurrently --kill-others \"npm run start-watch\" \"npm run build-watch\"",
     "build": "parcel build ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
     "start": "npm run build && node server/index.js",
-    "deploy": "node server/index.js"
+    "deploy": "node server/index.js",
+    "postbuild": "workbox generateSW"
   },
   "keywords": [
     "game",
@@ -34,6 +35,7 @@
     "parcel-plugin-clean-dist": "^0.0.6",
     "parcel-plugin-static-files-copy": "^2.6.0",
     "sass": "^1.83.4",
-    "svgo": "^3.3.2"
+    "svgo": "^3.3.2",
+    "workbox-cli": "^7.3.0"
   }
 }
