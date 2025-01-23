@@ -109,6 +109,18 @@
     }
 }
 
+#score-text {
+    top: 0;
+    margin-top: 10px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-size: 25px;
+    font-weight: bold;
+    color: map.get($map: colors.$default, $key: "main");
+    user-select: none;
+    pointer-events: none;
+}
+
 .button {
     // box-shadow: 0 0 3px darkslategray;
 }

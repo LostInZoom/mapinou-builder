@@ -20,9 +20,13 @@ class Game {
         // The tolerance in meters allowed to find the point in phase 1
         this.findTolerance = 500;
         // The tolerance in meters to validate the target
-        this.targetTolerance = 20;
+        this.targetTolerance = 50;
         // The tolerance in meters allowed around the pitfalls
         this.pitfallTolerance = 500;
+
+        // The score of the player
+        this.score = 0;
+        this.pitfallPenalty = 100;
         
         // The speed in km/h of the movement on the map
         this.speed = 5000;
@@ -40,6 +44,8 @@ class Game {
             [ 411794.4, 5707942.2 ],
             [ 409265.0, 5709098.6 ],
         ]
+        // Flag to track if player is currently inside a pitfall area
+        this.pitfall = false;
 
         this.zoom = 5;
         this.zoomMovement = 14;
@@ -87,7 +93,7 @@ class Game {
 
         this.hint = ''
         this.objective = ''
-        this.hintcontainer = makeDiv('hint-container', 'active');
+        this.hintcontainer = makeDiv('hint-container');
         this.hintbutton = makeDiv('hint-button');
         this.hintcontent = makeDiv('hint-content');
         this.hinttext = makeDiv('hint-text');
@@ -95,11 +101,15 @@ class Game {
         this.hintcontainer.append(this.hintbutton, this.hintcontent);
 
         this.hintbutton.addEventListener('click', (e) => {
-            if (hasClass(this.hintcontainer, 'active')) { removeClass(this.hintcontainer, 'active'); }
-            else { addClass(this.hintcontainer, 'active'); }
+            this.openHint();
         });
+
+        this.scoretext = makeDiv('score-text', 'button-game', this.score);
+        this.scoreActive = false;
+
+        this.incrementScore(1, 1000);
         
-        this.app.gamenode.append(this.loader, this.homebutton, this.modebutton, this.hintcontainer);
+        this.app.gamenode.append(this.loader, this.homebutton, this.scoretext, this.modebutton, this.hintcontainer);
 
         // Wait fot the translating animation to add the continue button on the main menu
         setTimeout(() => {
@@ -124,6 +134,7 @@ class Game {
         this.hinttext.innerHTML = this.hint;
         this.objective = 'Find your position'
         this.hintbutton.innerHTML = this.objective;
+        this.openHint();
 
         let finder = game.basemap.map.on('dblclick', (e) => {
             // Remove the listener while the animation is playing
@@ -167,7 +178,7 @@ class Game {
             this.hinttext.innerHTML = this.hint;
             this.objective = 'Travel to your destination'
             this.hintbutton.innerHTML = this.objective;
-            if (!hasClass(this.hintcontainer, 'active')) { addClass(this.hintcontainer, 'active'); }
+            this.openHint();
         });
     }
 
@@ -179,6 +190,34 @@ class Game {
         for (let i = 0; i < game.pitfalls.length; i++) {
             game.basemap.addPitfall(game.pitfalls[i]);
         }
+    }
+
+    /**
+     * This method open the hint window.
+     */
+    openHint() {
+        if (hasClass(this.hintcontainer, 'active')) {
+            removeClass(this.hintcontainer, 'active');
+            this.scoreActive = true;
+        }
+        else {
+            addClass(this.hintcontainer, 'active');
+            this.scoreActive = false;
+        }
+    }
+
+    /**
+     * This method increments the score with a multiplier.
+     */
+    incrementScore(value, interval) {
+        if (this.scoreInterval !== undefined) { clearInterval(this.scoreInterval); }
+        this.scoreInterval = setInterval(() => {
+            if (this.scoreActive) {
+                this.score += value;
+                this.scoretext.innerHTML = this.score;
+            }
+        }, interval);
+        
     }
 
     /**
@@ -197,7 +236,9 @@ class Game {
 
                 // Calculate the route towards the destination
                 game.router.calculateRoute(target, (result) => {
-                    console.log('routing...')
+                    console.log('routing...');
+                    this.incrementScore(1, 200);
+                    
                     const basemap = game.basemap;
                     const router = game.router;
 
@@ -225,7 +266,7 @@ class Game {
                     if (path !== undefined) { path = path.clone(); }
 
                     function animatePlayer(event) {
-                        function stopAnimation(context, end, status) {
+                        function stopAnimation(context, end) {
                             // Redraw on context to avoid flickering
                             context.setStyle(basemap.styles['path']);
                             context.drawGeometry(path);
@@ -239,12 +280,15 @@ class Game {
 
                             // Removing the render listener
                             basemap.pathLayer.un('postrender', animatePlayer);
+                            game.incrementScore(1, 1000);
                             console.log('end');
 
                             if (end) {
-                                game.over(status);
+                                game.over();
                             }
-                            else { game.activateMovement(game); }
+                            else {
+                                game.activateMovement(game);
+                            }
                         }
 
                         // Get the current time
@@ -262,12 +306,24 @@ class Game {
                             // Calculate the position of the point along the route line
                             let newPosition = line.getCoordinateAt(distance / length);
 
-                            let lose = false;
+                            let pit = false;
                             for (let i = 0; i < game.pitfalls.length; i++) {
-                                if (within(newPosition, game.pitfalls[i], game.pitfallTolerance)) {
-                                    lose = true;
-                                    break
+                                // Check if current position if within a pitfall area
+                                if (within(newPosition, game.pitfalls[i], game.pitfallTolerance)) { pit = true; break; }
+                            }
+                            // If current position is within a pitfall area
+                            if (pit) {
+                                // If player is not already inside a pitfall area
+                                if (!game.pitfall) {
+                                    // Increment the score by 100 and set player as within pitfall area
+                                    game.score += game.pitfallPenalty;
+                                    game.pitfall = true
                                 }
+                            }
+                            // Here current position is not within a pitfall area
+                            else {
+                                // If the player was previously in a pitfall area, set the player as outside pitfall
+                                if (game.pitfall) { game.pitfall = false; }
                             }
 
                             let win = false;
@@ -286,13 +342,12 @@ class Game {
                             // Render the map to trigger the listener
                             basemap.map.render();
 
-                            if (lose) { stopAnimation(context, true, 'lose'); }
-                            if (win) { stopAnimation(context, true, 'win'); }
+                            if (win) {
+                                stopAnimation(context, true);
+                            }
                         }
                         // Here, the journey is over
-                        else {
-                            stopAnimation(context, false, null);
-                        }
+                        else { stopAnimation(context, false); }
                     }
 
                     basemap.player.setGeometry(null);
@@ -304,17 +359,12 @@ class Game {
     }
 
     /**
-     * This method ends the current game. (Game over)
+     * This method ends the current game.
      */
-    over(status) {
+    over() {
         let game = this;
 
-        let text;
-        if (status === 'win') {
-            text = 'Congratulation, you reached the target!'
-        } else {
-            text = 'Game over.<br>Look before you leap!'
-        }
+        let text = 'Congratulation, you reached the target!<br>Your score: ' + game.score;
 
         // Create the loading screen
         let mask = makeDiv(null, 'mask');
