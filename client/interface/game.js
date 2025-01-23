@@ -58,8 +58,8 @@ class Game {
         this.basemap.setZoom(this.zoom);
 
         // DEBUG
-        this.basemap.setCenter(this.player);
-        this.basemap.setZoom(15);
+        // this.basemap.setCenter(this.player);
+        // this.basemap.setZoom(15);
 
         this.router = new Router(this.basemap, this.player);
 
@@ -107,7 +107,7 @@ class Game {
         this.scoretext = makeDiv('score-text', 'button-game', this.score);
         this.scoreActive = false;
 
-        this.incrementScore(1, 1000);
+        this.incrementScore(1, 1000, true);
         
         this.app.gamenode.append(this.loader, this.homebutton, this.scoretext, this.modebutton, this.hintcontainer);
 
@@ -193,31 +193,34 @@ class Game {
     }
 
     /**
-     * This method open the hint window.
+     * This method opens the hint window.
      */
     openHint() {
         if (hasClass(this.hintcontainer, 'active')) {
             removeClass(this.hintcontainer, 'active');
             this.scoreActive = true;
+            this.basemap.activate();
         }
         else {
             addClass(this.hintcontainer, 'active');
             this.scoreActive = false;
+            this.basemap.deactivate();
         }
     }
 
     /**
      * This method increments the score with a multiplier.
      */
-    incrementScore(value, interval) {
+    incrementScore(value, interval, pursue) {
         if (this.scoreInterval !== undefined) { clearInterval(this.scoreInterval); }
-        this.scoreInterval = setInterval(() => {
-            if (this.scoreActive) {
-                this.score += value;
-                this.scoretext.innerHTML = this.score;
-            }
-        }, interval);
-        
+        if (pursue) {
+            this.scoreInterval = setInterval(() => {
+                if (this.scoreActive) {
+                    this.score += value;
+                    this.scoretext.innerHTML = this.score;
+                }
+            }, interval); 
+        }
     }
 
     /**
@@ -237,7 +240,7 @@ class Game {
                 // Calculate the route towards the destination
                 game.router.calculateRoute(target, (result) => {
                     console.log('routing...');
-                    this.incrementScore(1, 200);
+                    this.incrementScore(1, 200, true);
                     
                     const basemap = game.basemap;
                     const router = game.router;
@@ -363,7 +366,7 @@ class Game {
      */
     over() {
         let game = this;
-
+        game.incrementScore(0, 0, false);
         let text = 'Congratulation, you reached the target!<br>Your score: ' + game.score;
 
         // Create the loading screen

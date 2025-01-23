@@ -19,7 +19,7 @@ import {
 import proj4 from 'proj4';
 
 import { buffer } from './analysis.js';
-import { makeDiv } from '../utils/dom.js';
+import { addClass, makeDiv, removeClass } from '../utils/dom.js';
 
 class Basemap {
     constructor(application) {
@@ -218,6 +218,14 @@ class Basemap {
         let res = this.view.getResolutionForExtent(extent, this.map.getSize());
         let zoom = this.view.getZoomForResolution(res);
         return Math.floor(zoom);
+    }
+
+    activate() {
+        addClass(this.div, 'active');
+    }
+
+    deactivate() {
+        removeClass(this.div, 'active');
     }
 };
 
