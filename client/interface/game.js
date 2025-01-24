@@ -105,9 +105,7 @@ class Game {
         });
 
         this.scoretext = makeDiv('score-text', 'button-game', this.score);
-        this.scoreActive = false;
-
-        this.incrementScore(1, 1000, true);
+        this.score = new Score(0, 1, 1000, this.scoretext);
         
         this.app.gamenode.append(this.loader, this.homebutton, this.scoretext, this.modebutton, this.hintcontainer);
 
@@ -198,12 +196,12 @@ class Game {
     openHint() {
         if (hasClass(this.hintcontainer, 'active')) {
             removeClass(this.hintcontainer, 'active');
-            this.scoreActive = true;
+            this.score.start();
             this.basemap.activate();
         }
         else {
             addClass(this.hintcontainer, 'active');
-            this.scoreActive = false;
+            this.score.stop();
             this.basemap.deactivate();
         }
     }
@@ -240,7 +238,7 @@ class Game {
                 // Calculate the route towards the destination
                 game.router.calculateRoute(target, (result) => {
                     console.log('routing...');
-                    this.incrementScore(1, 200, true);
+                    game.score.change(1, 200);
                     
                     const basemap = game.basemap;
                     const router = game.router;
@@ -283,7 +281,7 @@ class Game {
 
                             // Removing the render listener
                             basemap.pathLayer.un('postrender', animatePlayer);
-                            game.incrementScore(1, 1000);
+                            game.score.change(1, 1000);
                             console.log('end');
 
                             if (end) {
@@ -319,7 +317,7 @@ class Game {
                                 // If player is not already inside a pitfall area
                                 if (!game.pitfall) {
                                     // Increment the score by 100 and set player as within pitfall area
-                                    game.score += game.pitfallPenalty;
+                                    game.score.add(game.pitfallPenalty);
                                     game.pitfall = true
                                 }
                             }
@@ -366,7 +364,7 @@ class Game {
      */
     over() {
         let game = this;
-        game.incrementScore(0, 0, false);
+        game.score.stop();
         let text = 'Congratulation, you reached the target!<br>Your score: ' + game.score;
 
         // Create the loading screen
@@ -397,6 +395,39 @@ class Game {
         this.app.game = undefined;
         this.app.gamenode = makeDiv('game', 'menu-container');
         this.app.container.append(this.app.gamenode);
+    }
+}
+
+class Score {
+    constructor(value, increment, interval, html) {
+        this.value = value;
+        this.increment = increment;
+        this.interval = interval;
+        this.html = html;
+        this.object;
+    }
+
+    add(value) {
+        this.value += value;
+    }
+
+    start() {
+        this.stop();
+        this.object = setInterval(() => {
+            this.value += this.increment;
+            this.html.innerHTML = this.value;
+        }, this.interval);
+    }
+
+    stop() {
+        if (this.object !== undefined) { clearInterval(this.object); }
+    }
+
+    change(increment, interval) {
+        this.stop();
+        this.increment = increment;
+        this.interval = interval;
+        this.start();
     }
 }
 
