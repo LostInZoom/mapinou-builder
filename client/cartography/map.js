@@ -91,6 +91,8 @@ class Basemap {
             }),
             style: this.styles['player'],
             zIndex: 50,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
         });
 
         this.target = new Feature({ type: 'target' });
@@ -100,6 +102,8 @@ class Basemap {
             }),
             style: this.styles['target'],
             zIndex: 51,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
         });
 
         this.pitfalls = [];
@@ -108,6 +112,8 @@ class Basemap {
             style: this.styles['pitfalls'],
             maxZoom: 12,
             zIndex: 49,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
         });
 
         this.pitfallsAreaLayer = new VectorLayer({
@@ -115,6 +121,8 @@ class Basemap {
             style: this.styles['pitfallsArea'],
             minZoom: 12,
             zIndex: 48,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
         });
 
         this.path = new Feature({ type: 'path' });
@@ -124,6 +132,8 @@ class Basemap {
             }),
             style: this.styles['path'],
             zIndex: 10,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
         });
 
         this.baselayer = new TileLayer({

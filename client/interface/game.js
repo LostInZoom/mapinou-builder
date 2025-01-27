@@ -365,7 +365,7 @@ class Game {
     over() {
         let game = this;
         game.score.stop();
-        let text = 'Congratulation, you reached the target!<br>Your score: ' + game.score;
+        let text = 'Congratulation, you reached the target!<br>Your score: ' + game.score.value;
 
         // Create the loading screen
         let mask = makeDiv(null, 'mask');
