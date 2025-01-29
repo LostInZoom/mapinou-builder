@@ -1,9 +1,20 @@
-@use 'map';
-@use 'menu';
+// @use 'map';
+// @use 'menu';
 
-html {
-    width: 100%; 
+@use 'themes/fonts';
+@use 'interface/main';
+
+html, body {
+    font-family: 'Cantarell';
+    margin: 0;
+}
+
+#application {
+    position: absolute;
+    top: 0;
+    left: 0;
     height: 100%;
-    font-family: sans-serif;
-    overflow: hidden;
+    width: 100%;
+
+    display: flex;
 }

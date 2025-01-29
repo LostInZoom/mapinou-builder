@@ -1,0 +1,29 @@
+##############################
+#### INTERFACE PARAMETERS ####
+##############################
+interface:
+  theme: theme-light
+#########################
+#### GAME PARAMETERS ####
+#########################
+game:
+  tolerance:
+    flag: 500
+    target: 100
+    pitfall: 500
+  penalty:
+    pitfall: 100
+  speed: 5000
+#############################
+#### TUTORIAL DEFINITION ####
+#############################
+tutorial:
+  start:
+    zoom: 5
+    center: [ 270845.15, 5904541.30 ]
+  player: [ 396377.1, 5701254.9 ]
+  target: [ 416553.587, 5708562.378 ]
+###########################
+#### LEVELS DEFINITION ####
+###########################
+levels:

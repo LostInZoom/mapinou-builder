@@ -1,0 +1,25 @@
+@use 'sass:color';
+
+$themes: (
+    light: (
+        primary: #86BBD8,
+        secondary: #336699,
+        text: #2F4858,
+        button-background: #2F4858,
+        button-text: #86BBD8,
+    ),
+    dark: (
+        primary: #2F4858,
+        secondary: #336699,
+        text: #86BBD8,
+        button-background: #86BBD8,
+        button-text: #2F4858,
+    ),
+);
+
+$player: #6183af;
+$player-transparent: color.adjust($player, $alpha: 0.3);
+$target: #68b362;
+$target-transparent: color.adjust($target, $alpha: 0.3);
+$pitfalls: #af6161;
+$pitfalls-transparent: color.adjust($pitfalls, $alpha: 0.3);

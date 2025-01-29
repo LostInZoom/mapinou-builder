@@ -1,0 +1,44 @@
+@use '../themes/mixins';
+@use '../themes/colors';
+@use 'sass:map';
+
+.button {   
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transition: background .2s ease-in-out, color .2s ease-in-out;
+
+    user-select: none;
+    cursor: pointer;
+}
+
+.button-menu {
+    border-radius: .3rem;
+}
+
+#button-theme {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: .8rem;
+
+    & > svg {
+        height: 2rem;
+        width: 2rem;
+    }
+}
+
+#button-start {
+    margin-top: 1rem;
+    height: 5rem;
+    width: 5rem;
+    border-radius: 50%;
+}
+
+#button-previous {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: .8rem;
+}

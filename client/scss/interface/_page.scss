@@ -1,0 +1,41 @@
+@use '../themes/mixins';
+@use '../themes/colors';
+@use 'sass:map';
+
+.page {
+    @include mixins.themify(colors.$themes) {
+        background-color: mixins.themed('primary');
+        color: mixins.themed('text');
+    }
+
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    overflow: hidden;
+    transition: all .2s ease-in-out;
+
+    &.active {
+        flex: 1;
+    }
+
+    &.inactive {
+        flex: 0;
+    }
+
+    > .button-menu {
+        @include mixins.themify(colors.$themes) {
+            background-color: mixins.themed('button-background');
+            color: mixins.themed('button-text');
+        }
+    }
+}
+
+.title {
+    font-family: 'Vincendo Regular';
+    font-size: 32px;
+    text-transform: uppercase;
+}
