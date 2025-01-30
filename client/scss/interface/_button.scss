@@ -15,6 +15,7 @@
 
 .button-menu {
     border-radius: .3rem;
+    padding: .4rem .7rem;
 }
 
 #button-theme {
@@ -31,9 +32,13 @@
 
 #button-start {
     margin-top: 1rem;
-    height: 5rem;
-    width: 5rem;
+    padding: 0;
+    height: 30vw;
+    width: 30vw;
+    font-size: 5vw;
     border-radius: 50%;
+    text-transform: uppercase;
+    font-weight: bolder;
 }
 
 #button-previous {

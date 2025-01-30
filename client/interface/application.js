@@ -1,14 +1,21 @@
-import { StartPage } from './page.js';
-import Game from './game.js';
-import { makeDiv, addClass, hasClass, removeClass } from '../utils/dom.js';
+import { LevelPage, StartPage } from './page.js';
+import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
 
 class Application {
     constructor(params) {
         this.params = params;
         this.container = makeDiv('application', this.params.interface.theme);
+        this.sliding = false;
         document.body.append(this.container);
+        self = this;
 
-        this.page = new StartPage(this);
+        this.previous;
+        this.current = new StartPage(this);
+        this.next = new LevelPage(this);
+        this.current.activate();
+
+
+        // this.current.activate();
 
         // this.game;
         // this.theme = 'default';
@@ -44,16 +51,54 @@ class Application {
     light() {
         removeClass(this.container, 'theme-dark');
         addClass(this.container, 'theme-light');
-        this.page.light();
+        this.current.light();
     }
 
     dark() {
         removeClass(this.container, 'theme-light');
         addClass(this.container, 'theme-dark');
-        this.page.dark();
+        this.current.dark();
     }
 
+    setCurrent(page) {
+        this.current = page;
+    }
 
+    setNext(page) {
+        this.next = page;
+    }
+
+    setPrevious(page) {
+        this.previous = page;
+    }
+
+    slideNext(callback) {
+        this.sliding = true;
+        this.current.deactivate();
+        this.next.activate();
+
+        this.setPrevious(this.current);
+        this.setCurrent(this.next);
+
+        wait(this.params.interface.transition.page, () => {
+            this.sliding = false;
+            callback();
+        })
+    }
+
+    slidePrevious(callback) {
+        this.sliding = true;
+        this.current.deactivate();
+        this.previous.activate();
+
+        this.setNext(this.current);
+        this.setCurrent(this.next);
+
+        wait(this.params.interface.transition.page, () => {
+            this.sliding = false;
+            callback();
+        })
+    }
 
 
 

@@ -7,12 +7,6 @@ class Page {
         this.app.container.append(this.container);
     }
 
-    button(i, c, content) {
-        let button = makeDiv(i, c, content);
-        this.container.append(button);
-        return button;
-    }
-
     activate() {
         removeClass(this.container, 'inactive');
         addClass(this.container, 'active');
@@ -32,49 +26,56 @@ class Page {
         removeClass(this.container, 'theme-light');
         addClass(this.container, 'theme-dark');
     }
+
+    destroy() {
+        this.container.remove();
+    }
 }
 
 class StartPage extends Page {
     constructor(app) {
         super(app);
-        this.theme = this.button('button-theme', 'button');
-        addSVG(this.theme, new URL('../img/theme.svg', import.meta.url));
-
-        this.title = makeDiv(null, 'title', 'Cartogame');
-        this.container.append(this.title);
-        this.start = this.button('button-start', 'button-menu button', 'Play');
-        this.activate();
-        
-        this.next = new LevelPage(this.app);
-
         self = this;
-
-        function theme() { self.app.switchTheme(); }
+        this.theming()
         
-        function slide() {
-            self.start.removeEventListener('click', slide);
-            self.deactivate();
-            self.next.activate();
-            self.app.page = self.next;
-        }
-        this.theme.addEventListener('click', theme);
-        this.start.addEventListener('click', slide);
+        this.title = makeDiv(null, 'title', 'Cartogame');
+        this.startButton = makeDiv('button-start', 'button-menu button', 'Play');
+        this.container.append(this.title, this.startButton);
+
+        this.startButton.addEventListener('click', () => {
+            if (!this.app.sliding) {
+                this.app.slideNext(() => {
+                
+                });
+            }
+        });
+    }
+
+    theming() {
+        this.themeButton = makeDiv('button-theme', 'button', null);
+        addSVG(this.themeButton, new URL('../img/theme.svg', import.meta.url));
+        this.themeButton.addEventListener('click', () => { self.app.switchTheme(); });
+        this.container.append(this.themeButton);
     }
 }
 
 class LevelPage extends Page {
     constructor(app) {
         super(app);
-        this.previous = this.button('button-previous', 'button-menu button', 'Main menu');
-
         self = this;
-        function slide() {
-            self.previous.removeEventListener('click', slide);
-            self.deactivate();
-        }
-        this.previous.addEventListener('click', slide);
+
+        this.backButton = makeDiv('button-previous', 'button-menu button', 'Menu');
+        this.container.append(this.backButton);
+
+        this.backButton.addEventListener('click', () => {
+            if (!this.app.sliding) {
+                this.app.slidePrevious(() => {
+                
+                });
+            }
+        });
     }
 }
 
 export default { Page };
-export { StartPage };
+export { Page, StartPage, LevelPage };

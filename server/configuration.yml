@@ -3,6 +3,8 @@
 ##############################
 interface:
   theme: theme-light
+  transition:
+    page: 200
 #########################
 #### GAME PARAMETERS ####
 #########################
