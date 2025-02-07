@@ -1,30 +1,55 @@
-import { addClass, addSVG, makeDiv, removeClass, wait } from "../utils/dom.js";
+import { addClass, addSVG, clearElement, makeDiv, removeClass, wait } from "../utils/dom.js";
 
 class Page {
-    constructor(app) {
+    constructor(app, position) {
         this.app = app;
-        this.container = makeDiv(null, 'page inactive theme-light');
-        this.app.container.append(this.container);
+
+        // Create DOM Element
+        this.container = makeDiv(null, 'page ' + position);
+        // Add the element to the start or the end depending on the position
+        if (position === 'previous' && this.app.container.children.length > 0) {
+            this.app.container.insertBefore(this.container, this.app.container.firstChild);
+        }
+        else { this.app.container.append(this.container); }
+
+        // Storage for elements to style when changing theme
+        this.themed = [];
     }
 
-    activate() {
-        removeClass(this.container, 'inactive');
-        addClass(this.container, 'active');
+    setPrevious() {
+        removeClass(this.container, 'next');
+        removeClass(this.container, 'current');
+        addClass(this.container, 'previous');
     }
 
-    deactivate() {
-        removeClass(this.container, 'active');
-        addClass(this.container, 'inactive');
+    setCurrent() {
+        removeClass(this.container, 'previous');
+        removeClass(this.container, 'next');
+        addClass(this.container, 'current');
+    }
+
+    setNext() {
+        removeClass(this.container, 'previous');
+        removeClass(this.container, 'current');
+        addClass(this.container, 'next');
     }
 
     light() {
-        removeClass(this.container, 'theme-dark');
-        addClass(this.container, 'theme-light');
+        for (let i = 0; i < this.themed.length; i++) {
+            removeClass(this.themed[i], 'theme-dark');
+            addClass(this.themed[i], 'theme-light');
+        }
     }
 
     dark() {
-        removeClass(this.container, 'theme-light');
-        addClass(this.container, 'theme-dark');
+        for (let i = 0; i < this.themed.length; i++) {
+            removeClass(this.themed[i], 'theme-light');
+            addClass(this.themed[i], 'theme-dark');
+        }
+    }
+
+    clear() {
+        clearElement(this.container);
     }
 
     destroy() {
@@ -32,50 +57,4 @@ class Page {
     }
 }
 
-class StartPage extends Page {
-    constructor(app) {
-        super(app);
-        self = this;
-        this.theming()
-        
-        this.title = makeDiv(null, 'title', 'Cartogame');
-        this.startButton = makeDiv('button-start', 'button-menu button', 'Play');
-        this.container.append(this.title, this.startButton);
-
-        this.startButton.addEventListener('click', () => {
-            if (!this.app.sliding) {
-                this.app.slideNext(() => {
-                
-                });
-            }
-        });
-    }
-
-    theming() {
-        this.themeButton = makeDiv('button-theme', 'button', null);
-        addSVG(this.themeButton, new URL('../img/theme.svg', import.meta.url));
-        this.themeButton.addEventListener('click', () => { self.app.switchTheme(); });
-        this.container.append(this.themeButton);
-    }
-}
-
-class LevelPage extends Page {
-    constructor(app) {
-        super(app);
-        self = this;
-
-        this.backButton = makeDiv('button-previous', 'button-menu button', 'Menu');
-        this.container.append(this.backButton);
-
-        this.backButton.addEventListener('click', () => {
-            if (!this.app.sliding) {
-                this.app.slidePrevious(() => {
-                
-                });
-            }
-        });
-    }
-}
-
-export default { Page };
-export { Page, StartPage, LevelPage };
+export default Page;

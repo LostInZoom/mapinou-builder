@@ -1,20 +1,2 @@
-// @use 'map';
-// @use 'menu';
-
 @use 'themes/fonts';
 @use 'interface/main';
-
-html, body {
-    font-family: 'Cantarell';
-    margin: 0;
-}
-
-#application {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-
-    display: flex;
-}

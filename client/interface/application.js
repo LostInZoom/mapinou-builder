@@ -1,18 +1,33 @@
-import { LevelPage, StartPage } from './page.js';
+import Page from './page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
 
 class Application {
     constructor(params) {
         this.params = params;
-        this.container = makeDiv('application', this.params.interface.theme);
-        this.sliding = false;
-        document.body.append(this.container);
-        self = this;
 
-        this.previous;
-        this.current = new StartPage(this);
-        this.next = new LevelPage(this);
-        this.current.activate();
+        // Create the DOM Element
+        this.container = makeDiv('application', 'application ' + this.params.interface.theme);
+        document.body.append(this.container);
+
+        // Boolean to flag if the page is sliding
+        this.sliding = false;
+        
+        // Storage fot the previous page
+        this.previous = new Page(this, 'previous');
+
+        // Create the current page
+        this.current = new Page(this, 'current');
+
+        // Create the next page
+        this.next = new Page(this, 'next');
+
+        this.page1(this.current);
+
+
+
+
+        // this.next = new LevelPage(this);
+        
 
 
         // this.current.activate();
@@ -38,6 +53,76 @@ class Application {
         // this.container.append(this.homenode, this.gamenode);
     }
 
+    page1(page) {
+        let title = makeDiv(null, 'title', 'Cartogame');
+        let startButton = makeDiv('button-start', 'button-menu button ' + this.params.interface.theme, 'Play');
+        page.container.append(title, startButton);
+
+        let themeButton = makeDiv('button-theme', 'button', null);
+        addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
+        themeButton.addEventListener('click', () => { this.switchTheme(); });
+        page.container.append(themeButton);
+        page.themed.push(startButton);
+
+        startButton.addEventListener('click', () => {
+            this.page2(this.next);
+            if (!this.sliding) {
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
+    }
+
+    page2(page) {
+        let backButton = makeDiv('button-previous', 'button-menu button ' + this.params.interface.theme, 'Menu');
+        page.container.append(backButton);
+        page.themed.push(backButton);
+
+        let themeButton = makeDiv('button-theme', 'button', null);
+        addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
+        themeButton.addEventListener('click', () => { this.switchTheme(); });
+        page.container.append(themeButton);
+
+        let tutorial = this.params.tutorial;
+        let levels = this.params.levels;
+
+        let tutorialButton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, 'Tutorial');
+        page.container.append(tutorialButton);
+        page.themed.push(tutorialButton);
+
+        let levelcontainer = makeDiv(null, 'level-selection');
+        page.container.append(levelcontainer);
+
+        for (let i = 0; i < levels.length; i++) {
+            let levelbutton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, levels[i]);
+            levelcontainer.append(levelbutton);
+            page.themed.push(levelbutton);
+        }
+
+        tutorialButton.addEventListener('click', () => {
+            this.tutorial(this.next);
+            if (!this.sliding) {
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
+
+        backButton.addEventListener('click', () => {
+            this.page1(this.previous);
+            if (!this.sliding) {
+                this.slidePrevious(() => {
+                    this.previous = new Page(this, 'previous');
+                });
+            }
+        });
+    }
+
+    tutorial(page) {
+
+    }
+
     getTheme() {
         if (hasClass(this.container, 'theme-dark')) { return 'theme-dark' }
         else { return 'theme-light' }
@@ -51,36 +136,33 @@ class Application {
     light() {
         removeClass(this.container, 'theme-dark');
         addClass(this.container, 'theme-light');
+        this.previous.light();
         this.current.light();
+        this.next.light();
+        this.params.interface.theme = 'theme-light';
     }
 
     dark() {
         removeClass(this.container, 'theme-light');
         addClass(this.container, 'theme-dark');
+        this.previous.dark();
         this.current.dark();
-    }
-
-    setCurrent(page) {
-        this.current = page;
-    }
-
-    setNext(page) {
-        this.next = page;
-    }
-
-    setPrevious(page) {
-        this.previous = page;
+        this.next.dark();
+        this.params.interface.theme = 'theme-dark';
     }
 
     slideNext(callback) {
         this.sliding = true;
-        this.current.deactivate();
-        this.next.activate();
 
-        this.setPrevious(this.current);
-        this.setCurrent(this.next);
+        this.next.setCurrent();
+        this.current.setPrevious();
+
+        this.previous = this.current;
+        this.current = this.next;
 
         wait(this.params.interface.transition.page, () => {
+            this.previous.clear();
+            this.container.firstChild.remove();
             this.sliding = false;
             callback();
         })
@@ -88,51 +170,20 @@ class Application {
 
     slidePrevious(callback) {
         this.sliding = true;
-        this.current.deactivate();
-        this.previous.activate();
 
-        this.setNext(this.current);
-        this.setCurrent(this.next);
+        this.previous.setCurrent();
+        this.current.setNext();
+        
+        this.next = this.current;
+        this.current = this.previous;
 
         wait(this.params.interface.transition.page, () => {
+            this.next.clear();
+            this.container.lastChild.remove();
             this.sliding = false;
             callback();
         })
     }
-
-
-
-
-
-    addButton(content, start=false) {
-        let b = makeDiv('', 'button-menu button', content);
-        if (start) {
-            this.container.insertBefore(b, this.container.firstChild)
-            this.buttons.unshift(b);
-        } else {
-            this.container.append(b);
-            this.buttons.push(b);
-        }
-        return b
-    }
-
-    addContinueButton() {
-        if (this.continueButton === undefined) {
-            let b = makeDiv('button-continue', 'button-menu button', 'Continue');
-            b.addEventListener('click', (e) => {
-                this.container.style.transform = 'translateX(-100%)'
-            });
-            this.homenode.append(b);
-            this.continueButton = b;
-        }
-    }
-
-    removeContinueButton() {
-        if (this.continueButton !== undefined) {
-            this.continueButton.remove();
-            this.continueButton = undefined;
-        }
-    }
 }
 
-export { Application }
+export default Application;

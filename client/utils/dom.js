@@ -126,8 +126,8 @@ function remove(...args) {
  * @param {DOMElement} element The DOM Elements to clear.
  */
 function clearElement(element) {
-    for (let i = 0; i < element.children.length; i++) {
-        element.childNodes[i].remove();
+    while (element.firstChild) {
+        element.firstChild.remove();
     }
 }
 

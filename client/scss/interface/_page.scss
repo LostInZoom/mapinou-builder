@@ -2,13 +2,33 @@
 @use '../themes/colors';
 @use 'sass:map';
 
-.page {
+html, body {
+    font-family: 'Vincendo Regular';
+    margin: 0;
+
     @include mixins.themify(colors.$themes) {
         background-color: mixins.themed('primary');
         color: mixins.themed('text');
     }
+}
 
-    position: relative;
+.application {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+
+    transition: background .2s ease-in-out;
+}
+
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
 
     display: flex;
     flex-direction: column;
@@ -16,21 +36,23 @@
     align-items: center;
     
     overflow: hidden;
-    transition: all .2s ease-in-out;
+    transition: transform .2s ease-in-out;
 
-    &.active {
-        flex: 1;
+    &.previous {
+        transform: translateX(-100%);
     }
 
-    &.inactive {
-        flex: 0;
+    &.current {
+        transform: translateX(0%);
     }
 
-    > .button-menu {
-        @include mixins.themify(colors.$themes) {
-            background-color: mixins.themed('button-background');
-            color: mixins.themed('button-text');
-        }
+    &.next {
+        transform: translateX(100%);
+    }
+
+    @include mixins.themify(colors.$themes) {
+        background-color: mixins.themed('button-background');
+        color: mixins.themed('button-text');
     }
 }
 
@@ -40,4 +62,19 @@
     text-transform: uppercase;
 
     user-select: none;
+}
+
+.level-selection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+
+    margin: 1rem;
+    gap: 1rem;
+
+    // @include mixins.themify(colors.$themes) {
+    //     background-color: mixins.themed('button-background');
+    //     color: mixins.themed('button-text');
+    // }
 }
