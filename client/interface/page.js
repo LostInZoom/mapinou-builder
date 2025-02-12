@@ -55,6 +55,10 @@ class Page {
     destroy() {
         this.container.remove();
     }
+
+    getTheme() {
+        return this.app.getTheme();
+    }
 }
 
 export default Page;

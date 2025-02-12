@@ -1,6 +1,7 @@
 import * as turf from "@turf/turf";
 import { Polygon } from "ol/geom.js";
-import { project } from "./map.js";
+
+import proj4 from "proj4";
 
 /**
  * Calculate a buffer around the given coordinates.
@@ -52,4 +53,15 @@ function within(position1, position2, distance) {
     else { return true; }
 }
 
-export { buffer, middle, within }
+/**
+ * Project the given coordinates.
+ * @param {string} epsg1 - Origin EPSG.
+ * @param {string} epsg2 - Destination EPSG.
+ * @param {Array} coordinates - Coordinates to project.
+ * @returns {Array} - Projected coordinates.
+ */
+function project(epsg1, epsg2, coordinates) {
+    return proj4(proj4.defs('EPSG:' + epsg1), proj4.defs('EPSG:' + epsg2), coordinates);
+}
+
+export { buffer, middle, within, project }

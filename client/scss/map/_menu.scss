@@ -1,0 +1,10 @@
+.menu-map {
+    position: relative;
+
+    width: calc(100% - 2rem);
+    margin: 1rem 0;
+    flex: 1;
+
+    border-radius: .4rem;
+    overflow: hidden;
+}

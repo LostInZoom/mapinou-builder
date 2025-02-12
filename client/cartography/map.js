@@ -16,8 +16,6 @@ import {
     Style,
 } from 'ol/style.js';
 
-import proj4 from 'proj4';
-
 import { buffer } from './analysis.js';
 import { addClass, makeDiv, removeClass } from '../utils/dom.js';
 
@@ -172,6 +170,7 @@ class Basemap {
             view: this.view,
             interactions: new defaults({
                 altShiftDragRotate: false,
+                altShiftDragRotate: false,
                 doubleClickZoom: false,
                 keyboard: false,
                 // mouseWheelZoom: false,
@@ -239,10 +238,4 @@ class Basemap {
     }
 };
 
-
-function project(epsg1, epsg2, coordinates) {
-    return proj4(proj4.defs('EPSG:' + epsg1), proj4.defs('EPSG:' + epsg2), coordinates);
-}
-
-export { project }
 export default Basemap

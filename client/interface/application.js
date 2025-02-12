@@ -1,5 +1,6 @@
 import Page from './page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
+import TutorialMap from '../cartography/tutorial.js';
 
 class Application {
     constructor(params) {
@@ -82,10 +83,7 @@ class Application {
         let themeButton = makeDiv('button-theme', 'button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
-        page.container.append(themeButton);
-
-        let tutorial = this.params.tutorial;
-        let levels = this.params.levels;
+        page.container.append(themeButton);       
 
         let tutorialButton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, 'Tutorial');
         page.container.append(tutorialButton);
@@ -94,6 +92,7 @@ class Application {
         let levelcontainer = makeDiv(null, 'level-selection');
         page.container.append(levelcontainer);
 
+        let levels = this.params.levels;
         for (let i = 0; i < levels.length; i++) {
             let levelbutton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, levels[i]);
             levelcontainer.append(levelbutton);
@@ -120,7 +119,28 @@ class Application {
     }
 
     tutorial(page) {
+        addClass(page.container, 'tutorial');
+        
+        let menumap = new TutorialMap(page, 1);
+        menumap.setCenter(this.params.tutorial.player);
+        menumap.setZoom(16);
+        menumap.setPlayer(this.params.tutorial.player);
 
+        let information = makeDiv(null, 'tutorial-information');
+        let title = makeDiv(null, 'tutorial-title', 'Phase 1');
+
+        let text = makeDiv(null, 'tutorial-text', `
+            You must find your location on the map
+            following the information on screen.<br><br>
+            Hints are updated during the search if you
+            are heading in the right direction.<br><br>
+            Double tap on the screen when you have found the location,
+            a visual let you know if you're wrong.
+            `)
+
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Alright');
+        information.append(title, text, continueButton);
+        page.container.append(information);
     }
 
     getTheme() {

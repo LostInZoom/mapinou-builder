@@ -1,5 +1,19 @@
 @use 'sass:color';
 
+$player: #6183af;
+$player-transparent: color.adjust($player, $alpha: 0.3);
+$target: #68b362;
+$target-transparent: color.adjust($target, $alpha: 0.3);
+$pitfalls: #af6161;
+$pitfalls-transparent: color.adjust($pitfalls, $alpha: 0.3);
+
+.player { background-color: $player; }
+.player-transparent { background-color: color.adjust($player, $alpha: 0.3); }
+.target { background-color: $target; }
+.target-transparent { background-color: color.adjust($target, $alpha: 0.3); }
+.pitfalls { background-color: $player; }
+.pitfalls-transparent { background-color: color.adjust($pitfalls, $alpha: 0.3); }
+
 $themes: (
     light: (
         primary: #86BBD8,
@@ -7,6 +21,14 @@ $themes: (
         text: #2F4858,
         button-background: #2F4858,
         button-text: #86BBD8,
+        mask-background: #336699,
+        mask-loader: #86BBD8,
+        player: $player,
+        player-transparent: $player-transparent,
+        target: $target,
+        target-transparent: $target-transparent,
+        pitfalls: $pitfalls,
+        pitfalls-transparent: $pitfalls-transparent,
     ),
     dark: (
         primary: #2F4858,
@@ -14,12 +36,13 @@ $themes: (
         text: #86BBD8,
         button-background: #86BBD8,
         button-text: #2F4858,
+        mask-background: #336699,
+        mask-loader: #86BBD8,
+        player: $player,
+        player-transparent: $player-transparent,
+        target: $target,
+        target-transparent: $target-transparent,
+        pitfalls: $pitfalls,
+        pitfalls-transparent: $pitfalls-transparent,
     ),
 );
-
-$player: #6183af;
-$player-transparent: color.adjust($player, $alpha: 0.3);
-$target: #68b362;
-$target-transparent: color.adjust($target, $alpha: 0.3);
-$pitfalls: #af6161;
-$pitfalls-transparent: color.adjust($pitfalls, $alpha: 0.3);

@@ -1,0 +1,40 @@
+@use '../themes/mixins';
+@use '../themes/colors';
+@use 'sass:map';
+
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    overflow: hidden;
+    transition: transform .2s ease-in-out;
+
+    &.previous {
+        transform: translateX(-100%);
+    }
+
+    &.current {
+        transform: translateX(0%);
+    }
+
+    &.next {
+        transform: translateX(100%);
+    }
+
+    &.tutorial {
+        
+    }
+
+    @include mixins.themify(colors.$themes) {
+        background-color: mixins.themed('button-background');
+        color: mixins.themed('button-text');
+    }
+}

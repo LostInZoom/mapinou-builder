@@ -1,18 +1,21 @@
-@use "../../node_modules/ol/ol.css";
+@use 'map/main';
+@use 'map/menu';
 
-#map {
-    position: absolute;
-    top: 0;
-    z-index: 5;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
+// @use "../../node_modules/ol/ol.css";
 
-    &.active {
-        pointer-events: all;
-    }
-}
+// #map {
+//     position: absolute;
+//     top: 0;
+//     z-index: 5;
+//     width: 100%;
+//     height: 100%;
+//     pointer-events: none;
+
+//     &.active {
+//         pointer-events: all;
+//     }
+// }
   
-.ol-zoom {
-    display: none;
-}
+// .ol-zoom {
+//     display: none;
+// }
