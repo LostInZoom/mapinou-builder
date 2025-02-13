@@ -1,187 +1,19 @@
 import Map from 'ol/Map.js';
 import View from 'ol/View.js';
-import TileLayer from 'ol/layer/Tile.js';
-import WMTS from 'ol/source/WMTS.js';
-import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
-import VectorLayer from 'ol/layer/Vector.js';
-import VectorSource from 'ol/source/Vector.js';
 import { extend } from 'ol/extent.js';
 import { Feature } from 'ol';
-import { defaults } from 'ol/interaction/defaults.js';
+import { defaults as defaultInteractions } from 'ol/interaction/defaults.js';
 import { Point, LineString } from 'ol/geom.js';
-import {
-    Circle as CircleStyle,
-    Fill,
-    Stroke,
-    Style,
-} from 'ol/style.js';
 
-import { buffer } from './analysis.js';
-import { addClass, makeDiv, removeClass } from '../utils/dom.js';
+import { buffer, within } from './analysis.js';
+import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
+import { MapLayers } from './layers.js';
+import { unByKey } from 'ol/Observable.js';
 
 class Basemap {
-    constructor(application) {
-        this.parent = application.gamenode;
-        this.application = application;
-        this.index = 'map';
-        this.div = makeDiv(this.index, 'olmap');
-        this.parent.append(this.div);
-        this.view = new View();
-
-        this.styles = {
-            'player': new Style({
-                image: new CircleStyle({
-                    radius: 7,
-                    fill: new Fill({
-                        color: this.application.colors[this.application.theme]['player']
-                    }),
-                    stroke: new Stroke({
-                        color: 'white',
-                        width: 2,
-                    }),
-                }),
-            }),
-            'target': new Style({
-                image: new CircleStyle({
-                    radius: 7,
-                    fill: new Fill({
-                        color: this.application.colors[this.application.theme]['target']
-                    }),
-                    stroke: new Stroke({
-                        color: 'white',
-                        width: 2,
-                    }),
-                }),
-            }),
-            'pitfalls': new Style({
-                image: new CircleStyle({
-                    radius: 7,
-                    fill: new Fill({
-                        color: this.application.colors[this.application.theme]['pitfalls']
-                    }),
-                    stroke: new Stroke({
-                        color: 'white',
-                        width: 2,
-                    }),
-                }),
-            }),
-            'pitfallsArea': new Style({
-                fill: new Fill({
-                    color: this.application.colors[this.application.theme]['pitfalls-transparent']
-                }),
-                stroke: new Stroke({
-                    color: this.application.colors[this.application.theme]['pitfalls'],
-                    width: 3,
-                }),
-            }),
-            'path': new Style({
-                stroke: new Stroke({
-                    width: 6,
-                    color: this.application.colors[this.application.theme]['player-transparent'],
-                }),
-            })
-        };
-        
-        this.player = new Feature({ type: 'player' });
-        this.playerLayer = new VectorLayer({
-            source: new VectorSource({
-                features: [ this.player ],
-            }),
-            style: this.styles['player'],
-            zIndex: 50,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-        });
-
-        this.target = new Feature({ type: 'target' });
-        this.targetLayer = new VectorLayer({
-            source: new VectorSource({
-                features: [ this.target ],
-            }),
-            style: this.styles['target'],
-            zIndex: 51,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-        });
-
-        this.pitfalls = [];
-        this.pitfallsLayer = new VectorLayer({
-            source: new VectorSource({}),
-            style: this.styles['pitfalls'],
-            maxZoom: 12,
-            zIndex: 49,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-        });
-
-        this.pitfallsAreaLayer = new VectorLayer({
-            source: new VectorSource({}),
-            style: this.styles['pitfallsArea'],
-            minZoom: 12,
-            zIndex: 48,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-        });
-
-        this.path = new Feature({ type: 'path' });
-        this.pathLayer = new VectorLayer({
-            source: new VectorSource({
-                features: [ this.path ],
-            }),
-            style: this.styles['path'],
-            zIndex: 10,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-        });
-
-        this.baselayer = new TileLayer({
-            preload: 'Infinity',
-            source: new WMTS({
-                url: 'https://data.geopf.fr/wmts',
-                layer: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
-                matrixSet: 'PM',
-                format: 'image/png',
-                style: 'normal',
-                dimensions: [256, 256],
-                tileGrid: new WMTSTileGrid({
-                    origin: [-20037508, 20037508],
-                    resolutions: [
-                        156543.03392804103, 78271.5169640205, 39135.75848201024, 19567.879241005125, 9783.939620502562,
-                        4891.969810251281, 2445.9849051256406, 1222.9924525628203, 611.4962262814101, 305.74811314070485,
-                        152.87405657035254, 76.43702828517625, 38.218514142588134, 19.109257071294063, 9.554628535647034,
-                        4.777314267823517, 2.3886571339117584, 1.1943285669558792, 0.5971642834779396, 0.29858214173896974,
-                        0.14929107086948493, 0.07464553543474241
-                    ],
-                    matrixIds: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"],
-                })
-            })
-        })
-
-        this.map = new Map({
-            target: this.index,
-            layers: [
-                this.playerLayer,
-                this.pathLayer,
-                this.targetLayer,
-                this.pitfallsLayer,
-                this.pitfallsAreaLayer,
-                this.baselayer,
-            ],
-            view: this.view,
-            interactions: new defaults({
-                altShiftDragRotate: false,
-                altShiftDragRotate: false,
-                doubleClickZoom: false,
-                keyboard: false,
-                // mouseWheelZoom: false,
-                shiftDragZoom: false,
-                // dragPan: false,
-                pinchRotate: false,
-                // pinchZoom: false,
-                pointerInteraction: true,
-            })
-        });
-
+    constructor(page) {
+        this.page = page;
+        this.params = page.app.params;
     }
 
     setCenter(center) {
@@ -192,16 +24,186 @@ class Basemap {
         this.view.setZoom(zoom);
     }
 
+    setGeometry(name, position) {
+        this.layers.setGeometry(name, new Point(position))
+    }
+
     setPlayer(position) {
-        this.player.setGeometry(new Point(position));
+        this.layers.setGeometry('player', new Point(position))
     }
 
     setTarget(position) {
-        this.target.setGeometry(new Point(position));
+        this.layers.setGeometry('target', new Point(position))
     }
 
     setPath(vertexes) {
-        this.path.setGeometry(new LineString(vertexes));
+        this.layers.setGeometry('path', new LineString(vertexes))
+    }
+
+    isVisible(position, padding) {
+        let visible = false;
+        let size = this.map.getSize();
+        let [minx, maxy] = this.map.getCoordinateFromPixel([ padding, padding ]);
+        let [maxx, miny] = this.map.getCoordinateFromPixel([ size[0] - padding, size[1] - padding ]);
+        let [x, y] = position;
+        if (x > minx && x < maxx && y > miny && y < maxy) { visible = true; }
+
+        return visible;
+    }
+
+    getZoomForData() {
+        let extent1 = this.playerLayer.getSource().getExtent();
+        let extent2 = this.targetLayer.getSource().getExtent();
+        let extent3 = this.pitfallsAreaLayer.getSource().getExtent();
+        let extent = extend(extent1, extend(extent2, extent3));
+        let res = this.view.getResolutionForExtent(extent, this.map.getSize());
+        let zoom = this.view.getZoomForResolution(res);
+        return Math.floor(zoom);
+    }
+
+    activate() {
+        addClass(this.container, 'active');
+    }
+
+    deactivate() {
+        removeClass(this.container, 'active');
+    }
+
+    loading() {
+        removeClass(this.mask, 'loaded');
+    }
+
+    loaded() {
+        addClass(this.mask, 'loaded');
+    }
+
+    initialize() {
+        this.container = makeDiv(null, 'map map-' + this.type);
+        this.page.container.append(this.container);
+        this.mask = makeDiv(null, 'mask-map mask ' + this.page.getTheme());
+        this.page.themed.push(this.mask);
+        this.loader = makeDiv(null, 'loader');
+        this.mask.append(this.loader);
+        this.container.append(this.mask);
+
+        this.view = new View();
+        this.layers = new MapLayers();
+        this.layers.setBaseLayer();
+
+        let interactions = {
+            altShiftDragRotate: false,
+            altShiftDragRotate: false,
+            doubleClickZoom: false,
+            keyboard: false,
+            mouseWheelZoom: false,
+            shiftDragZoom: false,
+            dragPan: false,
+            pinchRotate: false,
+            pinchZoom: false,
+            pointerInteraction: false,
+        }
+
+        if (this.interactable) {
+            interactions.mouseWheelZoom = true;
+            interactions.dragPan = true;
+            interactions.pinchZoom = true;
+            interactions.pointerInteraction = true;
+        }
+
+        this.map = new Map({
+            target: this.container,
+            layers: [ this.layers.getBaseLayer() ],
+            view: this.view,
+            interactions: new defaultInteractions(interactions),
+        });
+
+        this.map.once('loadend', () => {
+            this.loaded();
+        });
+    }
+};
+
+class MenuMap extends Basemap {
+    constructor(page) {
+        super(page);
+        this.type = 'menu';
+        this.interactable = false;
+        this.initialize();
+
+        this.layers.add('player', 50);
+        this.map.addLayer(this.layers.getLayer('player'));
+    }
+}
+
+class GameMap extends Basemap {
+    constructor(page) {
+        super(page);
+        this.type = 'game';
+        this.interactable = true;
+        this.initialize();
+
+        this.clue = makeDiv(null, 'game-visual-clue');
+        this.container.append(this.clue);
+
+        this.pitfalls = []
+
+        this.layers.add('player', 50);
+        this.layers.add('target', 51);
+        this.layers.add('path', 10);
+
+        this.layers.add('pitfalls', 49);
+        this.layers.setMaxZoom('pitfalls', 12);
+
+        this.layers.add('pitfallsArea', 48);
+        this.layers.setMinZoom('pitfallsArea', 12);
+
+        this.map.addLayer(this.layers.getLayer('player'));
+        this.map.addLayer(this.layers.getLayer('path'));
+        this.map.addLayer(this.layers.getLayer('target'));
+        this.map.addLayer(this.layers.getLayer('pitfalls'));
+        this.map.addLayer(this.layers.getLayer('pitfallsArea'));
+
+        this.player = this.params.tutorial.player;
+        this.hints = this.params.tutorial.hints;
+
+        this.hint = makeDiv(null, 'game-hint');
+        this.hintext = makeDiv(null, 'game-hint-text collapse ' + this.params.interface.theme);
+        this.hint.append(this.hintext);
+        this.page.themed.push(this.hintext);
+        this.container.append(this.hint);
+
+        this.map.on('postrender', () => {
+            let visible = this.isVisible(this.player, 50);
+            let zoom = this.view.getZoom();
+            for (let minzoom in this.hints) {
+                if (!visible) {
+                    this.hintext.innerHTML = 'Come back, you are getting lost!';
+                } else {
+                    if (zoom >= minzoom) {
+                        removeClass(this.hintext, 'collapse');
+                        this.hintext.innerHTML = this.hints[minzoom];
+                    }
+                }
+            }
+        });
+
+        this.activeclue = false;
+
+        let clue = this.map.on('dblclick', (e) => {
+            let target = this.map.getEventCoordinate(event);
+            if (within(target, this.player, this.params.game.tolerance.target)) {
+                console.log('found')
+            } else {
+                if (!this.activeclue) {
+                    this.activeclue = true;
+                    addClass(this.clue, 'active');
+                    wait(500, () => {
+                        removeClass(this.clue, 'active');
+                        this.activeclue = false;
+                    })
+                }
+            }
+        });
     }
 
     addPitfall(coordinates) {
@@ -218,24 +220,6 @@ class Basemap {
         });
         this.pitfallsAreaLayer.getSource().addFeature(area);
     }
+}
 
-    getZoomForData() {
-        let extent1 = this.playerLayer.getSource().getExtent();
-        let extent2 = this.targetLayer.getSource().getExtent();
-        let extent3 = this.pitfallsAreaLayer.getSource().getExtent();
-        let extent = extend(extent1, extend(extent2, extent3));
-        let res = this.view.getResolutionForExtent(extent, this.map.getSize());
-        let zoom = this.view.getZoomForResolution(res);
-        return Math.floor(zoom);
-    }
-
-    activate() {
-        addClass(this.div, 'active');
-    }
-
-    deactivate() {
-        removeClass(this.div, 'active');
-    }
-};
-
-export default Basemap
+export { Basemap, GameMap, MenuMap };

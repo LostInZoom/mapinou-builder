@@ -124,7 +124,7 @@ class Game {
     phase1(game) {
         this.hint = `
             You are in a hamlet called La Colombière.<br><br>
-            It is located in the west of Lyon, between Saint-Etienne and Clermond-Ferrand in the Parc Naturel Régional du Livradois-Forez.<br><br>
+            It is located in the west of Lyon, between Saint-Etienne and Clermont-Ferrand in the Parc Naturel Régional du Livradois-Forez.<br><br>
             The hamlet is in the west of the town of Ambert, between St-Amant-Roche-Savine and St-Germain-l'Herm.<br><br>
             It is southwest of Fournols, near the waterbodies of Étangs de la Colombière.<br><br>
             Double click on your position to continue.

@@ -1,6 +1,6 @@
 import Page from './page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
-import TutorialMap from '../cartography/tutorial.js';
+import { GameMap, MenuMap } from '../cartography/map.js';
 
 class Application {
     constructor(params) {
@@ -121,10 +121,10 @@ class Application {
     tutorial(page) {
         addClass(page.container, 'tutorial');
         
-        let menumap = new TutorialMap(page, 1);
+        let menumap = new MenuMap(page);
         menumap.setCenter(this.params.tutorial.player);
         menumap.setZoom(16);
-        menumap.setPlayer(this.params.tutorial.player);
+        menumap.setGeometry('player', this.params.tutorial.player);
 
         let information = makeDiv(null, 'tutorial-information');
         let title = makeDiv(null, 'tutorial-title', 'Phase 1');
@@ -141,6 +141,21 @@ class Application {
         let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Alright');
         information.append(title, text, continueButton);
         page.container.append(information);
+
+        continueButton.addEventListener('click', () => {
+            this.phase1(this.next);
+            if (!this.sliding) {
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
+    }
+
+    phase1(page) {
+        let gamemap = new GameMap(page);
+        gamemap.setCenter(this.params.tutorial.start.center);
+        gamemap.setZoom(this.params.tutorial.start.zoom);
     }
 
     getTheme() {

@@ -11,7 +11,7 @@ interface:
 game:
   tolerance:
     flag: 500
-    target: 100
+    target: 200
     pitfall: 500
   penalty:
     pitfall: 100
@@ -26,6 +26,13 @@ tutorial:
     center: [ 270845.15, 5904541.30 ]
   player: [ 396377.1, 5701254.9 ]
   target: [ 416553.587, 5708562.378 ]
+  hints:
+    0: You are in the west of the city of Lyon
+    6: You are between St-Étienne and Clermont-Ferrand
+    8: You are south-west of Ambert
+    10: You are between St-Amant-Roche-Savine and St-Germain-l'Herm
+    11: You are south-west of Fournols
+    13: You are in La Colombière, double-tap on your position
 ###########################
 #### LEVELS DEFINITION ####
 ###########################
