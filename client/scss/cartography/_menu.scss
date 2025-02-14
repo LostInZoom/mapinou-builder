@@ -1,0 +1,19 @@
+@use '../themes/mixins';
+@use '../themes/colors';
+@use 'sass:map';
+
+.map-menu {
+    position: relative;
+
+    width: calc(100% - 2rem);
+    margin: 1rem 0;
+    flex: 1;
+
+    border-radius: .4rem;
+    overflow: hidden;
+
+    @include mixins.themify(colors.$themes) {
+        background-color: mixins.themed('primary');
+        color: mixins.themed('text');
+    }
+}

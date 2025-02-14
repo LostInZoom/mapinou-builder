@@ -38,7 +38,7 @@ class MapStyles {
                 image: new CircleStyle({
                     radius: 7,
                     fill: new Fill({
-                        color: getColorsByClassNames('pitfalls').target
+                        color: getColorsByClassNames('pitfalls').pitfalls
                     }),
                     stroke: new Stroke({
                         color: 'white',
@@ -51,14 +51,14 @@ class MapStyles {
                     color: getColorsByClassNames('pitfalls-transparent')['pitfalls-transparent']
                 }),
                 stroke: new Stroke({
-                    color: getColorsByClassNames('pitfalls').target,
+                    color: getColorsByClassNames('pitfalls').pitfalls,
                     width: 3,
                 }),
             }),
             'path': new Style({
                 stroke: new Stroke({
                     width: 6,
-                    color: getColorsByClassNames('player-transparent')['player-transparent']
+                    color: getColorsByClassNames('path').path
                 }),
             })
         };

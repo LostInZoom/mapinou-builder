@@ -11,7 +11,7 @@ $pitfalls-transparent: color.adjust($pitfalls, $alpha: 0.3);
 .player-transparent { background-color: color.adjust($player, $alpha: 0.3); }
 .target { background-color: $target; }
 .target-transparent { background-color: color.adjust($target, $alpha: 0.3); }
-.pitfalls { background-color: $player; }
+.pitfalls { background-color: $pitfalls; }
 .pitfalls-transparent { background-color: color.adjust($pitfalls, $alpha: 0.3); }
 
 $themes: (

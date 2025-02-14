@@ -34,7 +34,7 @@
     }
 
     @include mixins.themify(colors.$themes) {
-        background-color: mixins.themed('button-background');
-        color: mixins.themed('button-text');
+        background-color: mixins.themed('text');
+        color: mixins.themed('primary');
     }
 }

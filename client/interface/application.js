@@ -1,6 +1,7 @@
 import Page from './page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
 import { GameMap, MenuMap } from '../cartography/map.js';
+import { middle } from '../cartography/analysis.js';
 
 class Application {
     constructor(params) {
@@ -23,35 +24,6 @@ class Application {
         this.next = new Page(this, 'next');
 
         this.page1(this.current);
-
-
-
-
-        // this.next = new LevelPage(this);
-        
-
-
-        // this.current.activate();
-
-        // this.game;
-        // this.theme = 'default';
-        // this.colors = getCSSColors(this.theme);
-        // this.homenode = makeDiv('home', 'menu-container');
-        // this.gamenode = makeDiv('game', 'menu-container');
-        // this.buttons = [];
-        // this.continueButton;
-
-        // let start = this.addButton('New Game', this.homenode);
-        // start.addEventListener('click', (e) => {
-        //     if (this.game !== undefined) {
-        //         this.game.destroy();
-        //     }
-        //     this.game = new Game(this);
-        //     // this.container.style.transform = 'translateX(-100%)'
-            
-        // })
-
-        // this.container.append(this.homenode, this.gamenode);
     }
 
     page1(page) {
@@ -66,8 +38,8 @@ class Application {
         page.themed.push(startButton);
 
         startButton.addEventListener('click', () => {
-            this.page2(this.next);
             if (!this.sliding) {
+                this.page2(this.next);
                 this.slideNext(() => {
                     this.next = new Page(this, 'next');
                 });
@@ -100,8 +72,8 @@ class Application {
         }
 
         tutorialButton.addEventListener('click', () => {
-            this.tutorial(this.next);
             if (!this.sliding) {
+                this.tutorial2(this.next);
                 this.slideNext(() => {
                     this.next = new Page(this, 'next');
                 });
@@ -109,8 +81,8 @@ class Application {
         });
 
         backButton.addEventListener('click', () => {
-            this.page1(this.previous);
             if (!this.sliding) {
+                this.page1(this.previous);
                 this.slidePrevious(() => {
                     this.previous = new Page(this, 'previous');
                 });
@@ -118,10 +90,13 @@ class Application {
         });
     }
 
-    tutorial(page) {
+    tutorial1(page) {
         addClass(page.container, 'tutorial');
         
         let menumap = new MenuMap(page);
+        menumap.layers.add('player', 50);
+        menumap.map.addLayer(menumap.layers.getLayer('player'));
+
         menumap.setCenter(this.params.tutorial.player);
         menumap.setZoom(16);
         menumap.setGeometry('player', this.params.tutorial.player);
@@ -138,13 +113,13 @@ class Application {
             a visual let you know if you're wrong.
             `)
 
-        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Alright');
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Try it now!');
         information.append(title, text, continueButton);
         page.container.append(information);
 
         continueButton.addEventListener('click', () => {
-            this.phase1(this.next);
             if (!this.sliding) {
+                this.phase1(this.next);
                 this.slideNext(() => {
                     this.next = new Page(this, 'next');
                 });
@@ -153,6 +128,97 @@ class Application {
     }
 
     phase1(page) {
+        let gamemap = new GameMap(page);
+        gamemap.setCenter(this.params.tutorial.start.center);
+        gamemap.setZoom(this.params.tutorial.start.zoom);
+    }
+
+    tutorial2(page) {
+        addClass(page.container, 'tutorial');
+        let menumap = new MenuMap(page);
+
+        menumap.layers.add('player', 50);
+        menumap.map.addLayer(menumap.layers.getLayer('player'));
+        menumap.setGeometry('player', this.params.tutorial.player);
+
+        menumap.layers.add('target', 51);
+        menumap.map.addLayer(menumap.layers.getLayer('target'));
+        menumap.setGeometry('target', this.params.tutorial.target);
+
+        menumap.layers.add('pitfalls', 49);
+        menumap.map.addLayer(menumap.layers.getLayer('pitfalls'));
+        for (let i = 0; i < this.params.tutorial.pitfalls.length; i++) {
+            let p = this.params.tutorial.pitfalls[i];
+            menumap.addPoint('pitfalls', p);
+        }
+
+        menumap.setCenter(menumap.getCenterForData());
+        menumap.setZoom(menumap.getZoomForData(20));
+
+        let information = makeDiv(null, 'tutorial-information');
+        let title = makeDiv(null, 'tutorial-title', 'Phase 2 - The journey');
+
+        let text = makeDiv(null, 'tutorial-text', `
+            Now that you found your location on the map, you must travel to your
+            destination (in green) while avoiding pitfalls (in red) on the way.
+            `)
+
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Continue');
+        information.append(title, text, continueButton);
+        page.container.append(information);
+
+        continueButton.addEventListener('click', () => {
+            if (!this.sliding) {
+                this.tutorial3(this.next);
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
+    }
+
+    tutorial3(page) {
+        addClass(page.container, 'tutorial');
+        let menumap = new MenuMap(page);
+
+        let information = makeDiv(null, 'tutorial-information');
+        let title = makeDiv(null, 'tutorial-title', 'Phase 2 - The journey');
+
+        let text = makeDiv(null, 'tutorial-text', `
+            Now that you found your location on the map, you must travel to your
+            destination (in green) while avoiding pitfalls (in red) on the way.
+            `)
+
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Continue');
+        information.append(title, text, continueButton);
+        page.container.append(information);
+
+        continueButton.addEventListener('click', () => {
+            if (!this.sliding) {
+                this.page2(this.next);
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
+
+        menumap.layers.add('player', 50);
+        menumap.map.addLayer(menumap.layers.getLayer('player'));
+        menumap.setGeometry('player', this.params.tutorial.player);
+
+        menumap.layers.add('pitfallsArea', 49, .3);
+        menumap.map.addLayer(menumap.layers.getLayer('pitfallsArea'));
+        for (let i = 0; i < this.params.tutorial.pitfalls.length; i++) {
+            if (i > 1) { break; }
+            let p = this.params.tutorial.pitfalls[i];
+            menumap.addZone('pitfallsArea', p);
+        }
+
+        menumap.setCenter(menumap.getCenterForData());
+        menumap.setZoom(menumap.getZoomForData(30));
+    }
+
+    phase2(page) {
         let gamemap = new GameMap(page);
         gamemap.setCenter(this.params.tutorial.start.center);
         gamemap.setZoom(this.params.tutorial.start.zoom);

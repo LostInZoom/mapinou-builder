@@ -1,0 +1,13 @@
+@use '../themes/mixins';
+@use '../themes/colors';
+@use 'sass:map';
+
+html, body {
+    font-family: 'Cabin';
+    margin: 0;
+
+    @include mixins.themify(colors.$themes) {
+        background-color: mixins.themed('primary');
+        color: mixins.themed('text');
+    }
+}

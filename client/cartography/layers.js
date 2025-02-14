@@ -15,7 +15,7 @@ class MapLayers {
         this.features = {}
     }
 
-    add(name, zindex) {
+    add(name, zindex, opacity=1) {
         this.features[name] = new Feature({ type: name });
         this.layers[name] = new VectorLayer({
             source: new VectorSource({
@@ -25,6 +25,7 @@ class MapLayers {
             zIndex: zindex,
             updateWhileAnimating: true,
             updateWhileInteracting: true,
+            opacity: opacity
         });
     }
 
@@ -55,6 +56,10 @@ class MapLayers {
 
     getLayer(name) {
         return this.layers[name];
+    }
+
+    getLayers() {
+        return this.layers;
     }
 
     getFeature(name) {

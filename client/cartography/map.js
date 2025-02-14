@@ -5,10 +5,10 @@ import { Feature } from 'ol';
 import { defaults as defaultInteractions } from 'ol/interaction/defaults.js';
 import { Point, LineString } from 'ol/geom.js';
 
-import { buffer, within } from './analysis.js';
-import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
+import { buffer, middle, within } from './analysis.js';
+import { addClass, addSVG, makeDiv, removeClass, wait } from '../utils/dom.js';
 import { MapLayers } from './layers.js';
-import { unByKey } from 'ol/Observable.js';
+import Page from '../interface/page.js';
 
 class Basemap {
     constructor(page) {
@@ -47,18 +47,29 @@ class Basemap {
         let [maxx, miny] = this.map.getCoordinateFromPixel([ size[0] - padding, size[1] - padding ]);
         let [x, y] = position;
         if (x > minx && x < maxx && y > miny && y < maxy) { visible = true; }
-
         return visible;
     }
 
-    getZoomForData() {
-        let extent1 = this.playerLayer.getSource().getExtent();
-        let extent2 = this.targetLayer.getSource().getExtent();
-        let extent3 = this.pitfallsAreaLayer.getSource().getExtent();
-        let extent = extend(extent1, extend(extent2, extent3));
-        let res = this.view.getResolutionForExtent(extent, this.map.getSize());
+    getZoomForData(padding) {
+        let extent;
+        for (let name in this.layers.getLayers()) {
+            if (extent === undefined) { extent = this.layers.getLayer(name).getSource().getExtent() }
+            else { extent = extend(extent, this.layers.getLayer(name).getSource().getExtent()) }
+        }
+        let size = this.map.getSize();
+        let padded = [ size[0] - 2*padding, size[1] - 2*padding ]
+        let res = this.view.getResolutionForExtent(extent, padded);
         let zoom = this.view.getZoomForResolution(res);
-        return Math.floor(zoom);
+        return zoom;
+    }
+
+    getCenterForData() {
+        let extent;
+        for (let name in this.layers.getLayers()) {
+            if (extent === undefined) { extent = this.layers.getLayer(name).getSource().getExtent() }
+            else { extent = extend(extent, this.layers.getLayer(name).getSource().getExtent()) }
+        }
+        return middle([extent[0], extent[1]], [extent[2], extent[3]])
     }
 
     activate() {
@@ -77,6 +88,30 @@ class Basemap {
         addClass(this.mask, 'loaded');
     }
 
+    routing() {
+        removeClass(this.modebutton, 'collapse');
+    }
+
+    navigation() {
+        addClass(this.modebutton, 'collapse');
+    }
+
+    addPoint(layer, coordinates) {
+        let feature = new Feature({
+            type: layer,
+            geometry: new Point(coordinates)
+        });
+        this.layers.addFeature(layer, feature);
+    }
+
+    addZone(layer, coordinates) {
+        let feature = new Feature({
+            type: layer,
+            geometry: buffer(coordinates, this.params.game.tolerance.pitfall)
+        });
+        this.layers.addFeature(layer, feature);
+    }
+
     initialize() {
         this.container = makeDiv(null, 'map map-' + this.type);
         this.page.container.append(this.container);
@@ -89,6 +124,11 @@ class Basemap {
         this.view = new View();
         this.layers = new MapLayers();
         this.layers.setBaseLayer();
+
+        this.modebutton = makeDiv(null, 'game-mode collapse ' + this.page.getTheme());
+        addSVG(this.modebutton, new URL('../img/routing.svg', import.meta.url));
+        this.page.themed.push(this.modebutton);
+        this.container.append(this.modebutton);
 
         let interactions = {
             altShiftDragRotate: false,
@@ -130,8 +170,11 @@ class MenuMap extends Basemap {
         this.interactable = false;
         this.initialize();
 
-        this.layers.add('player', 50);
-        this.map.addLayer(this.layers.getLayer('player'));
+        this.map.on('postrender', () => {
+            let zoom = this.view.getZoom();
+            if (zoom >= this.params.game.routing) { this.routing(); }
+            else { this.navigation(); }
+        });
     }
 }
 
@@ -175,6 +218,9 @@ class GameMap extends Basemap {
         this.map.on('postrender', () => {
             let visible = this.isVisible(this.player, 50);
             let zoom = this.view.getZoom();
+            if (zoom >= this.params.game.routing) { this.routing(); }
+            else { this.navigation(); }
+
             for (let minzoom in this.hints) {
                 if (!visible) {
                     this.hintext.innerHTML = 'Come back, you are getting lost!';
@@ -189,10 +235,15 @@ class GameMap extends Basemap {
 
         this.activeclue = false;
 
-        let clue = this.map.on('dblclick', (e) => {
+        this.map.on('dblclick', (e) => {
             let target = this.map.getEventCoordinate(event);
             if (within(target, this.player, this.params.game.tolerance.target)) {
-                console.log('found')
+                if (!this.page.app.sliding) {
+                    this.page.app.tutorial2(this.page.app.next);
+                    this.page.app.slideNext(() => {
+                        this.page.app.next = new Page(this.page.app, 'next');
+                    });
+                }
             } else {
                 if (!this.activeclue) {
                     this.activeclue = true;

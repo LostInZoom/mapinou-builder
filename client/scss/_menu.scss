@@ -1,33 +1,9 @@
+@use 'menu/application';
 @use 'menu/elements';
 @use 'menu/button';
 @use 'menu/page';
 @use 'menu/tutorial';
-
 @use 'themes/fonts';
-@use 'themes/mixins';
-@use 'themes/colors';
-@use 'sass:map';
-
-html, body {
-    font-family: 'Cabin';
-    margin: 0;
-
-    @include mixins.themify(colors.$themes) {
-        background-color: mixins.themed('primary');
-        color: mixins.themed('text');
-    }
-}
-
-.application {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-
-    transition: background .2s ease-in-out;
-}
 
 .title {
     font-family: 'Vincendo';
@@ -46,6 +22,17 @@ html, body {
     margin: 1rem;
     gap: 1rem;
 }
+
+.application {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    transition: background .2s ease-in-out;
+}
+
 
 // @use 'animations';
 // @use 'loader';

@@ -1,7 +1,4 @@
-@use '../themes/mixins';
-@use '../themes/colors';
 @use '../animations';
-@use 'sass:map';
 
 .ol-control {
     display: none;
@@ -12,6 +9,30 @@
 
     width: 100%;
     height: 100%;
+}
+
+.game-mode {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    margin: 1rem;
+    padding: .6rem;
+    height: 1.2rem;
+    width: 1.2rem;
+    border-radius: 50%;
+
+    transform: scale(1, 1);
+    transition: transform .2s ease-in-out;
+
+    & > svg {
+        height: inherit;
+        width: inherit;
+    }
+
+    &.collapse {
+        transform: scale(0, 0);
+    }
 }
 
 .game-visual-clue {
@@ -42,11 +63,6 @@
 
     display: flex;
     justify-content: center;
-
-    @include mixins.themify(colors.$themes) {
-        background-color: mixins.themed('primary');
-        color: mixins.themed('text');
-    }
 }
 
 .game-hint-text {

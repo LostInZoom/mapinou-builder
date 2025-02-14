@@ -20,7 +20,7 @@ class Game {
         // The tolerance in meters allowed to find the point in phase 1
         this.findTolerance = 500;
         // The tolerance in meters to validate the target
-        this.targetTolerance = 50;
+        this.targetTolerance = 200;
         // The tolerance in meters allowed around the pitfalls
         this.pitfallTolerance = 500;
 
