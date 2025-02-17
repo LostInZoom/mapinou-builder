@@ -66,8 +66,16 @@ class Application {
 
         let levels = this.params.levels;
         for (let i = 0; i < levels.length; i++) {
-            let levelbutton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, levels[i]);
+            let levelbutton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, i + 1);
             levelcontainer.append(levelbutton);
+            levelbutton.addEventListener('click', () => {
+                if (!this.sliding) {
+                    this.startGame(this.next, i);
+                    this.slideNext(() => {
+                        this.next = new Page(this, 'next');
+                    });
+                }
+            });
             page.themed.push(levelbutton);
         }
 
@@ -206,12 +214,12 @@ class Application {
         menumap.map.addLayer(menumap.layers.getLayer('player'));
         menumap.setGeometry('player', this.params.tutorial.player);
 
-        menumap.layers.add('pitfallsArea', 49, .3);
+        menumap.layers.add('pitfallsArea', 49);
         menumap.map.addLayer(menumap.layers.getLayer('pitfallsArea'));
         for (let i = 0; i < this.params.tutorial.pitfalls.length; i++) {
             if (i > 1) { break; }
             let p = this.params.tutorial.pitfalls[i];
-            menumap.addZone('pitfallsArea', p);
+            menumap.addZone('pitfallsArea', p, this.params.game.tolerance.pitfall);
         }
 
         menumap.setCenter(menumap.getCenterForData());
@@ -222,6 +230,23 @@ class Application {
         let gamemap = new GameMap(page);
         gamemap.setCenter(this.params.tutorial.start.center);
         gamemap.setZoom(this.params.tutorial.start.zoom);
+
+        gamemap.doubleClick(() => {
+            
+        });
+    }
+
+    startGame(page, index) {
+        let options = this.params.levels[index]
+        let gamemap = new GameMap(page, options);
+        // gamemap.phase1(() => {
+        //     gamemap.phase2(() => {
+
+        //     });
+        // });
+        gamemap.phase2(() => {
+
+        })
     }
 
     getTheme() {

@@ -1,7 +1,18 @@
+@use '../themes/mixins';
+@use '../themes/colors';
+@use 'sass:map';
+
 @use '../animations';
 
 .ol-control {
     display: none;
+}
+
+.map {
+    @include mixins.themify(colors.$themes) {
+        background-color: mixins.themed('primary');
+        color: mixins.themed('text');
+    }
 }
 
 .map-game {
@@ -66,10 +77,11 @@
 }
 
 .game-hint-text {
-    margin: 1rem 2rem;
-    padding: .4rem;
+    margin: 1rem auto;
+    padding: .4rem .6rem;
     text-align: center;
     border-radius: .3rem;
+    word-break: normal;
 
     transform: scale(1, 1);
     transition: transform .2s ease-in-out;

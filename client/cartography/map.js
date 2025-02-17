@@ -5,15 +5,19 @@ import { Feature } from 'ol';
 import { defaults as defaultInteractions } from 'ol/interaction/defaults.js';
 import { Point, LineString } from 'ol/geom.js';
 
-import { buffer, middle, within } from './analysis.js';
+import { buffer, middle, project, within } from './analysis.js';
 import { addClass, addSVG, makeDiv, removeClass, wait } from '../utils/dom.js';
 import { MapLayers } from './layers.js';
-import Page from '../interface/page.js';
+import { unByKey } from 'ol/Observable.js';
+import Score from './score.js';
+import Router from './routing.js';
+import { getVectorContext } from 'ol/render.js';
 
 class Basemap {
     constructor(page) {
         this.page = page;
         this.params = page.app.params;
+        this.routable = false;
     }
 
     setCenter(center) {
@@ -89,10 +93,12 @@ class Basemap {
     }
 
     routing() {
+        this.routable = true;
         removeClass(this.modebutton, 'collapse');
     }
 
     navigation() {
+        this.routable = false;
         addClass(this.modebutton, 'collapse');
     }
 
@@ -104,10 +110,10 @@ class Basemap {
         this.layers.addFeature(layer, feature);
     }
 
-    addZone(layer, coordinates) {
+    addZone(layer, coordinates, size) {
         let feature = new Feature({
             type: layer,
-            geometry: buffer(coordinates, this.params.game.tolerance.pitfall)
+            geometry: buffer(coordinates, size)
         });
         this.layers.addFeature(layer, feature);
     }
@@ -179,16 +185,19 @@ class MenuMap extends Basemap {
 }
 
 class GameMap extends Basemap {
-    constructor(page) {
+    constructor(page, options) {
         super(page);
+        this.options = options;
         this.type = 'game';
+        this.phase;
+
         this.interactable = true;
+        this.activeclue = false;
+
         this.initialize();
 
         this.clue = makeDiv(null, 'game-visual-clue');
         this.container.append(this.clue);
-
-        this.pitfalls = []
 
         this.layers.add('player', 50);
         this.layers.add('target', 51);
@@ -206,21 +215,23 @@ class GameMap extends Basemap {
         this.map.addLayer(this.layers.getLayer('pitfalls'));
         this.map.addLayer(this.layers.getLayer('pitfallsArea'));
 
-        this.player = this.params.tutorial.player;
-        this.hints = this.params.tutorial.hints;
+        this.setCenter(this.options.start.center);
+        this.setZoom(this.options.start.zoom);
+    }
 
+    phase1(callback) {
+        this.phase = 1;
+        this.player = this.options.player;
+        this.hints = this.options.hints;
         this.hint = makeDiv(null, 'game-hint');
         this.hintext = makeDiv(null, 'game-hint-text collapse ' + this.params.interface.theme);
         this.hint.append(this.hintext);
         this.page.themed.push(this.hintext);
         this.container.append(this.hint);
 
-        this.map.on('postrender', () => {
+        let hintlistener = this.map.on('postrender', () => {
             let visible = this.isVisible(this.player, 50);
             let zoom = this.view.getZoom();
-            if (zoom >= this.params.game.routing) { this.routing(); }
-            else { this.navigation(); }
-
             for (let minzoom in this.hints) {
                 if (!visible) {
                     this.hintext.innerHTML = 'Come back, you are getting lost!';
@@ -233,17 +244,12 @@ class GameMap extends Basemap {
             }
         });
 
-        this.activeclue = false;
-
-        this.map.on('dblclick', (e) => {
+        let doublelistener = this.map.on('dblclick', (e) => {
             let target = this.map.getEventCoordinate(event);
             if (within(target, this.player, this.params.game.tolerance.target)) {
-                if (!this.page.app.sliding) {
-                    this.page.app.tutorial2(this.page.app.next);
-                    this.page.app.slideNext(() => {
-                        this.page.app.next = new Page(this.page.app, 'next');
-                    });
-                }
+                unByKey(hintlistener);
+                unByKey(doublelistener);
+                callback();
             } else {
                 if (!this.activeclue) {
                     this.activeclue = true;
@@ -257,19 +263,170 @@ class GameMap extends Basemap {
         });
     }
 
-    addPitfall(coordinates) {
-        let pitfall = new Feature({
-            type: 'pitfalls',
-            geometry: new Point(coordinates)
-        });
-        this.pitfalls.push(pitfall);
-        this.pitfallsLayer.getSource().addFeature(pitfall);
+    phase2(callback) {
+        this.phase = 2;
+        this.pitfall = false;
+        this.scoretext = makeDiv('score-text', 'button-game', 0);
+        this.container.append(this.scoretext);
+        this.score = new Score(0, 1, 1000, this.scoretext);
 
-        let area = new Feature({
-            type: 'pitfallsArea',
-            geometry: buffer(coordinates, 500)
+        this.router = new Router(this, this.options.player);
+
+        this.setPlayer(this.options.player);
+        this.setTarget(this.options.target);
+        this.addPitfall(this.options.pitfalls);
+        this.setCenter(this.getCenterForData());
+        this.setZoom(this.getZoomForData(30));
+
+        this.map.on('postrender', () => {
+            let zoom = this.view.getZoom();
+            if (zoom >= this.params.game.routing) { this.routing(); }
+            else { this.navigation(); }
         });
-        this.pitfallsAreaLayer.getSource().addFeature(area);
+
+        this.activateMovement(callback);
+    }
+
+    addPitfall(coordinates) {
+        for (let i = 0; i < coordinates.length; i++) {
+            let p = this.params.tutorial.pitfalls[i];
+            this.addZone('pitfallsArea', p, this.params.game.tolerance.pitfall);
+            this.addPoint('pitfalls', p);
+        }
+    }
+
+    /**
+     * This method activate a listener on the map click that allows
+     * the player to move.
+     */
+    activateMovement(callback) {
+        this.map.on('click', () => {
+            // Allow movement only if routing is active
+            if (this.routable) {
+                this.routable = false;
+                // Get the destination position
+                let target = this.map.getEventCoordinate(event);
+                console.log('start');
+
+                // Calculate the route towards the destination
+                this.router.calculateRoute(target, (result) => {
+                    console.log('routing...');
+                    this.score.change(1, 200);
+                    
+                    // Retrieve the vertexes composing the calculated route
+                    const vertexes = [];
+                    const nodes = result.geometry.coordinates;
+                    for (let i = 0; i < nodes.length; i++) {
+                        vertexes.push(project('4326', '3857', nodes[i]));
+                    }
+                    let destination = vertexes[vertexes.length - 1]
+                    
+                    // Create the path line and calculate its length
+                    const line = new LineString(vertexes);
+                    const length = line.getLength();
+
+                    let lastTime = Date.now();
+                    let distance = 0;
+
+                    // Get the speed in meters/second
+                    const speed = this.params.game.speed / 3.6;
+                    const position = this.layers.getGeometry('player').clone();
+
+                    let path = this.layers.getGeometry('path');
+                    if (path !== undefined) { path = path.clone(); }
+
+                    self = this;
+                    function stopAnimation(context, end) {
+                        // Redraw on context to avoid flickering
+                        context.setStyle(self.layers.getStyle(['path']));
+                        context.drawGeometry(path);
+                        context.setStyle(self.layers.getStyle(['player']));
+                        context.drawGeometry(position);
+
+                        self.layers.setGeometry('player', position);
+                        self.layers.setGeometry('path', path);
+
+                        self.router.setPosition(destination);
+
+                        // Removing the render listener
+                        self.layers.getLayer('path').un('postrender', animatePlayer);
+                        self.score.change(1, 1000);
+                        console.log('end');
+
+                        if (end) {
+                            callback();
+                        }
+                        else {
+                            self.routable = true;
+                        }
+                    }
+
+                    function animatePlayer(event) {
+                        // Get the current time
+                        const time = event.frameState.time;
+                        const context = getVectorContext(event);
+                        // Calculate the elapsed time in seconds
+                        const elapsed = (time - lastTime) / 1000;
+                        // Calculate the distance traveled depending on the elapsed time and the speed
+                        distance = distance + (elapsed * speed);
+                        // Set the previous time as the current one
+                        lastTime = time;
+
+                        // If the travelled distance is below the length of the route, continue the animation
+                        if (distance < length) {
+                            // Calculate the position of the point along the route line
+                            let newPosition = line.getCoordinateAt(distance / length);
+
+                            let pit = false;
+                            for (let i = 0; i < self.options.pitfalls.length; i++) {
+                                // Check if current position if within a pitfall area
+                                if (within(newPosition, self.options.pitfalls[i], self.params.game.tolerance.pitfall)) { pit = true; break; }
+                            }
+                            // If current position is within a pitfall area
+                            if (pit) {
+                                // If player is not already inside a pitfall area
+                                if (!self.pitfall) {
+                                    // Increment the score by 100 and set player as within pitfall area
+                                    self.score.add(self.params.game.penalty.pitfall);
+                                    self.pitfall = true
+                                }
+                            }
+                            // Here current position is not within a pitfall area
+                            else {
+                                // If the player was previously in a pitfall area, set the player as outside pitfall
+                                if (self.pitfall) { self.pitfall = false; }
+                            }
+
+                            let win = false;
+                            if (within(newPosition, self.options.target, self.params.game.tolerance.target)) { win = true; }
+
+                            if (path === undefined) { path = new LineString([ vertexes[0], newPosition ]); }
+                            else { path.appendCoordinate(newPosition); }
+
+                            context.setStyle(self.layers.getStyle(['path']));
+                            context.drawGeometry(path);
+
+                            position.setCoordinates(newPosition);
+                            context.setStyle(self.layers.getStyle(['player']));
+                            context.drawGeometry(position);
+
+                            // Render the map to trigger the listener
+                            self.map.render();
+
+                            if (win) {
+                                stopAnimation(context, true);
+                            }
+                        }
+                        // Here, the journey is over
+                        else { stopAnimation(context, false); }
+                    }
+
+                    this.layers.setGeometry('player', null);
+                    this.layers.setGeometry('path', null);
+                    this.layers.getLayer('path').on('postrender', animatePlayer);
+                });
+            }
+        });
     }
 }
 

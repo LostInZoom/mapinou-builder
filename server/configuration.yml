@@ -16,7 +16,7 @@ game:
   penalty:
     pitfall: 100
   speed: 5000
-  routing: 13
+  routing: 13.5
 
 #############################
 #### TUTORIAL DEFINITION ####
@@ -51,4 +51,28 @@ tutorial:
 #### LEVELS DEFINITION ####
 ###########################
 levels:
-  - 1
+  - start:
+      zoom: 5
+      center: [ 270845.15, 5904541.30 ]
+    player: [ 396377.1, 5701254.9 ]
+    target: [ 416553.587, 5708562.378 ]
+    hints:
+      0: You are in the west of the city of Lyon
+      6: You are between St-Étienne and Clermont-Ferrand
+      8: You are south-west of Ambert
+      10: You are between St-Amant-Roche-Savine and St-Germain-l'Herm
+      11: You are south-west of Fournols
+      13: You are in La Colombière, double-tap on your position
+    pitfalls:
+      - [ 399537.1, 5699198.9 ]
+      - [ 399416.53, 5703120.31 ]
+      - [ 402172.7, 5700144.5 ]
+      - [ 404291.06, 5700146.56 ]
+      - [ 407776.7, 5703492.8 ]
+      - [ 411222.6, 5703538.6 ]
+      - [ 415029.6, 5707542.2 ]
+      - [ 402876.1, 5707401.3 ]
+      - [ 404785.3, 5711359.4 ]
+      - [ 405730.7, 5706364.3 ]
+      - [ 411794.4, 5707942.2 ]
+      - [ 409265.0, 5709098.6 ]

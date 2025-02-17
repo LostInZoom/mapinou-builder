@@ -4,7 +4,7 @@
  */
 
 import { ajaxGet } from "../utils/ajax.js";
-import { project } from "./map.js";
+import { project } from "./analysis.js";
 
 class Router {
     constructor(map, position) {

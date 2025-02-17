@@ -1,7 +1,3 @@
-@use '../themes/mixins';
-@use '../themes/colors';
-@use 'sass:map';
-
 .map-menu {
     position: relative;
 
@@ -11,9 +7,4 @@
 
     border-radius: .4rem;
     overflow: hidden;
-
-    @include mixins.themify(colors.$themes) {
-        background-color: mixins.themed('primary');
-        color: mixins.themed('text');
-    }
 }

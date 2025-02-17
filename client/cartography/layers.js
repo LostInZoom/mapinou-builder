@@ -69,6 +69,10 @@ class MapLayers {
     getBaseLayer() {
         return this.baselayer;
     }
+
+    getStyle(name) {
+        return this.styles.styles[name];
+    }
     
     addFeature(name, feature) {
         this.layers[name].getSource().addFeature(feature);
@@ -76,6 +80,10 @@ class MapLayers {
 
     setGeometry(name, geometry) {
         this.features[name].setGeometry(geometry);
+    }
+
+    getGeometry(name) {
+        return this.features[name].getGeometry();
     }
 
     setMaxZoom(name, zoom) {
