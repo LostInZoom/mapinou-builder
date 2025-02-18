@@ -4,6 +4,8 @@ $player: #6183af;
 $player-transparent: #6183af7a;
 $target: #68b362;
 $target-transparent: #67b36280;
+$bonus: #61afa8;
+$bonus-transparent: #61afa880;
 $pitfalls: #af6161;
 $pitfalls-transparent: #af616177;
 
@@ -11,6 +13,8 @@ $pitfalls-transparent: #af616177;
 .player-transparent { background-color: $player-transparent; }
 .target { background-color: $target; }
 .target-transparent { background-color: $target-transparent; }
+.bonus { background-color: $bonus; }
+.bonus-transparent { background-color: $bonus-transparent; }
 .pitfalls { background-color: $pitfalls; }
 .pitfalls-transparent { background-color: $pitfalls-transparent; }
 .path { background-color: $player-transparent }

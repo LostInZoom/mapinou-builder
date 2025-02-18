@@ -102,19 +102,21 @@ class Basemap {
         addClass(this.modebutton, 'collapse');
     }
 
-    addPoint(layer, coordinates) {
+    addPoint(layer, coordinates, index=null) {
         let feature = new Feature({
             type: layer,
             geometry: new Point(coordinates)
         });
+        if ( index !== null ) { feature.setId(index); }
         this.layers.addFeature(layer, feature);
     }
 
-    addZone(layer, coordinates, size) {
+    addZone(layer, coordinates, size, index=null) {
         let feature = new Feature({
             type: layer,
             geometry: buffer(coordinates, size)
         });
+        if ( index !== null ) { feature.setId(index); }
         this.layers.addFeature(layer, feature);
     }
 
@@ -209,11 +211,19 @@ class GameMap extends Basemap {
         this.layers.add('pitfallsArea', 48);
         this.layers.setMinZoom('pitfallsArea', 12);
 
+        this.layers.add('bonus', 47);
+        this.layers.setMaxZoom('bonus', 12);
+
+        this.layers.add('bonusArea', 46);
+        this.layers.setMinZoom('bonusArea', 12);
+
         this.map.addLayer(this.layers.getLayer('player'));
         this.map.addLayer(this.layers.getLayer('path'));
         this.map.addLayer(this.layers.getLayer('target'));
         this.map.addLayer(this.layers.getLayer('pitfalls'));
         this.map.addLayer(this.layers.getLayer('pitfallsArea'));
+        this.map.addLayer(this.layers.getLayer('bonus'));
+        this.map.addLayer(this.layers.getLayer('bonusArea'));
 
         this.setCenter(this.options.start.center);
         this.setZoom(this.options.start.zoom);
@@ -266,15 +276,23 @@ class GameMap extends Basemap {
     phase2(callback) {
         this.phase = 2;
         this.pitfall = false;
-        this.scoretext = makeDiv('score-text', 'button-game', 0);
-        this.container.append(this.scoretext);
-        this.score = new Score(0, 1, 1000, this.scoretext);
+        this.bonus = false;
+        this.scorecontainer = makeDiv(null, 'score-container');
+        this.scoretext = makeDiv(null, 'score-text ' + this.params.interface.theme, 0);
+        this.scorecontainer.append(this.scoretext);
+        this.container.append(this.scorecontainer);
+
+        let increment = this.params.game.score.increments.default;
+        let interval = this.params.game.score.intervals.default;
+        this.score = new Score(0, increment, interval, this.scoretext);
+        this.score.start();
 
         this.router = new Router(this, this.options.player);
 
         this.setPlayer(this.options.player);
         this.setTarget(this.options.target);
         this.addPitfall(this.options.pitfalls);
+        this.addBonus(this.options.bonus);
         this.setCenter(this.getCenterForData());
         this.setZoom(this.getZoomForData(30));
 
@@ -289,9 +307,15 @@ class GameMap extends Basemap {
 
     addPitfall(coordinates) {
         for (let i = 0; i < coordinates.length; i++) {
-            let p = this.params.tutorial.pitfalls[i];
-            this.addZone('pitfallsArea', p, this.params.game.tolerance.pitfall);
-            this.addPoint('pitfalls', p);
+            this.addZone('pitfallsArea', coordinates[i], this.params.game.tolerance.pitfalls, i);
+            this.addPoint('pitfalls', coordinates[i], i);
+        }
+    }
+
+    addBonus(coordinates) {
+        for (let i = 0; i < coordinates.length; i++) {
+            this.addZone('bonusArea', coordinates[i], this.params.game.tolerance.bonus, i);
+            this.addPoint('bonus', coordinates[i], i);
         }
     }
 
@@ -300,7 +324,7 @@ class GameMap extends Basemap {
      * the player to move.
      */
     activateMovement(callback) {
-        this.map.on('click', () => {
+        let movement = this.map.on('click', () => {
             // Allow movement only if routing is active
             if (this.routable) {
                 this.routable = false;
@@ -311,7 +335,9 @@ class GameMap extends Basemap {
                 // Calculate the route towards the destination
                 this.router.calculateRoute(target, (result) => {
                     console.log('routing...');
-                    this.score.change(1, 200);
+                    let increment = this.params.game.score.increments.movement;
+                    let interval = this.params.game.score.intervals.movement; 
+                    this.score.change(increment, interval);
                     
                     // Retrieve the vertexes composing the calculated route
                     const vertexes = [];
@@ -350,10 +376,13 @@ class GameMap extends Basemap {
 
                         // Removing the render listener
                         self.layers.getLayer('path').un('postrender', animatePlayer);
-                        self.score.change(1, 1000);
+                        let increment = self.params.game.score.increments.default;
+                        let interval = self.params.game.score.intervals.default; 
+                        self.score.change(increment, interval);
                         console.log('end');
 
                         if (end) {
+                            unByKey(movement);
                             callback();
                         }
                         else {
@@ -377,25 +406,8 @@ class GameMap extends Basemap {
                             // Calculate the position of the point along the route line
                             let newPosition = line.getCoordinateAt(distance / length);
 
-                            let pit = false;
-                            for (let i = 0; i < self.options.pitfalls.length; i++) {
-                                // Check if current position if within a pitfall area
-                                if (within(newPosition, self.options.pitfalls[i], self.params.game.tolerance.pitfall)) { pit = true; break; }
-                            }
-                            // If current position is within a pitfall area
-                            if (pit) {
-                                // If player is not already inside a pitfall area
-                                if (!self.pitfall) {
-                                    // Increment the score by 100 and set player as within pitfall area
-                                    self.score.add(self.params.game.penalty.pitfall);
-                                    self.pitfall = true
-                                }
-                            }
-                            // Here current position is not within a pitfall area
-                            else {
-                                // If the player was previously in a pitfall area, set the player as outside pitfall
-                                if (self.pitfall) { self.pitfall = false; }
-                            }
+                            self.pitfallsHandling(newPosition);
+                            self.bonusHandling(newPosition);
 
                             let win = false;
                             if (within(newPosition, self.options.target, self.params.game.tolerance.target)) { win = true; }
@@ -427,6 +439,44 @@ class GameMap extends Basemap {
                 });
             }
         });
+    }
+
+    pitfallsHandling(position) {
+        let intersect = false; let index;
+        for (let i = 0; i < this.options.pitfalls.length; i++) {
+            if (within(position, this.options.pitfalls[i], this.params.game.tolerance.pitfalls)) { intersect = true; index = i; break; }
+        }
+        if (intersect) {
+            if (!this.pitfall) {
+                this.score.add(this.params.game.score.modifiers.pitfalls);
+                this.pitfall = true
+            }
+        }
+        else {
+            if (this.pitfall) { this.pitfall = false; }
+        }
+    }
+
+    bonusHandling(position) {
+        let intersect = false; let index;
+        for (let i = 0; i < this.options.bonus.length; i++) {
+            if (within(position, this.options.bonus[i], this.params.game.tolerance.bonus)) { intersect = true; index = i; break; }
+        }
+        if (intersect) {
+            if (!this.bonus) {
+                this.score.add(this.params.game.score.modifiers.bonus);
+                this.bonus = true;
+                let source = this.layers.getLayer('bonus').getSource()
+                let sourceArea = this.layers.getLayer('bonusArea').getSource()
+                let f = source.getFeatureById(index);
+                let fa = sourceArea.getFeatureById(index);
+                source.removeFeature(f);
+                sourceArea.removeFeature(fa);
+            }
+        }
+        else {
+            if (this.bonus) { this.bonus = false; }
+        }
     }
 }
 

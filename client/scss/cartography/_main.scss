@@ -48,6 +48,7 @@
 
 .game-visual-clue {
     position: absolute;
+    z-index: 100;
     top: 0;
     left: 0;
     height: 100%;
@@ -89,4 +90,23 @@
     &.collapse {
         transform: scale(0, 0);
     }
+}
+
+.score-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    z-index: 50;
+    pointer-events: none;
+    user-select: none;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.score-text {
+    border-radius: .3rem;
+    padding: .2rem .4rem;
+    margin-bottom: 1rem;
 }

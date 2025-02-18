@@ -18,10 +18,7 @@
     padding: .4rem .7rem;
 }
 
-#button-theme {
-    position: absolute;
-    top: 0;
-    right: 0;
+.button-theme {
     margin: .8rem;
 
     & > svg {
@@ -30,7 +27,7 @@
     }
 }
 
-#button-start {
+.button-start {
     font-family: 'Vincendo';
     margin-top: 1rem;
     padding: 0;
@@ -42,11 +39,12 @@
     font-weight: bolder;
 }
 
-#button-previous {
-    position: absolute;
-    top: 0;
-    left: 0;
+.button-back {
     margin: .8rem;
+}
+
+.button-content {
+    margin: 1rem auto 2rem auto;
 }
 
 .button-level {

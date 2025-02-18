@@ -9,12 +9,21 @@ interface:
 #### GAME PARAMETERS ####
 #########################
 game:
+  score:
+    increments:
+      default: 1
+      movement: 1
+    intervals:
+      default: 100
+      movement: 20
+    modifiers:
+      pitfalls: 200
+      bonus: -100
   tolerance:
     flag: 500
     target: 200
-    pitfall: 500
-  penalty:
-    pitfall: 100
+    pitfalls: 500
+    bonus: 200
   speed: 5000
   routing: 13.5
 
@@ -76,3 +85,13 @@ levels:
       - [ 405730.7, 5706364.3 ]
       - [ 411794.4, 5707942.2 ]
       - [ 409265.0, 5709098.6 ]
+    bonus:
+      - [ 398112.1, 5703642.2 ]
+      - [ 400818.1, 5698171.1 ]
+      - [ 402239.3, 5705426.3 ]
+      - [ 406444.5, 5701153.8 ]
+      - [ 409983.0, 5702743.2 ]
+      - [ 406771.2, 5708716.8 ]
+      - [ 413894.2, 5705047.0 ]
+      - [ 415196.3, 5709601.9 ]
+      - [ 416592.9, 5703133.2 ]

@@ -9,6 +9,7 @@ class Score {
 
     add(value) {
         this.value += value;
+        this.html.innerHTML = this.value;
     }
 
     start() {

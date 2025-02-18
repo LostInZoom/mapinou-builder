@@ -55,6 +55,27 @@ class MapStyles {
                     width: 3,
                 }),
             }),
+            'bonus': new Style({
+                image: new CircleStyle({
+                    radius: 7,
+                    fill: new Fill({
+                        color: getColorsByClassNames('bonus').bonus
+                    }),
+                    stroke: new Stroke({
+                        color: 'white',
+                        width: 2,
+                    }),
+                }),
+            }),
+            'bonusArea': new Style({
+                fill: new Fill({
+                    color: getColorsByClassNames('bonus-transparent')['bonus-transparent']
+                }),
+                stroke: new Stroke({
+                    color: getColorsByClassNames('bonus').bonus,
+                    width: 3,
+                }),
+            }),
             'path': new Style({
                 stroke: new Stroke({
                     width: 6,

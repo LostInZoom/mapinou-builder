@@ -1,7 +1,6 @@
 import Page from './page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
 import { GameMap, MenuMap } from '../cartography/map.js';
-import { middle } from '../cartography/analysis.js';
 
 class Application {
     constructor(params) {
@@ -16,22 +15,20 @@ class Application {
         
         // Storage fot the previous page
         this.previous = new Page(this, 'previous');
-
         // Create the current page
         this.current = new Page(this, 'current');
-
         // Create the next page
         this.next = new Page(this, 'next');
 
-        this.page1(this.current);
+        this.title(this.current);
     }
 
-    page1(page) {
+    title(page) {
         let title = makeDiv(null, 'title', 'Cartogame');
-        let startButton = makeDiv('button-start', 'button-menu button ' + this.params.interface.theme, 'Play');
+        let startButton = makeDiv(null, 'button-start button-menu button ' + this.params.interface.theme, 'Play');
         page.container.append(title, startButton);
 
-        let themeButton = makeDiv('button-theme', 'button', null);
+        let themeButton = makeDiv(null, 'button-theme button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
         page.container.append(themeButton);
@@ -39,7 +36,7 @@ class Application {
 
         startButton.addEventListener('click', () => {
             if (!this.sliding) {
-                this.page2(this.next);
+                this.consent(this.next);
                 this.slideNext(() => {
                     this.next = new Page(this, 'next');
                 });
@@ -47,15 +44,92 @@ class Application {
         });
     }
 
+    consent(page) {
+        let header = makeDiv(null, 'header collapse');
+        let content = makeDiv(null, 'content');
+        page.container.append(header, content);
+
+        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
+        let title = makeDiv(null, 'header-title', 'Consent form');
+        let themeButton = makeDiv(null, 'button-theme button', null);
+        addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
+        themeButton.addEventListener('click', () => { this.switchTheme(); });
+
+        header.append(backButton, title, themeButton);
+
+        let continueButton = makeDiv(null, 'button-content button-menu button ' + this.params.interface.theme, 'Continue');
+
+        let text = `
+            I agree to participate in a study which aims at collecting data
+            during the navigation wihtin an interactive map.
+            The following points have been explained to me:
+            The purpose of this research is to study how much people can be lost when exploring an interactive map. I understand that the results of this study may be submitted for publication. The benefits I may expect from the study are:
+            An appreciation of research on multi-scale cartography.
+            An opportunity to contribute to scientific research.
+            An opportunity to learn about the cognition of maps.
+            The procedure will be as follow:
+            I will first be given a step-by-step tutorial of a training application interface.
+            The researchers do not foresee any risks to me for participating in this study, nor do they expect that I will experience any discomfort or stress.
+            I understand that I may withdraw from the study at any time.
+            I understand that I will receive a copy of this consent form if requested.
+            All of the data collected will remain strictly anonymized. My responses will not be associated with my name or email; instead, only a code number will be used when the researchers store the data. The anonymized data may then be made accessible for other researchers according to the principles of open science.
+            This study respects the GDPR legislation (contact dpo@ign.fr for questions related to GDPR).
+            For any questions about the study or the LostInZoom project, you can contact Guillaume Touya.
+            You must be overage to participate.
+            You can access the full information sheet concerning the experiment here
+        `
+
+        let textContent = makeDiv(null, 'content-text', text);
+
+        let checkboxcontainer = makeDiv(null, 'checkbox-container');
+        let consented = false;
+        let checkbox = makeDiv(null, 'checkbox ' + this.params.interface.theme);
+        checkbox.addEventListener('click', () => {
+            if (consented) {
+                removeClass(checkbox, 'checked');
+                consented = false;
+            } else {
+                addClass(checkbox, 'checked');
+                consented = true;
+            }
+        })
+
+        let checkboxlabel = makeDiv(null, 'checkbox-label', 'I understand.');
+        checkboxcontainer.append(checkbox, checkboxlabel);
+
+        content.append(textContent, checkboxcontainer, continueButton);
+        page.themed.push(backButton, continueButton, checkbox);
+
+        continueButton.addEventListener('click', () => {
+            if (consented) {
+                if (!this.sliding) {
+                    this.page2(this.next);
+                    this.slideNext(() => {
+                        this.next = new Page(this, 'next');
+                    });
+                }
+            }
+        });
+
+        backButton.addEventListener('click', () => {
+            if (!this.sliding) {
+                this.title(this.previous);
+                this.slidePrevious(() => {
+                    this.previous = new Page(this, 'previous');
+                });
+            }
+        });
+    }
+
     page2(page) {
-        let backButton = makeDiv('button-previous', 'button-menu button ' + this.params.interface.theme, 'Menu');
+        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
         page.container.append(backButton);
         page.themed.push(backButton);
 
-        let themeButton = makeDiv('button-theme', 'button', null);
+        let themeButton = makeDiv(null, 'button-theme button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
-        page.container.append(themeButton);       
+        page.container.append(themeButton);
 
         let tutorialButton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, 'Tutorial');
         page.container.append(tutorialButton);
@@ -90,7 +164,7 @@ class Application {
 
         backButton.addEventListener('click', () => {
             if (!this.sliding) {
-                this.page1(this.previous);
+                this.consent(this.previous);
                 this.slidePrevious(() => {
                     this.previous = new Page(this, 'previous');
                 });
@@ -246,7 +320,7 @@ class Application {
         // });
         gamemap.phase2(() => {
 
-        })
+        });
     }
 
     getTheme() {
@@ -278,20 +352,22 @@ class Application {
     }
 
     slideNext(callback) {
-        this.sliding = true;
+        if (!this.sliding) {
+            this.sliding = true;
 
-        this.next.setCurrent();
-        this.current.setPrevious();
+            this.next.setCurrent();
+            this.current.setPrevious();
 
-        this.previous = this.current;
-        this.current = this.next;
+            this.previous = this.current;
+            this.current = this.next;
 
-        wait(this.params.interface.transition.page, () => {
-            this.previous.clear();
-            this.container.firstChild.remove();
-            this.sliding = false;
-            callback();
-        })
+            wait(this.params.interface.transition.page, () => {
+                this.previous.clear();
+                this.container.firstChild.remove();
+                this.sliding = false;
+                callback();
+            })
+        }
     }
 
     slidePrevious(callback) {
