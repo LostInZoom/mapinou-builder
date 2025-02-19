@@ -1,6 +1,7 @@
 import Page from './page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
 import { GameMap, MenuMap } from '../cartography/map.js';
+import { ConsentForm } from './elements.js';
 
 class Application {
     constructor(params) {
@@ -24,16 +25,20 @@ class Application {
     }
 
     title(page) {
-        let title = makeDiv(null, 'title', 'Cartogame');
-        let startButton = makeDiv(null, 'button-start button-menu button ' + this.params.interface.theme, 'Play');
-        page.container.append(title, startButton);
+        let header = makeDiv(null, 'header centered');
+        let content = makeDiv(null, 'content centered');
+        page.container.append(header, content);
 
         let themeButton = makeDiv(null, 'button-theme button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
-        page.container.append(themeButton);
-        page.themed.push(startButton);
+        header.append(themeButton);
 
+        let title = makeDiv(null, 'title', 'Cartogame');
+        let startButton = makeDiv(null, 'button-start button-menu button ' + this.params.interface.theme, 'Play');
+        content.append(title, startButton);
+
+        page.themed.push(startButton);
         startButton.addEventListener('click', () => {
             if (!this.sliding) {
                 this.consent(this.next);
@@ -45,7 +50,7 @@ class Application {
     }
 
     consent(page) {
-        let header = makeDiv(null, 'header collapse');
+        let header = makeDiv(null, 'header');
         let content = makeDiv(null, 'content');
         page.container.append(header, content);
 
@@ -57,51 +62,15 @@ class Application {
 
         header.append(backButton, title, themeButton);
 
+        let form = new ConsentForm(page, content);
+
         let continueButton = makeDiv(null, 'button-content button-menu button ' + this.params.interface.theme, 'Continue');
+        content.append(continueButton);
 
-        let text = `
-            I agree to participate in a study which aims at collecting data
-            during the navigation wihtin an interactive map.
-            The following points have been explained to me:
-            The purpose of this research is to study how much people can be lost when exploring an interactive map. I understand that the results of this study may be submitted for publication. The benefits I may expect from the study are:
-            An appreciation of research on multi-scale cartography.
-            An opportunity to contribute to scientific research.
-            An opportunity to learn about the cognition of maps.
-            The procedure will be as follow:
-            I will first be given a step-by-step tutorial of a training application interface.
-            The researchers do not foresee any risks to me for participating in this study, nor do they expect that I will experience any discomfort or stress.
-            I understand that I may withdraw from the study at any time.
-            I understand that I will receive a copy of this consent form if requested.
-            All of the data collected will remain strictly anonymized. My responses will not be associated with my name or email; instead, only a code number will be used when the researchers store the data. The anonymized data may then be made accessible for other researchers according to the principles of open science.
-            This study respects the GDPR legislation (contact dpo@ign.fr for questions related to GDPR).
-            For any questions about the study or the LostInZoom project, you can contact Guillaume Touya.
-            You must be overage to participate.
-            You can access the full information sheet concerning the experiment here
-        `
-
-        let textContent = makeDiv(null, 'content-text', text);
-
-        let checkboxcontainer = makeDiv(null, 'checkbox-container');
-        let consented = false;
-        let checkbox = makeDiv(null, 'checkbox ' + this.params.interface.theme);
-        checkbox.addEventListener('click', () => {
-            if (consented) {
-                removeClass(checkbox, 'checked');
-                consented = false;
-            } else {
-                addClass(checkbox, 'checked');
-                consented = true;
-            }
-        })
-
-        let checkboxlabel = makeDiv(null, 'checkbox-label', 'I understand.');
-        checkboxcontainer.append(checkbox, checkboxlabel);
-
-        content.append(textContent, checkboxcontainer, continueButton);
-        page.themed.push(backButton, continueButton, checkbox);
+        page.themed.push(backButton, continueButton);
 
         continueButton.addEventListener('click', () => {
-            if (consented) {
+            if (form.isChecked()) {
                 if (!this.sliding) {
                     this.page2(this.next);
                     this.slideNext(() => {
@@ -122,21 +91,25 @@ class Application {
     }
 
     page2(page) {
+        let header = makeDiv(null, 'header');
+        let content = makeDiv(null, 'content centered');
+        page.container.append(header, content);
+
         let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
-        page.container.append(backButton);
+        header.append(backButton);
         page.themed.push(backButton);
 
         let themeButton = makeDiv(null, 'button-theme button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
-        page.container.append(themeButton);
+        header.append(themeButton);
 
         let tutorialButton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, 'Tutorial');
-        page.container.append(tutorialButton);
+        content.append(tutorialButton);
         page.themed.push(tutorialButton);
 
         let levelcontainer = makeDiv(null, 'level-selection');
-        page.container.append(levelcontainer);
+        content.append(levelcontainer);
 
         let levels = this.params.levels;
         for (let i = 0; i < levels.length; i++) {
