@@ -26,6 +26,52 @@ game:
     bonus: 200
   speed: 5000
   routing: 13.5
+###########################
+#### FORM DEFINITION ######
+###########################
+form:
+  - question: 'Gender (select all relevant answers):'
+    mandatory: false
+    multiple: true
+    answers:
+      - text: Woman
+        unique: false
+      - text: Man
+        unique: false
+      - text: Transgender
+        unique: false
+      - text: Prefer not to answer
+        unique: true
+  - question: 'Select your age category:'
+    mandatory: false
+    multiple: false
+    answers:
+      - text: 18-24
+        unique: true
+      - text: 25-34
+        unique: true
+      - text: 35-44
+        unique: true
+      - text: 45-59
+        unique: true
+      - text: 60 and above
+        unique: true
+      - text: Prefer not to answer
+        unique: true
+  - question: 'You use interactive maps:'
+    mandatory: false
+    multiple: false
+    answers:
+      - text: Every day
+        unique: true
+      - text: A few times a week
+        unique: true
+      - text: A few times a month
+        unique: true
+      - text: Almost never
+        unique: true
+      - text: Prefer not to answer
+        unique: true
 
 #############################
 #### TUTORIAL DEFINITION ####

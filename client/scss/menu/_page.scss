@@ -35,14 +35,38 @@
     }
 }
 
-.header {
+.banner {
     width: 100%;
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     overflow: hidden;
 
+    &.column {
+        flex-direction: column;
+    }
+
     &.centered {
+        justify-content: center;
+    }
+
+    &.left {
+        justify-content: start;
+    }
+
+    &.right {
         justify-content: end;
+    }
+}
+
+.header {
+
+}
+
+.footer {
+    > .button {
+        margin-bottom: 1rem;
     }
 }
 
@@ -60,10 +84,20 @@
 
     display: flex;
     flex-direction: column;
-    align-items: center;
+    justify-content: center;
+
+    gap: 1rem;
 
     &.centered {
-        justify-content: center;
+        align-items: center;
+    }
+
+    &.left {
+        align-items: end;
+    }
+
+    &.right {
+        align-items: start;
     }
 }
 

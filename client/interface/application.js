@@ -1,7 +1,8 @@
 import Page from './page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
 import { GameMap, MenuMap } from '../cartography/map.js';
-import { ConsentForm } from './elements.js';
+import { Content, Footer, Header } from './elements.js';
+import { ConsentForm, Form } from './forms.js';
 
 class Application {
     constructor(params) {
@@ -25,9 +26,9 @@ class Application {
     }
 
     title(page) {
-        let header = makeDiv(null, 'header centered');
-        let content = makeDiv(null, 'content centered');
-        page.container.append(header, content);
+        let header = new Header(page);
+        header.right();
+        let content = new Content(page);
 
         let themeButton = makeDiv(null, 'button-theme button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
@@ -50,9 +51,8 @@ class Application {
     }
 
     consent(page) {
-        let header = makeDiv(null, 'header');
-        let content = makeDiv(null, 'content');
-        page.container.append(header, content);
+        let header = new Header(page);
+        let content = new Content(page);
 
         let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
         let title = makeDiv(null, 'header-title', 'Consent form');
@@ -62,17 +62,18 @@ class Application {
 
         header.append(backButton, title, themeButton);
 
-        let form = new ConsentForm(page, content);
+        let footer = new Footer(page);
+        let form = new ConsentForm(page, content, footer);
 
-        let continueButton = makeDiv(null, 'button-content button-menu button ' + this.params.interface.theme, 'Continue');
-        content.append(continueButton);
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Continue');
+        footer.append(continueButton)
 
         page.themed.push(backButton, continueButton);
 
         continueButton.addEventListener('click', () => {
             if (form.isChecked()) {
                 if (!this.sliding) {
-                    this.page2(this.next);
+                    this.form(this.next);
                     this.slideNext(() => {
                         this.next = new Page(this, 'next');
                     });
@@ -90,10 +91,51 @@ class Application {
         });
     }
 
+    form(page) {
+        let header = new Header(page);
+        let content = new Content(page);
+        let footer = new Footer(page);
+
+        let themeButton = makeDiv(null, 'button-theme button', null);
+        addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
+        themeButton.addEventListener('click', () => { this.switchTheme(); });
+
+        
+        let form = new Form(page, content, footer);
+
+        let questions = this.params.form;
+        form.add(...questions);
+
+        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
+        header.append(backButton, themeButton);
+
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Validate and continue');
+        footer.append(continueButton);
+
+        page.themed.push(backButton, continueButton);
+
+        backButton.addEventListener('click', () => {
+            if (!this.sliding) {
+                this.title(this.previous);
+                this.slidePrevious(() => {
+                    this.previous = new Page(this, 'previous');
+                });
+            }
+        });
+
+        continueButton.addEventListener('click', () => {
+            if (!this.sliding) {
+                this.page2(this.next);
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
+    }
+
     page2(page) {
-        let header = makeDiv(null, 'header');
-        let content = makeDiv(null, 'content centered');
-        page.container.append(header, content);
+        let header = new Header(page);
+        let content = new Content(page);
 
         let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
         header.append(backButton);
@@ -137,7 +179,7 @@ class Application {
 
         backButton.addEventListener('click', () => {
             if (!this.sliding) {
-                this.consent(this.previous);
+                this.title(this.previous);
                 this.slidePrevious(() => {
                     this.previous = new Page(this, 'previous');
                 });

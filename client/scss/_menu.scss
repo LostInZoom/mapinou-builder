@@ -6,12 +6,17 @@
 @use 'menu/tutorial';
 @use 'themes/fonts';
 
+@use 'themes/mixins';
+@use 'themes/colors';
+@use 'sass:map';
+
 .title {
     font-family: 'Vincendo';
     font-size: 15vw;
     text-transform: uppercase;
 
     user-select: none;
+    transition: color .2s ease-in-out;
 }
 
 .level-selection {

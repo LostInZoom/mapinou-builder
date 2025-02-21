@@ -1,51 +1,76 @@
 import { addClass, removeClass, makeDiv } from "../utils/dom.js";
 
-class ConsentForm {
-    constructor(page, container) {
+class Element {
+    constructor(page) {
         this.page = page;
-        this.container = container;
-
-        let text = `
-            I accept that my game data are collected and used by the LostInZoom
-            team to analyse the way we navigate inside interactive maps.
-            <br><br>
-            The following data are collected:<br>
-            · Request form answers (sociological and cognitive tests).<br>
-            · Game metrics (time elapsed, score).<br>
-        `
-
-        this.textContent = makeDiv(null, 'content-text', text);
-        this.checkboxcontainer = makeDiv(null, 'checkbox-container');
-        this.checked = false;
-        this.checkbox = makeDiv(null, 'checkbox ' + this.page.app.params.interface.theme);
-        this.checkbox.addEventListener('click', () => { this.checking(); });
-
-        this.checkboxlabel = makeDiv(null, 'checkbox-label', 'I understand.');
-        this.checkboxcontainer.append(this.checkbox, this.checkboxlabel);
-
-        this.container.append(this.textContent, this.checkboxcontainer);
-        this.page.themed.push(this.checkbox);
-    }
-    
-    checking() {
-        if (this.checked) { this.uncheck(); }
-        else { this.check(); }
+        this.centering = 'center';
     }
 
-    check() {
-        addClass(this.checkbox, 'checked');
-        this.checked = true;
+    center() {
+        removeClass(this.container, this.centering);
+        addClass(this.container, 'centered');
+        this.centering = 'centered';
     }
 
-    uncheck() {
-        removeClass(this.checkbox, 'checked');
-        this.checked = false;
+    left() {
+        removeClass(this.container, this.centering);
+        addClass(this.container, 'left');
+        this.centering = 'left';
     }
 
-    isChecked() {
-        if (this.checked) { return true; }
-        else { return false; }
+    right() {
+        removeClass(this.container, this.centering);
+        addClass(this.container, 'right');
+        this.centering = 'right';
+    }
+
+    append(...elements) {
+        for (let i = 0; i < elements.length; i++) {
+            this.container.append(elements[i]);
+        }
     }
 }
 
-export { ConsentForm };
+class Banner extends Element {
+    constructor(page) {
+        super(page);
+        this.container = makeDiv(null, 'banner');
+    }
+
+    column() {
+        addClass(this.container, 'column');
+    }
+
+    line() {
+        removeClass(this.container, 'column');
+    }
+}
+
+class Header extends Banner {
+    constructor(page) {
+        super(page);
+        addClass(this.container, 'header');
+        this.page.container.insertBefore(this.container, this.page.container.firstChild);
+    }
+}
+
+class Footer extends Banner {
+    constructor(page) {
+        super(page);
+        addClass(this.container, 'footer');
+        this.page.container.append(this.container);
+        this.column();
+    }
+}
+
+
+class Content extends Banner {
+    constructor(page) {
+        super(page);
+        this.container = makeDiv(null, 'content');
+        this.page.container.append(this.container);
+        this.center();
+    }
+}
+
+export { Header, Content, Footer };

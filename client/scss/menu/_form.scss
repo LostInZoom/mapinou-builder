@@ -2,12 +2,45 @@
 @use '../themes/colors';
 @use 'sass:map';
 
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin: 1rem;
+}
+
+.question-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.question {
+    font-size: 1.1rem;
+    text-align: center;
+    transition: .2s color ease-in-out;
+}
+
+.answer-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+
+    @include mixins.themify(colors.$themes) {
+        &.selected {
+            background-color: mixins.themed('secondary');
+        }
+    }
+}
+
 .checkbox-container {
     display: flex;
     justify-content: center;
     align-self: center;
 
-    margin-top: 1rem;
+    margin: 1rem;
 
     @include mixins.themify(colors.$themes) {
         background-color: mixins.themed('primary');
@@ -39,4 +72,6 @@
     font-size: 1rem;
     font-weight: bold;
     text-align: justify;
+
+    transition: color .2s ease-in-out;
 }
