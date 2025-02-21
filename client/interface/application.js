@@ -158,7 +158,7 @@ class Application {
             let levelbutton = makeDiv(null, 'button-level button inactive ' + this.params.interface.theme, i + 1);
             levelcontainer.append(levelbutton);
             levelbutton.addEventListener('click', () => {
-                if (!this.sliding) {
+                if (!this.sliding && !hasClass(levelbutton, 'inactive')) {
                     this.startGame(this.next, i);
                     this.slideNext(() => {
                         this.next = new Page(this, 'next');

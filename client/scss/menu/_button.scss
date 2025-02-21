@@ -51,4 +51,9 @@
     border-radius: 50%;
     height: 3rem;
     width: 3rem;
+
+    &.inactive {
+        cursor: default;
+        pointer-events: none;
+    }
 }
