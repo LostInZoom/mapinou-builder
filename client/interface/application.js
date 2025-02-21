@@ -125,7 +125,7 @@ class Application {
 
         continueButton.addEventListener('click', () => {
             if (!this.sliding) {
-                this.page2(this.next);
+                this.levels(this.next);
                 this.slideNext(() => {
                     this.next = new Page(this, 'next');
                 });
@@ -133,7 +133,7 @@ class Application {
         });
     }
 
-    page2(page) {
+    levels(page) {
         let header = new Header(page);
         let content = new Content(page);
 
@@ -146,7 +146,7 @@ class Application {
         themeButton.addEventListener('click', () => { this.switchTheme(); });
         header.append(themeButton);
 
-        let tutorialButton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, 'Tutorial');
+        let tutorialButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Tutorial');
         content.append(tutorialButton);
         page.themed.push(tutorialButton);
 
@@ -155,7 +155,7 @@ class Application {
 
         let levels = this.params.levels;
         for (let i = 0; i < levels.length; i++) {
-            let levelbutton = makeDiv(null, 'button-level button-menu button ' + this.params.interface.theme, i + 1);
+            let levelbutton = makeDiv(null, 'button-level button inactive ' + this.params.interface.theme, i + 1);
             levelcontainer.append(levelbutton);
             levelbutton.addEventListener('click', () => {
                 if (!this.sliding) {

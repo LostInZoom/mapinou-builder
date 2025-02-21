@@ -32,6 +32,10 @@
     @include mixins.themify(colors.$themes) {
         background-color: mixins.themed('text');
         color: mixins.themed('primary');
+
+        &.inactive {
+            background-color: mixins.themed('inactive');
+        }
     }
 }
 
@@ -66,7 +70,7 @@
 
 .footer {
     > .button {
-        margin-bottom: 1rem;
+        margin: 1rem;
     }
 }
 
