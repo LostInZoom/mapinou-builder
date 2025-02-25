@@ -22,7 +22,7 @@ class Application {
         // Create the next page
         this.next = new Page(this, 'next');
 
-        this.done = 10;
+        this.done = 0;
         this.tutodone = true;
 
         this.title(this.current);
@@ -107,7 +107,6 @@ class Application {
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
 
-        
         let form = new Form(page, content, footer);
 
         let questions = this.params.form;
@@ -405,13 +404,14 @@ class Application {
     startGame(page, index) {
         let options = this.params.levels[index]
         let gamemap = new GameMap(page, options);
-        // gamemap.phase1(() => {
-        //     gamemap.phase2(() => {
-        //            ++this.done;
-        //     });
-        // });
-        gamemap.phase2(() => {
-
+        gamemap.phase1(() => {
+            gamemap.phase2(() => {
+                ++this.done;
+                this.levels(this.next);
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            });
         });
     }
 

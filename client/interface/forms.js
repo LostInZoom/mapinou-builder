@@ -91,7 +91,7 @@ class ConsentForm {
             · Map interactions (pan, zoom in, zoom out).<br>
             <br>
             We won't collect any personnal data such as your name or adress,
-            and the dataset by itself will not be open. That being said, we will
+            and the dataset by itself will not be disclosed. That being said, we will
             use this dataset to conduct statistical analysis, and those analysis
             will be subject to one or multiple publication.
         `

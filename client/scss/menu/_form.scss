@@ -40,7 +40,7 @@
     justify-content: center;
     align-self: center;
 
-    margin: 1rem;
+    margin-top: 1rem;
 
     @include mixins.themify(colors.$themes) {
         background-color: mixins.themed('primary');

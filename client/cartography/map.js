@@ -9,6 +9,7 @@ import { buffer, middle, project, within } from './analysis.js';
 import { addClass, addSVG, makeDiv, removeClass, wait } from '../utils/dom.js';
 import { MapLayers } from './layers.js';
 import { unByKey } from 'ol/Observable.js';
+import { inAndOut } from 'ol/easing.js';
 import Score from './score.js';
 import Router from './routing.js';
 import { getVectorContext } from 'ol/render.js';
@@ -55,11 +56,7 @@ class Basemap {
     }
 
     getZoomForData(padding) {
-        let extent;
-        for (let name in this.layers.getLayers()) {
-            if (extent === undefined) { extent = this.layers.getLayer(name).getSource().getExtent() }
-            else { extent = extend(extent, this.layers.getLayer(name).getSource().getExtent()) }
-        }
+        let extent = this.getExtentForData();
         let size = this.map.getSize();
         let padded = [ size[0] - 2*padding, size[1] - 2*padding ]
         let res = this.view.getResolutionForExtent(extent, padded);
@@ -68,12 +65,17 @@ class Basemap {
     }
 
     getCenterForData() {
+        let extent = this.getExtentForData();
+        return middle([extent[0], extent[1]], [extent[2], extent[3]])
+    }
+
+    getExtentForData() {
         let extent;
         for (let name in this.layers.getLayers()) {
             if (extent === undefined) { extent = this.layers.getLayer(name).getSource().getExtent() }
             else { extent = extend(extent, this.layers.getLayer(name).getSource().getExtent()) }
         }
-        return middle([extent[0], extent[1]], [extent[2], extent[3]])
+        return extent;
     }
 
     activate() {
@@ -118,6 +120,16 @@ class Basemap {
         });
         if ( index !== null ) { feature.setId(index); }
         this.layers.addFeature(layer, feature);
+    }
+
+    fit(padding, transition, callback) {
+        let extent = this.getExtentForData();
+        this.map.getView().fit(extent, {
+            padding: [ padding, padding, padding, padding ],
+            duration: transition,
+            easing: inAndOut,
+            callback: callback
+        });
     }
 
     initialize() {
@@ -264,6 +276,8 @@ class GameMap extends Basemap {
             if (within(target, this.player, this.params.game.tolerance.target)) {
                 unByKey(hintlistener);
                 unByKey(doublelistener);
+                addClass(this.hintext, 'collapse');
+                wait(200, () => { this.hintext.remove(); })
                 callback();
             } else {
                 if (!this.activeclue) {
@@ -290,24 +304,23 @@ class GameMap extends Basemap {
         let increment = this.params.game.score.increments.default;
         let interval = this.params.game.score.intervals.default;
         this.score = new Score(0, increment, interval, this.scoretext);
-        this.score.start();
-
         this.router = new Router(this, this.options.player);
 
         this.setPlayer(this.options.player);
         this.setTarget(this.options.target);
         this.addPitfall(this.options.pitfalls);
         this.addBonus(this.options.bonus);
-        this.setCenter(this.getCenterForData());
-        this.setZoom(this.getZoomForData(30));
-
-        this.map.on('postrender', () => {
-            let zoom = this.view.getZoom();
-            if (zoom >= this.params.game.routing) { this.routing(); }
-            else { this.navigation(); }
+        
+        this.fit(30, 500, () => {
+            this.map.on('postrender', () => {
+                let zoom = this.view.getZoom();
+                if (zoom >= this.params.game.routing) { this.routing(); }
+                else { this.navigation(); }
+            });
+    
+            this.score.start();
+            this.activateMovement(callback);
         });
-
-        this.activateMovement(callback);
     }
 
     addPitfall(coordinates) {

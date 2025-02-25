@@ -7,6 +7,7 @@ html, body {
     margin: 0;
 
     @include mixins.themify(colors.$themes) {
+        transition: all .2s ease-in-out;
         background-color: mixins.themed('primary');
         color: mixins.themed('text');
     }
