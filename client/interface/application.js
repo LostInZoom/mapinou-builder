@@ -22,6 +22,9 @@ class Application {
         // Create the next page
         this.next = new Page(this, 'next');
 
+        this.done = 10;
+        this.tutodone = true;
+
         this.title(this.current);
     }
 
@@ -29,6 +32,7 @@ class Application {
         let header = new Header(page);
         header.right();
         let content = new Content(page);
+        let footer = new Footer(page);
 
         let themeButton = makeDiv(null, 'button-theme button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
@@ -38,6 +42,9 @@ class Application {
         let title = makeDiv(null, 'title', 'Cartogame');
         let startButton = makeDiv(null, 'button-start button-menu button ' + this.params.interface.theme, 'Play');
         content.append(title, startButton);
+
+        let credits = makeDiv(null, 'credits', 'LostInZoom - ' + new Date().getFullYear());
+        footer.append(credits);
 
         page.themed.push(startButton);
         startButton.addEventListener('click', () => {
@@ -54,7 +61,7 @@ class Application {
         let header = new Header(page);
         let content = new Content(page);
 
-        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
+        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Back');
         let title = makeDiv(null, 'header-title', 'Consent form');
         let themeButton = makeDiv(null, 'button-theme button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
@@ -106,7 +113,7 @@ class Application {
         let questions = this.params.form;
         form.add(...questions);
 
-        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
+        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Back');
         header.append(backButton, themeButton);
 
         let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Validate and continue');
@@ -137,14 +144,33 @@ class Application {
         let header = new Header(page);
         let content = new Content(page);
 
-        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Menu');
-        header.append(backButton);
+        let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Main menu');
         page.themed.push(backButton);
+
+        let infosbutton = makeDiv(null, 'button-help button-menu button ' + this.params.interface.theme, '?');
+        let infoscontainer = makeDiv(null, 'help-container ' + this.params.interface.theme);
+        let infos = makeDiv(null, 'help-info', `
+            To unlock new levels, progress in the game.<br>
+            You must first learn the game mechanics through the tutorial before
+            starting the first level.
+            `);
+        infoscontainer.append(infos);
+        page.container.insertBefore(infoscontainer, content.container);
+
+        page.themed.push(infosbutton);
+        page.themed.push(infoscontainer);
+
+        let infoheight = infoscontainer.offsetHeight;
+        infoscontainer.style.height = '0';
+        infosbutton.addEventListener('click', () => {
+            if (infoscontainer.offsetHeight === 0) { infoscontainer.style.height = infoheight + 'px'; }
+            else { infoscontainer.style.height = '0'; }
+        });
 
         let themeButton = makeDiv(null, 'button-theme button', null);
         addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
-        header.append(themeButton);
+        header.append(backButton, infosbutton, themeButton);
 
         let tutorialButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Tutorial');
         content.append(tutorialButton);
@@ -155,7 +181,12 @@ class Application {
 
         let levels = this.params.levels;
         for (let i = 0; i < levels.length; i++) {
-            let levelbutton = makeDiv(null, 'button-level button inactive ' + this.params.interface.theme, i + 1);
+            let levelbutton = makeDiv(null, 'button-level button ' + this.params.interface.theme, i + 1);
+            if (i === 0) { if (!this.tutodone) { addClass(levelbutton, 'inactive'); } }
+            else {
+                if (i > this.done) { addClass(levelbutton, 'inactive'); }
+            }
+
             levelcontainer.append(levelbutton);
             levelbutton.addEventListener('click', () => {
                 if (!this.sliding && !hasClass(levelbutton, 'inactive')) {
@@ -170,7 +201,7 @@ class Application {
 
         tutorialButton.addEventListener('click', () => {
             if (!this.sliding) {
-                this.tutorial2(this.next);
+                this.tutorial1(this.next);
                 this.slideNext(() => {
                     this.next = new Page(this, 'next');
                 });
@@ -190,7 +221,7 @@ class Application {
     tutorial1(page) {
         addClass(page.container, 'tutorial');
         
-        let menumap = new MenuMap(page);
+        let menumap = new MenuMap(page, false);
         menumap.layers.add('player', 50);
         menumap.map.addLayer(menumap.layers.getLayer('player'));
 
@@ -225,9 +256,15 @@ class Application {
     }
 
     phase1(page) {
-        let gamemap = new GameMap(page);
-        gamemap.setCenter(this.params.tutorial.start.center);
-        gamemap.setZoom(this.params.tutorial.start.zoom);
+        let gamemap = new GameMap(page, this.params.tutorial);
+        gamemap.phase1(() => {
+            if (!this.sliding) {
+                this.tutorial2(this.next);
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
     }
 
     tutorial2(page) {
@@ -258,9 +295,12 @@ class Application {
         let text = makeDiv(null, 'tutorial-text', `
             Now that you found your location on the map, you must travel to your
             destination (in green) while avoiding pitfalls (in red) on the way.
+            <br><br>
+            The lower your score, the better. It will increase even when idle
+            but will increase quicker during movement.
             `)
 
-        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Continue');
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Next');
         information.append(title, text, continueButton);
         page.container.append(information);
 
@@ -279,20 +319,21 @@ class Application {
         let menumap = new MenuMap(page);
 
         let information = makeDiv(null, 'tutorial-information');
-        let title = makeDiv(null, 'tutorial-title', 'Phase 2 - The journey');
 
         let text = makeDiv(null, 'tutorial-text', `
-            Now that you found your location on the map, you must travel to your
-            destination (in green) while avoiding pitfalls (in red) on the way.
+            Crossing a pitfall area will increase your score by ${this.params.game.score.modifiers.pitfalls} points.
+            <br><br>
+            Pitfalls have a radius only visible at a certain zoom level,
+            so tread carefully and plan your journey accordingly.
             `)
 
-        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Continue');
-        information.append(title, text, continueButton);
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, 'Next');
+        information.append(text, continueButton);
         page.container.append(information);
 
         continueButton.addEventListener('click', () => {
             if (!this.sliding) {
-                this.page2(this.next);
+                this.tutorial4(this.next);
                 this.slideNext(() => {
                     this.next = new Page(this, 'next');
                 });
@@ -308,20 +349,56 @@ class Application {
         for (let i = 0; i < this.params.tutorial.pitfalls.length; i++) {
             if (i > 1) { break; }
             let p = this.params.tutorial.pitfalls[i];
-            menumap.addZone('pitfallsArea', p, this.params.game.tolerance.pitfall);
+            menumap.addZone('pitfallsArea', p, this.params.game.tolerance.pitfalls);
         }
 
         menumap.setCenter(menumap.getCenterForData());
         menumap.setZoom(menumap.getZoomForData(30));
     }
 
-    phase2(page) {
-        let gamemap = new GameMap(page);
-        gamemap.setCenter(this.params.tutorial.start.center);
-        gamemap.setZoom(this.params.tutorial.start.zoom);
+    tutorial4(page) {
+        addClass(page.container, 'tutorial');
+        let menumap = new MenuMap(page);
 
-        gamemap.doubleClick(() => {
-            
+        let information = makeDiv(null, 'tutorial-information');
+
+        let text = makeDiv(null, 'tutorial-text', `
+            On your journey, you may come accross a bonus that reduces your score by ${Math.abs(this.params.game.score.modifiers.bonus)} points.
+            <br><br>
+            Like pitfalls, they are visible only at a certain zoom level. But in addition, they only become visible
+            if you are within ${Math.abs(this.params.game.visibility.bonus)} meters.
+        `)
+
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, "Let's try it!");
+        information.append(text, continueButton);
+        page.container.append(information);
+
+        continueButton.addEventListener('click', () => {
+            if (!this.sliding) {
+                this.phase2(this.next);
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
+
+        menumap.layers.add('bonusArea', 49);
+        menumap.map.addLayer(menumap.layers.getLayer('bonusArea'));
+        let p = this.params.tutorial.bonus[0];
+        menumap.addZone('bonusArea', p, this.params.game.tolerance.bonus);
+
+        menumap.setCenter(menumap.getCenterForData());
+        menumap.setZoom(menumap.getZoomForData(30));
+    }
+
+    phase2(page) {
+        let options = this.params.tutorial
+        let gamemap = new GameMap(page, options);
+        gamemap.phase2(() => {
+            this.levels(this.next);
+            this.slideNext(() => {
+                this.next = new Page(this, 'next');
+            });
         });
     }
 
@@ -330,7 +407,7 @@ class Application {
         let gamemap = new GameMap(page, options);
         // gamemap.phase1(() => {
         //     gamemap.phase2(() => {
-
+        //            ++this.done;
         //     });
         // });
         gamemap.phase2(() => {

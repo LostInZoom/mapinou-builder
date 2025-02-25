@@ -172,17 +172,20 @@ class Basemap {
 };
 
 class MenuMap extends Basemap {
-    constructor(page) {
+    constructor(page, mode) {
         super(page);
+        this.mode = mode;
         this.type = 'menu';
         this.interactable = false;
         this.initialize();
 
-        this.map.on('postrender', () => {
-            let zoom = this.view.getZoom();
-            if (zoom >= this.params.game.routing) { this.routing(); }
-            else { this.navigation(); }
-        });
+        if (this.mode) {
+            this.map.on('postrender', () => {
+                let zoom = this.view.getZoom();
+                if (zoom >= this.params.game.routing) { this.routing(); }
+                else { this.navigation(); }
+            });
+        }
     }
 }
 
@@ -224,6 +227,8 @@ class GameMap extends Basemap {
         this.map.addLayer(this.layers.getLayer('pitfallsArea'));
         this.map.addLayer(this.layers.getLayer('bonus'));
         this.map.addLayer(this.layers.getLayer('bonusArea'));
+
+        this.visiblebonus = []
 
         this.setCenter(this.options.start.center);
         this.setZoom(this.options.start.zoom);
@@ -454,6 +459,13 @@ class GameMap extends Basemap {
         }
         else {
             if (this.pitfall) { this.pitfall = false; }
+        }
+    }
+
+    bonusVisibility(position) {
+        let intersect = false; let index;
+        for (let i = 0; i < this.options.bonus.length; i++) {
+            if (within(position, this.options.bonus[i], this.params.game.tolerance.bonus)) { intersect = true; index = i; break; }
         }
     }
 
