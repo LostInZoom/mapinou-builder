@@ -11,7 +11,7 @@ class Form {
         this.page = page;
         this.content = content;
         this.footer = footer;
-        this.container = makeDiv(null, 'form');
+        this.container = makeDiv(null, 'form no-scrollbar');
         this.content.append(this.container);
 
         this.answers = []
@@ -87,16 +87,20 @@ class ConsentForm {
             <br>
             The following data are collected by the team:<br>
             · Request form answers (sociological and cognitive tests).<br>
-            · Game metrics (time elapsed, score).<br>
+            · Game metrics (time elapsed, score, routing distance).<br>
             · Map interactions (pan, zoom in, zoom out).<br>
             <br>
-            We won't collect any personnal data such as your name or adress,
-            and the dataset by itself will not be disclosed. That being said, we will
-            use this dataset to conduct statistical analysis, and those analysis
-            will be subject to one or multiple publication.
+            This game doesn't collect any personnal information such as your name or localization,
+            nor any data specific to your device like your IP address or anything else.
+            The dataset collected by itself will not be disclosed to the public. That being said,
+            it will be used to conduct statistical analysis, and those analysis
+            will be subject to one or multiple publication.<br>
+            <br>
+            By proceeding and signing this consent form, you have understood and accept
+            the data hereby collected.
         `
 
-        this.textContent = makeDiv(null, 'content-text', text);
+        this.textContent = makeDiv(null, 'content-text no-scrollbar', text);
         this.checkboxcontainer = makeDiv(null, 'checkbox-container');
         this.checked = false;
         this.checkbox = makeDiv(null, 'checkbox ' + this.page.app.params.interface.theme);

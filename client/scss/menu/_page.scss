@@ -99,7 +99,7 @@
 .content {
     flex: 1;
     width: 100%;
-    overflow: auto;
+    overflow: hidden;
 
     display: flex;
     flex-direction: column;
@@ -122,6 +122,7 @@
 
 .content-text {
     margin: 0 2rem;
+    overflow: auto;
 }
 
 .credits {

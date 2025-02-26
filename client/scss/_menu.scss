@@ -39,6 +39,15 @@
     transition: background .2s ease-in-out;
 }
 
+.no-scrollbar {
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
 
 // @use 'animations';
 // @use 'loader';
