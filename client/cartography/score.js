@@ -7,6 +7,10 @@ class Score {
         this.object;
     }
 
+    get() {
+        return this.value;
+    }
+
     add(value) {
         this.value += value;
         this.html.innerHTML = this.value;

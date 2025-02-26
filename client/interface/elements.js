@@ -63,7 +63,6 @@ class Footer extends Banner {
     }
 }
 
-
 class Content extends Banner {
     constructor(page) {
         super(page);

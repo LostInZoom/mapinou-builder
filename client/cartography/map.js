@@ -19,6 +19,7 @@ class Basemap {
         this.page = page;
         this.params = page.app.params;
         this.routable = false;
+        this.moving = false;
     }
 
     setCenter(center) {
@@ -137,7 +138,8 @@ class Basemap {
         this.page.container.append(this.container);
         this.mask = makeDiv(null, 'mask-map mask ' + this.page.getTheme());
         this.page.themed.push(this.mask);
-        this.loader = makeDiv(null, 'loader');
+        this.loader = makeDiv(null, 'loader ' + this.page.getTheme());
+        this.page.themed.push(this.loader);
         this.mask.append(this.loader);
         this.container.append(this.mask);
 
@@ -207,6 +209,9 @@ class GameMap extends Basemap {
         this.options = options;
         this.type = 'game';
         this.phase;
+        this.travelled = 0;
+        this.statspitfalls = 0;
+        this.statsbonus = 0;
 
         this.interactable = true;
         this.activeclue = false;
@@ -309,7 +314,6 @@ class GameMap extends Basemap {
         this.setPlayer(this.options.player);
         this.setTarget(this.options.target);
         this.addPitfall(this.options.pitfalls);
-        this.addBonus(this.options.bonus);
         
         this.fit(30, 500, () => {
             this.map.on('postrender', () => {
@@ -319,7 +323,15 @@ class GameMap extends Basemap {
             });
     
             this.score.start();
-            this.activateMovement(callback);
+            this.activateMovement((distance) => {
+                let stats = {
+                    distance: distance,
+                    score: this.score.get(),
+                    pitfalls: this.statspitfalls,
+                    bonus: this.statsbonus,
+                }
+                callback(stats);
+            });
         });
     }
 
@@ -344,8 +356,9 @@ class GameMap extends Basemap {
     activateMovement(callback) {
         let movement = this.map.on('click', () => {
             // Allow movement only if routing is active
-            if (this.routable) {
+            if (this.routable && !this.moving) {
                 this.routable = false;
+                this.moving = true;
                 // Get the destination position
                 let target = this.map.getEventCoordinate(event);
                 console.log('start');
@@ -401,10 +414,11 @@ class GameMap extends Basemap {
 
                         if (end) {
                             unByKey(movement);
-                            callback();
+                            callback(distance);
                         }
                         else {
                             self.routable = true;
+                            self.moving = false;
                         }
                     }
 
@@ -443,9 +457,7 @@ class GameMap extends Basemap {
                             // Render the map to trigger the listener
                             self.map.render();
 
-                            if (win) {
-                                stopAnimation(context, true);
-                            }
+                            if (win) { stopAnimation(context, true); }
                         }
                         // Here, the journey is over
                         else { stopAnimation(context, false); }
@@ -466,8 +478,9 @@ class GameMap extends Basemap {
         }
         if (intersect) {
             if (!this.pitfall) {
+                ++this.statspitfalls;
                 this.score.add(this.params.game.score.modifiers.pitfalls);
-                this.pitfall = true
+                this.pitfall = true;
             }
         }
         else {
@@ -475,28 +488,50 @@ class GameMap extends Basemap {
         }
     }
 
-    bonusVisibility(position) {
-        let intersect = false; let index;
-        for (let i = 0; i < this.options.bonus.length; i++) {
-            if (within(position, this.options.bonus[i], this.params.game.tolerance.bonus)) { intersect = true; index = i; break; }
-        }
-    }
-
     bonusHandling(position) {
+        let self = this;
+        function removeBonus(index) {
+            let source = self.layers.getLayer('bonus').getSource()
+            let sourceArea = self.layers.getLayer('bonusArea').getSource()
+            let f = source.getFeatureById(index);
+            let fa = sourceArea.getFeatureById(index);
+            source.removeFeature(f);
+            sourceArea.removeFeature(fa);
+        }
+
+        for (let i = 0; i < this.options.bonus.length; i++) {
+            let bonus = this.options.bonus[i];
+            if (within(position, bonus, this.params.game.visibility.bonus)) {
+                if (!this.visiblebonus.includes(i)) {
+                    this.visiblebonus.push(i);
+                    this.addZone('bonusArea', bonus, this.params.game.tolerance.bonus, i);
+                    this.addPoint('bonus', bonus, i);
+                }
+            } else {
+                if (this.visiblebonus.includes(i)) {
+                    let j = this.visiblebonus.indexOf(i);
+                    this.visiblebonus.splice(j, 1);
+                    removeBonus(i);
+                }
+            }
+        }
+
         let intersect = false; let index;
         for (let i = 0; i < this.options.bonus.length; i++) {
-            if (within(position, this.options.bonus[i], this.params.game.tolerance.bonus)) { intersect = true; index = i; break; }
+            let bonus = this.options.bonus[i];
+            if (within(position, bonus, this.params.game.tolerance.bonus)) {
+                intersect = true;
+                index = i;
+                break;
+            }
         }
+
         if (intersect) {
             if (!this.bonus) {
                 this.score.add(this.params.game.score.modifiers.bonus);
                 this.bonus = true;
-                let source = this.layers.getLayer('bonus').getSource()
-                let sourceArea = this.layers.getLayer('bonusArea').getSource()
-                let f = source.getFeatureById(index);
-                let fa = sourceArea.getFeatureById(index);
-                source.removeFeature(f);
-                sourceArea.removeFeature(fa);
+                ++this.statsbonus;
+                removeBonus(index);
             }
         }
         else {

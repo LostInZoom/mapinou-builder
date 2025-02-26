@@ -1,11 +1,16 @@
 @use '../animations';
 
+@use '../themes/mixins';
+@use '../themes/colors';
+@use 'sass:map';
+
 .loader {
     width: .8rem;
     height: .8rem;
     border-radius: 50%;
-    border: .4rem solid #fff;
-    border-color: #fff transparent #fff transparent;
+    border-width: .4rem;
+    border-style: solid;
+    border-color: white transparent;
     animation: rotationcw 1.2s linear infinite;
 }
 

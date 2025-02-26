@@ -25,8 +25,8 @@ game:
     pitfalls: 500
     bonus: 200
   visibility:
-    bonus: 800
-  speed: 5000
+    bonus: 1500
+  speed: 50000
   routing: 13.5
 ###########################
 #### FORM DEFINITION ######

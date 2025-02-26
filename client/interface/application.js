@@ -393,7 +393,7 @@ class Application {
     phase2(page) {
         let options = this.params.tutorial
         let gamemap = new GameMap(page, options);
-        gamemap.phase2(() => {
+        gamemap.phase2((stats) => {
             this.levels(this.next);
             this.slideNext(() => {
                 this.next = new Page(this, 'next');
@@ -401,13 +401,37 @@ class Application {
         });
     }
 
+    endGame(page, stats) {
+        let content = new Content(page);
+        let congrats = makeDiv(null, 'game-congratulations', 'Congratulations!');
+        let statistics = makeDiv(null, 'game-statistics ' + this.params.interface.theme);
+
+        let score = makeDiv(null, 'game-score', stats.score);
+        let distance = makeDiv(null, 'game-distance', 'Distance travelled: ' + Math.floor(stats.distance/1000) + ' km');
+        let pitfalls = makeDiv(null, 'game-pitfalls', 'Pitfalls encountered: ' + stats.pitfalls);
+        let bonus = makeDiv(null, 'game-bonus', 'Bonus found: ' + stats.bonus);
+        statistics.append(score, distance, pitfalls, bonus);
+
+        let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, "Got it!");
+        page.themed.push(continueButton);
+        content.append(congrats, statistics, continueButton);
+        continueButton.addEventListener('click', () => {
+            if (!this.sliding) {
+                this.levels(this.next);
+                this.slideNext(() => {
+                    this.next = new Page(this, 'next');
+                });
+            }
+        });
+    }
+
     startGame(page, index) {
         let options = this.params.levels[index]
         let gamemap = new GameMap(page, options);
         gamemap.phase1(() => {
-            gamemap.phase2(() => {
+            gamemap.phase2((stats) => {
                 ++this.done;
-                this.levels(this.next);
+                this.endGame(this.next, stats);
                 this.slideNext(() => {
                     this.next = new Page(this, 'next');
                 });
