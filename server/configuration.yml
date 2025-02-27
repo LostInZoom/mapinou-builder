@@ -26,7 +26,7 @@ game:
     bonus: 200
   visibility:
     bonus: 1500
-  speed: 50000
+  speed: 5000
   routing: 13.5
 ###########################
 #### FORM DEFINITION ######
