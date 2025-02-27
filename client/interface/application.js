@@ -394,7 +394,7 @@ class Application {
         let options = this.params.tutorial
         let gamemap = new GameMap(page, options);
         gamemap.phase2((stats) => {
-            this.levels(this.next);
+            this.endGame(this.next, stats);
             this.slideNext(() => {
                 this.next = new Page(this, 'next');
             });
@@ -404,17 +404,36 @@ class Application {
     endGame(page, stats) {
         let content = new Content(page);
         let congrats = makeDiv(null, 'game-congratulations', 'Congratulations!');
+
+        let scorecontainer = makeDiv(null, 'game-score-container ' + this.params.interface.theme)
         let statistics = makeDiv(null, 'game-statistics ' + this.params.interface.theme);
 
-        let score = makeDiv(null, 'game-score', stats.score);
-        let distance = makeDiv(null, 'game-distance', 'Distance travelled: ' + Math.floor(stats.distance/1000) + ' km');
-        let pitfalls = makeDiv(null, 'game-pitfalls', 'Pitfalls encountered: ' + stats.pitfalls);
-        let bonus = makeDiv(null, 'game-bonus', 'Bonus found: ' + stats.bonus);
-        statistics.append(score, distance, pitfalls, bonus);
+        let scorelabel = makeDiv(null, 'game-score-label', 'Your score:');
+        let score = makeDiv(null, 'game-score-value', stats.score);
+
+        let distance = makeDiv(null, 'game-statistics-container');
+        let distancelabel = makeDiv(null, 'game-statistics-label', 'Distance travelled');
+        let distancevalue = makeDiv(null, 'game-statistics-value', Math.floor(stats.distance/1000) + ' km');
+        distance.append(distancelabel, distancevalue);
+
+        let pitfalls = makeDiv(null, 'game-statistics-container');
+        let pitfallslabel = makeDiv(null, 'game-statistics-label', 'Pitfalls encountered');
+        let pitfallsvalue = makeDiv(null, 'game-statistics-value', stats.pitfalls);
+        pitfalls.append(pitfallslabel, pitfallsvalue);
+
+        let bonus = makeDiv(null, 'game-statistics-container');
+        let bonuslabel = makeDiv(null, 'game-statistics-label', 'Bonus found');
+        let bonusvalue = makeDiv(null, 'game-statistics-value', stats.bonus);
+        bonus.append(bonuslabel, bonusvalue);
+
+        scorecontainer.append(scorelabel, score);
+        statistics.append(distance, pitfalls, bonus);
 
         let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, "Got it!");
         page.themed.push(continueButton);
-        content.append(congrats, statistics, continueButton);
+
+        content.append(congrats, scorecontainer, statistics, continueButton);
+
         continueButton.addEventListener('click', () => {
             if (!this.sliding) {
                 this.levels(this.next);

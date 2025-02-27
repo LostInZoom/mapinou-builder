@@ -323,9 +323,9 @@ class GameMap extends Basemap {
             });
     
             this.score.start();
-            this.activateMovement((distance) => {
+            this.activateMovement(() => {
                 let stats = {
-                    distance: distance,
+                    distance: this.travelled,
                     score: this.score.get(),
                     pitfalls: this.statspitfalls,
                     bonus: this.statsbonus,
@@ -410,11 +410,12 @@ class GameMap extends Basemap {
                         let increment = self.params.game.score.increments.default;
                         let interval = self.params.game.score.intervals.default; 
                         self.score.change(increment, interval);
+                        self.travelled += distance;
                         console.log('end');
 
                         if (end) {
                             unByKey(movement);
-                            callback(distance);
+                            callback();
                         }
                         else {
                             self.routable = true;
