@@ -183,7 +183,7 @@ class Application {
             let levelbutton = makeDiv(null, 'button-level button ' + this.params.interface.theme, i + 1);
             if (i === 0) { if (!this.tutodone) { addClass(levelbutton, 'inactive'); } }
             else {
-                if (i > this.done) { addClass(levelbutton, 'inactive'); }
+                if (i > 0) { addClass(levelbutton, 'inactive'); }
             }
 
             levelcontainer.append(levelbutton);
