@@ -7,6 +7,7 @@
   "source": "index.js",
   "type": "module",
   "scripts": {
+    "initialize_db": "node .database/initialize.js",
     "build-watch": "parcel watch ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
     "start-watch": "nodemon ./server/index.js",
     "dev": "concurrently --kill-others \"npm run start-watch\" \"npm run build-watch\"",
@@ -34,6 +35,7 @@
     "parcel": "^2.13.3",
     "parcel-plugin-clean-dist": "^0.0.6",
     "parcel-plugin-static-files-copy": "^2.6.0",
+    "pg": "^8.15.1",
     "sass": "^1.83.4",
     "svgo": "^3.3.2"
   }
