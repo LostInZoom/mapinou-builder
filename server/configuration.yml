@@ -5,6 +5,11 @@ interface:
   theme: theme-dark
   transition:
     page: 200
+  languages:
+    available:
+      - fr
+      - en
+    current: en
 #########################
 #### GAME PARAMETERS ####
 #########################

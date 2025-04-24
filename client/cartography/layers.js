@@ -12,7 +12,7 @@ class MapLayers {
         this.styles = new MapStyles();
         this.baselayer;
         this.layers = {};
-        this.features = {}
+        this.features = {};
     }
 
     add(name, zindex, opacity=1) {

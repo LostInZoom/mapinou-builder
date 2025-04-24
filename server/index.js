@@ -5,8 +5,8 @@ import express from 'express';
 const file = fs.readFileSync('./server/configuration.yml', { encoding: 'utf-8' });
 const params = load(file);
 
-const app = express()
-const port = 8001
+const app = express();
+const port = 8001;
 const __dirname = import.meta.dirname;
 
 app.use('/cartogame/configuration', (req, res) => {
@@ -17,5 +17,5 @@ app.use('/cartogame/configuration', (req, res) => {
 app.use('/', express.static('dist'));
 
 app.listen(port, () => {
-	console.log(`Listening on port ${port}`)
+	console.log(`Listening on port ${port}`);
 });
