@@ -4,8 +4,14 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 import { Feature } from 'ol';
 import VectorLayer from 'ol/layer/Vector.js';
 import VectorSource from 'ol/source/Vector.js';
+import { LineString, Point } from 'ol/geom.js';
+import { Style } from 'ol/style.js';
+import { getVectorContext } from 'ol/render.js';
 
-import { MapStyles } from './styles';
+import { MapStyles } from './styles.js';
+import { Sprite } from './sprite.js';
+import { scale } from 'ol/size.js';
+import { angle, project, within } from './analysis.js';
 
 class MapLayers {
     constructor() {
@@ -95,4 +101,173 @@ class MapLayers {
     }
 }
 
-export { MapLayers };
+class MapElement {
+    constructor(basemap) {
+        this.basemap = basemap;
+    }
+}
+
+class Player extends MapElement {
+    constructor(basemap, coordinates) {
+        super(basemap);
+        this.type = 'player';
+        this.params = basemap.params;
+        this.coordinates = coordinates;
+        this.layer = new VectorLayer({
+            source: new VectorSource(),
+            zIndex: 100,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true
+        });
+        this.basemap.map.addLayer(this.layer);
+
+        this.sprite = new Sprite({
+            layer: this.layer,
+            src: './assets/sprites/bird64.png',
+            size: 64,
+            scale: 1,
+            framerate: 200,
+            coordinates: this.coordinates,
+        });
+
+        this.moving = false;
+        this.travelled = 0;
+    }
+
+    display() {
+        this.sprite.icon.setOpacity(1);
+    }
+
+    hide() {
+        this.sprite.icon.setOpacity(0);
+    }
+
+    move(route, callback) {
+        callback = callback || function () {};
+        if (!this.moving) {
+            let increment = this.params.game.score.increments.movement;
+            let interval = this.params.game.score.intervals.movement; 
+            this.basemap.score.change(increment, interval);
+
+            this.sprite.setState('move');
+            
+            // Retrieve the vertexes composing the calculated route
+            const vertexes = [];
+            const nodes = route.geometry.coordinates;
+            for (let i = 0; i < nodes.length; i++) {
+                vertexes.push(project('4326', '3857', nodes[i]));
+            }
+            
+            const destination = vertexes[vertexes.length - 1];
+            
+            // Create the path line and calculate its length
+            const line = new LineString(vertexes);
+            const length = line.getLength();
+
+            let lastTime = Date.now();
+            let distance = 0;
+
+            // Get the speed in meters/second
+            const speed = this.params.game.speed / 3.6;
+            const position = this.sprite.getGeometryClone();
+
+            this.sprite.setGeometry(null);
+            this.layer.on('postrender', animatePlayer);
+
+            let self = this;
+            function animatePlayer(event) {
+                // Get the current time
+                const time = event.frameState.time;
+                const context = getVectorContext(event);
+                // Calculate the elapsed time in seconds
+                const elapsed = (time - lastTime) / 1000;
+                // Calculate the distance traveled depending on the elapsed time and the speed
+                distance = distance + (elapsed * speed);
+                // Set the previous time as the current one
+                lastTime = time;
+
+                // If the travelled distance is below the length of the route, continue the animation
+                if (distance < length) {
+                    // Calculate the position of the point along the route line
+                    let newPosition = line.getCoordinateAt(distance / length);
+
+                    let a = angle(position.getCoordinates(), newPosition);
+                    self.sprite.setDirection(a);
+
+                    // self.pitfallsHandling(newPosition);
+                    // self.bonusHandling(newPosition);
+
+                    let win = false;
+                    
+                    // if (within(newPosition, self.options.target, self.params.game.tolerance.target)) { win = true; }
+
+                    // if (path === undefined) { path = new LineString([ vertexes[0], newPosition ]); }
+                    // else { path.appendCoordinate(newPosition); }
+
+                    // // context.setStyle(self.layers.getStyle(['path']));
+                    // context.drawGeometry(path);
+
+                    position.setCoordinates(newPosition);
+                    context.setStyle(self.sprite.style);
+                    context.drawGeometry(position);
+
+                    // Render the map to trigger the listener
+                    self.basemap.map.render();
+
+                    if (win) { stopAnimation(context, true); }
+                }
+                // Here, the journey is over
+                else { stopAnimation(context, false); }
+            }
+
+            function stopAnimation(context, end) {
+                // Redraw on context to avoid flickering
+                // context.setStyle(self.layers.getStyle(['path']));
+                // context.drawGeometry(path);
+
+                context.setStyle(self.sprite.style);
+                context.drawGeometry(position);
+
+                // self.layers.setGeometry('player', position);
+                self.sprite.setGeometry(position);
+                self.sprite.setDirection('');
+                self.sprite.setState('idle');
+                // self.layers.setGeometry('path', path);
+
+                // Removing the render listener
+                self.layer.un('postrender', animatePlayer);
+
+                let increment = self.params.game.score.increments.default;
+                let interval = self.params.game.score.intervals.default; 
+                self.basemap.score.change(increment, interval);
+                self.travelled += distance;
+                console.log('end');
+
+                callback(destination, end);
+            }
+        }
+    }
+}
+
+class Target extends MapElement {
+    constructor(basemap) {
+        super(basemap);
+        this.type = 'target';
+    }
+}
+
+class Pitfalls extends MapElement {
+    constructor(basemap) {
+        super(basemap);
+        this.type = 'pitfalls';
+    }
+}
+
+class Bonus extends MapElement {
+    constructor(basemap) {
+        super(basemap);
+        this.type = 'bonus';
+    }
+}
+
+export { MapLayers, Player, Target, Pitfalls, Bonus };

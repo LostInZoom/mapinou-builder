@@ -9,11 +9,12 @@
   "scripts": {
     "initialize": "run-func .database/manage.js initialize",
     "update": "run-func .database/manage.js update",
+    "copy-assets": "rm -fr ./dist/cartogame/assets && cp -r ./client/assets ./dist/cartogame",
     "build-watch": "parcel watch ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
-    "start-watch": "nodemon ./server/index.js",
+    "start-watch": "npm run copy-assets && nodemon ./server/index.js",
     "dev": "concurrently --kill-others \"npm run start-watch\" \"npm run build-watch\"",
     "build": "parcel build ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
-    "start": "npm run build && node server/index.js",
+    "start": "npm run build-img && npm run build && node server/index.js",
     "deploy": "node server/index.js"
   },
   "keywords": [
@@ -23,6 +24,7 @@
   "dependencies": {
     "@turf/turf": "^7.2.0",
     "ol": "^10.3.1",
+    "ol-games": "^2.0.0",
     "proj4": "^2.15.0"
   },
   "devDependencies": {

@@ -22,8 +22,8 @@ game:
       default: 100
       movement: 20
     modifiers:
-      pitfalls: 200
-      bonus: -100
+      pitfalls: 500
+      bonus: -250
   tolerance:
     flag: 500
     target: 200

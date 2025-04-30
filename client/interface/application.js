@@ -25,7 +25,8 @@ class Application {
         this.done = 0;
         this.tutodone = true;
 
-        this.title(this.current);
+        this.phase2(this.current);
+        // this.title(this.current);
     }
 
     title(page) {
@@ -35,7 +36,7 @@ class Application {
         let footer = new Footer(page);
 
         let themeButton = makeDiv(null, 'button-theme button', null);
-        addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
+        addSVG(themeButton, new URL('../assets/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
         header.append(themeButton);
 
@@ -64,7 +65,7 @@ class Application {
         let backButton = makeDiv(null, 'button-back button-menu button ' + this.params.interface.theme, 'Back');
         let title = makeDiv(null, 'header-title', 'Consent form');
         let themeButton = makeDiv(null, 'button-theme button', null);
-        addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
+        addSVG(themeButton, new URL('../assets/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
 
         header.append(backButton, title, themeButton);
@@ -104,7 +105,7 @@ class Application {
         let footer = new Footer(page);
 
         let themeButton = makeDiv(null, 'button-theme button', null);
-        addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
+        addSVG(themeButton, new URL('../assets/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
 
         let form = new Form(page, content, footer);
@@ -167,7 +168,7 @@ class Application {
         });
 
         let themeButton = makeDiv(null, 'button-theme button', null);
-        addSVG(themeButton, new URL('../img/theme.svg', import.meta.url));
+        addSVG(themeButton, new URL('../assets/theme.svg', import.meta.url));
         themeButton.addEventListener('click', () => { this.switchTheme(); });
         header.append(backButton, infosbutton, themeButton);
 

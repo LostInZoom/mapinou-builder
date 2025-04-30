@@ -54,6 +54,20 @@ function within(position1, position2, distance) {
 }
 
 /**
+ * Return the angle of the line formed by two coordinates.
+ * @param {array} position1 - Coordinates of the first position
+ * @param {array} position2 - Coordinates of the first position
+ * @return {number} - The angle formed by the two positions.
+ */
+function angle(position1, position2) {
+    let x = position2[0] - position1[0];
+    let y = position2[1] - position1[1];
+    let a = Math.atan2(y, x);
+    if (a < 0) { return a + 2*Math.PI }
+    else { return a }
+}
+
+/**
  * Project the given coordinates.
  * @param {string} epsg1 - Origin EPSG.
  * @param {string} epsg2 - Destination EPSG.
@@ -64,4 +78,4 @@ function project(epsg1, epsg2, coordinates) {
     return proj4(proj4.defs('EPSG:' + epsg1), proj4.defs('EPSG:' + epsg2), coordinates);
 }
 
-export { buffer, middle, within, project }
+export { buffer, middle, within, project, angle }

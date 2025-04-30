@@ -13,7 +13,7 @@ class Router {
     }
 
     setPosition(position) {
-        this.position = position
+        this.position = position;
     }
 
     calculateRoute(target, callback) {
