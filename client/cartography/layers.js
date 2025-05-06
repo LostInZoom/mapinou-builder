@@ -7,11 +7,17 @@ import VectorSource from 'ol/source/Vector.js';
 import { LineString, Point } from 'ol/geom.js';
 import { Style } from 'ol/style.js';
 import { getVectorContext } from 'ol/render.js';
-
-import { MapStyles } from './styles.js';
+import {
+    Circle as CircleStyle,
+    Fill,
+    Stroke,
+    Style,
+} from 'ol/style.js';
 import { Sprite } from './sprite.js';
 import { scale } from 'ol/size.js';
-import { angle, project, within } from './analysis.js';
+
+import { angle, project, within, buffer, randomPointInCircle } from './analysis.js';
+import { getColorsByClassNames } from '../utils/parse.js';
 
 class MapLayers {
     constructor() {
@@ -101,18 +107,14 @@ class MapLayers {
     }
 }
 
-class MapElement {
-    constructor(basemap) {
-        this.basemap = basemap;
-    }
-}
+class Character {
+    constructor(options) {
+        this.options = options || {};
 
-class Player extends MapElement {
-    constructor(basemap, coordinates) {
-        super(basemap);
-        this.type = 'player';
-        this.params = basemap.params;
-        this.coordinates = coordinates;
+        this.basemap = options.basemap;
+        this.coordinates = options.coordinates;
+        this.params = this.basemap.params;
+        
         this.layer = new VectorLayer({
             source: new VectorSource(),
             zIndex: 100,
@@ -120,18 +122,10 @@ class Player extends MapElement {
             updateWhileInteracting: true
         });
         this.basemap.map.addLayer(this.layer);
-
-        this.sprite = new Sprite({
-            layer: this.layer,
-            src: './assets/sprites/bird64.png',
-            size: 64,
-            scale: 1,
-            framerate: 200,
-            coordinates: this.coordinates,
-        });
+        this.basemap.layers.push(this.layer);
 
         this.moving = false;
-        this.travelled = 0;
+        this.travelled = 0;        
     }
 
     display() {
@@ -142,7 +136,41 @@ class Player extends MapElement {
         this.sprite.icon.setOpacity(0);
     }
 
-    move(route, callback) {
+    getLayer() {
+        return this.layer;
+    }
+}
+
+class Player extends Character {
+    constructor(options) {
+        super(options);
+
+        let zindex = this.options.zindex || 1;
+        this.layer.setZIndex(zindex);
+
+        this.sprite = new Sprite({
+            layer: this.layer,
+            src: './assets/sprites/bird64.png',
+            width: 64,
+            height: 64,
+            scale: 1,
+            framerate: 200,
+            coordinates: this.coordinates,
+            states: {
+                idle: { line: 2, length: 3 },
+                moveW: { line: 0, length: 3 },
+                moveN: { line: 1, length: 3 },
+                moveS: { line: 2, length: 3 },
+                moveE: { line: 3, length: 3 },
+                walkW: { line: 4, length: 3 },
+                walkN: { line: 5, length: 3 },
+                walkS: { line: 6, length: 3 },
+                walkE: { line: 7, length: 3 },
+            }
+        });
+    }
+
+    travel(route, callback) {
         callback = callback || function () {};
         if (!this.moving) {
             let increment = this.params.game.score.increments.movement;
@@ -168,7 +196,7 @@ class Player extends MapElement {
             let distance = 0;
 
             // Get the speed in meters/second
-            const speed = this.params.game.speed / 3.6;
+            const speed = this.params.game.speed.travel / 3.6;
             const position = this.sprite.getGeometryClone();
 
             this.sprite.setGeometry(null);
@@ -249,25 +277,145 @@ class Player extends MapElement {
     }
 }
 
-class Target extends MapElement {
-    constructor(basemap) {
-        super(basemap);
-        this.type = 'target';
+class Target extends Character {
+    constructor(options) {
+        super(options);
+
+        let zindex = this.options.zindex || 1;
+        this.layer.setZIndex(zindex);
+
+        this.sprite = new Sprite({
+            layer: this.layer,
+            src: './assets/sprites/chick.png',
+            width: 64,
+            height: 64,
+            scale: .5,
+            framerate: 200,
+            coordinates: this.coordinates,
+            anchor: [0.5, 0.5],
+            states: {
+                idle: { line: 2, length: 4 },
+                moveW: { line: 0, length: 4 },
+                moveE: { line: 1, length: 4 },
+                moveS: { line: 2, length: 4 },
+                moveN: { line: 3, length: 4 },
+                forageW: { line: 4, length: 3 },
+                forageE: { line: 5, length: 3 },
+                forageS: { line: 6, length: 3 },
+                forageN: { line: 7, length: 3 },
+            }
+        });
+
+        let sizeArea = this.basemap.params.game.tolerance.target;
+        this.area = new VectorLayer({
+            source: new VectorSource({
+                features: [
+                    new Feature({ geometry: buffer(this.coordinates, sizeArea) })
+                ],
+            }),
+            style: new Style({
+                fill: new Fill({
+                    color: getColorsByClassNames('bonus-transparent')['bonus-transparent']
+                })
+            }),
+            zIndex: zindex - 1,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
+            opacity: 0,
+        });
+
+        this.basemap.map.addLayer(this.area);
+        this.basemap.layers.push(this.area);
+
+        this.roam(this.coordinates, sizeArea);
+    }
+
+    display() {
+        this.sprite.icon.setOpacity(1);
+        this.area.setOpacity(1);
+    }
+
+    hide() {
+        this.sprite.icon.setOpacity(0);
+        this.area.setOpacity(0);
+    }
+
+    roam(coordinates, radius) {
+        this.sprite.setState('move');
+
+        let destination = randomPointInCircle(this.coordinates, radius);
+        let a = angle(coordinates, destination);
+        this.sprite.setDirection(a);
+
+        const line = new LineString([ coordinates, destination ]);
+        const length = line.getLength();
+        const speed = this.params.game.speed.roaming;
+        const position = this.sprite.getGeometryClone();
+        this.sprite.setGeometry(null);
+
+        let lastTime = Date.now();
+        let distance = 0;
+        let newPosition = position.getCoordinates();
+
+        this.layer.on('postrender', animate);
+
+        let self = this;
+        function animate(event) {
+            const time = event.frameState.time;
+            const context = getVectorContext(event);
+            context.setStyle(self.sprite.style);
+
+            const elapsed = (time - lastTime) / 1000;
+
+            distance += speed * elapsed * self.basemap.view.getResolution();
+            lastTime = time;
+
+            // If the travelled distance is below the length of the route, continue the animation
+            if (distance < length) {
+                newPosition = line.getCoordinateAt(distance / length);
+                position.setCoordinates(newPosition);
+                context.drawGeometry(position);
+                self.basemap.map.render();
+            }
+            else {
+                self.layer.un('postrender', animate);
+                position.setCoordinates(destination);
+                context.drawGeometry(position);
+
+                self.sprite.setGeometry(position);
+                
+                self.sprite.setState('forage');
+
+                // self.roam(destination, radius);
+
+                setTimeout(() => {
+                    self.roam(destination, radius);
+                }, 3 * self.sprite.getFramerate());
+            }
+        }
     }
 }
 
-class Pitfalls extends MapElement {
-    constructor(basemap) {
-        super(basemap);
-        this.type = 'pitfalls';
+class Enemy extends Character {
+    constructor(basemap, coordinates) {
+        super(basemap, coordinates);
+        this.sprite = new Sprite({
+            layer: this.layer,
+            src: './assets/sprites/fox.png',
+            width: 64,
+            height: 64,
+            scale: 1,
+            framerate: 200,
+            coordinates: this.coordinates,
+            states: {
+                idle: { line: 2, length: 3 },
+                moveW: { line: 3, length: 3 },
+                moveN: { line: 0, length: 3 },
+                moveS: { line: 2, length: 3 },
+                moveE: { line: 1, length: 3 },
+            }
+        });
     }
 }
 
-class Bonus extends MapElement {
-    constructor(basemap) {
-        super(basemap);
-        this.type = 'bonus';
-    }
-}
-
-export { MapLayers, Player, Target, Pitfalls, Bonus };
+export { MapLayers, Character, Player, Target, Enemy };

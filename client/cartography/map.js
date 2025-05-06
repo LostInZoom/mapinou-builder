@@ -4,10 +4,13 @@ import { extend } from 'ol/extent.js';
 import { Feature } from 'ol';
 import { defaults as defaultInteractions } from 'ol/interaction/defaults.js';
 import { Point, LineString } from 'ol/geom.js';
+import TileLayer from 'ol/layer/Tile.js';
+import WMTS from 'ol/source/WMTS.js';
+import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 
 import { buffer, middle, project, within } from './analysis.js';
 import { addClass, addSVG, makeDiv, removeClass, wait } from '../utils/dom.js';
-import { MapLayers, Player } from './layers.js';
+import { MapLayers, Player, Enemy, Target } from './layers.js';
 import { unByKey } from 'ol/Observable.js';
 import { inAndOut } from 'ol/easing.js';
 import Score from './score.js';
@@ -20,6 +23,7 @@ class Basemap {
         this.params = page.app.params;
         this.routable = false;
         this.moving = false;
+        this.layers = [];
     }
 
     setCenter(center) {
@@ -72,10 +76,10 @@ class Basemap {
 
     getExtentForData() {
         let extent;
-        for (let name in this.layers.getLayers()) {
-            if (extent === undefined) { extent = this.layers.getLayer(name).getSource().getExtent() }
-            else { extent = extend(extent, this.layers.getLayer(name).getSource().getExtent()) }
-        }
+        this.layers.forEach((layer) => {
+            if (extent === undefined) { extent = layer.getSource().getExtent() }
+            else { extent = extend(extent, layer.getSource().getExtent()) }
+        })
         return extent;
     }
 
@@ -144,8 +148,30 @@ class Basemap {
         this.container.append(this.mask);
 
         this.view = new View();
-        this.layers = new MapLayers();
-        this.layers.setBaseLayer();
+        this.baselayer = new TileLayer({
+            preload: 'Infinity',
+            source: new WMTS({
+                url: 'https://data.geopf.fr/wmts',
+                layer: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
+                matrixSet: 'PM',
+                format: 'image/png',
+                style: 'normal',
+                dimensions: [256, 256],
+                tileGrid: new WMTSTileGrid({
+                    origin: [-20037508, 20037508],
+                    resolutions: [
+                        156543.03392804103, 78271.5169640205, 39135.75848201024, 19567.879241005125, 9783.939620502562,
+                        4891.969810251281, 2445.9849051256406, 1222.9924525628203, 611.4962262814101, 305.74811314070485,
+                        152.87405657035254, 76.43702828517625, 38.218514142588134, 19.109257071294063, 9.554628535647034,
+                        4.777314267823517, 2.3886571339117584, 1.1943285669558792, 0.5971642834779396, 0.29858214173896974,
+                        0.14929107086948493, 0.07464553543474241
+                    ],
+                    matrixIds: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"],
+                })
+            })
+        });
+        // this.layers = new MapLayers();
+        // this.layers.setBaseLayer();
 
         this.modebutton = makeDiv(null, 'game-mode collapse ' + this.page.getTheme());
         addSVG(this.modebutton, new URL('../assets/routing.svg', import.meta.url));
@@ -174,7 +200,7 @@ class Basemap {
 
         this.map = new Map({
             target: this.container,
-            layers: [ this.layers.getBaseLayer() ],
+            layers: [ this.baselayer ],
             view: this.view,
             interactions: new defaultInteractions(interactions),
         });
@@ -221,31 +247,40 @@ class GameMap extends Basemap {
         this.clue = makeDiv(null, 'game-visual-clue');
         this.container.append(this.clue);
 
-        this.player = new Player(this, this.options.player);
+        this.player = new Player({
+            basemap: this,
+            coordinates: this.options.player,
+            zindex: 50
+        });
+        this.target = new Target({
+            basemap: this,
+            coordinates: this.options.target,
+            zindex: 40
+        });
 
         // this.layers.add('player', 50);
-        this.layers.add('target', 51);
-        this.layers.add('path', 10);
+        // this.layers.add('target', 51);
+        // this.layers.add('path', 10);
 
-        this.layers.add('pitfalls', 49);
-        this.layers.setMaxZoom('pitfalls', 12);
+        // this.layers.add('pitfalls', 49);
+        // this.layers.setMaxZoom('pitfalls', 12);
 
-        this.layers.add('pitfallsArea', 48);
-        this.layers.setMinZoom('pitfallsArea', 12);
+        // this.layers.add('pitfallsArea', 48);
+        // this.layers.setMinZoom('pitfallsArea', 12);
 
-        this.layers.add('bonus', 47);
-        this.layers.setMaxZoom('bonus', 12);
+        // this.layers.add('bonus', 47);
+        // this.layers.setMaxZoom('bonus', 12);
 
-        this.layers.add('bonusArea', 46);
-        this.layers.setMinZoom('bonusArea', 12);
+        // this.layers.add('bonusArea', 46);
+        // this.layers.setMinZoom('bonusArea', 12);
 
         // this.map.addLayer(this.layers.getLayer('player'));
-        this.map.addLayer(this.layers.getLayer('path'));
-        this.map.addLayer(this.layers.getLayer('target'));
-        this.map.addLayer(this.layers.getLayer('pitfalls'));
-        this.map.addLayer(this.layers.getLayer('pitfallsArea'));
-        this.map.addLayer(this.layers.getLayer('bonus'));
-        this.map.addLayer(this.layers.getLayer('bonusArea'));
+        // this.map.addLayer(this.layers.getLayer('path'));
+        // this.map.addLayer(this.layers.getLayer('target'));
+        // this.map.addLayer(this.layers.getLayer('pitfalls'));
+        // this.map.addLayer(this.layers.getLayer('pitfallsArea'));
+        // this.map.addLayer(this.layers.getLayer('bonus'));
+        // this.map.addLayer(this.layers.getLayer('bonusArea'));
 
         this.visiblebonus = []
 
@@ -303,6 +338,7 @@ class GameMap extends Basemap {
     phase2(callback) {
         this.phase = 2;
         this.player.display();
+        this.target.display();
 
         this.pitfall = false;
         this.bonus = false;
@@ -317,8 +353,8 @@ class GameMap extends Basemap {
         this.router = new Router(this, this.options.player);
 
         // this.setPlayer(this.options.player);
-        this.setTarget(this.options.target);
-        this.addPitfall(this.options.pitfalls);
+        // this.setTarget(this.options.target);
+        // this.addPitfall(this.options.pitfalls);
         
         this.fit(30, 500, () => {
             this.map.on('postrender', () => {
@@ -363,7 +399,7 @@ class GameMap extends Basemap {
             if (this.routable) {
                 let target = this.map.getEventCoordinate(event);
                 this.router.calculateRoute(target, (route) => {
-                    this.player.move(route, (position, end) => {
+                    this.player.travel(route, (position, end) => {
                         this.router.setPosition(position);
                         if (end) {
                             unByKey(movement);

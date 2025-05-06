@@ -78,4 +78,18 @@ function project(epsg1, epsg2, coordinates) {
     return proj4(proj4.defs('EPSG:' + epsg1), proj4.defs('EPSG:' + epsg2), coordinates);
 }
 
-export { buffer, middle, within, project, angle }
+/**
+ * Get a random point inside a given circle.
+ * @param {float} center - Center of the circle.
+ * @param {float} radius - Radius of the circle.
+ * @returns {Array} - Random point coordinates.
+ */
+function randomPointInCircle(center, radius) {
+    let angle = Math.random() * 2 * Math.PI;
+    let hypothenus = Math.sqrt(Math.random()) * radius;
+    let adjacent = Math.cos(angle) * hypothenus;
+    let opposite = Math.sin(angle) * hypothenus;
+    return [center[0] + adjacent, center[1] + opposite]
+}
+
+export { buffer, middle, within, project, angle, randomPointInCircle }

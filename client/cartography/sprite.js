@@ -14,17 +14,21 @@ class Sprite {
         this.options.layer.getSource().addFeature(this.feature);
 
         let canvas = document.createElement('canvas');
-        let size = canvas.width = canvas.height = options.size || 32;
+
+        let width = canvas.width = options.width || 32;
+        let height = canvas.height = options.height || 32;
 
         this.icon = new Icon({
             img: canvas,
-            imgSize: [size, size],
+            imgSize: [ width, height ],
+            anchor: options.anchor || [0.5, 0.5],
             scale: options.scale || 1,
             opacity: 0
         });
 
-        this.size = size;
-        this.offset = [ 0, this.states.idle.line*this.size ]
+        this.width = width;
+        this.height = height;
+        this.offset = [ 0, this.states.idle.line*this.height ]
         
         let img = this.icon.img_ = new Image();
         img.crossOrigin = options.crossOrigin || "anonymous";
@@ -43,20 +47,31 @@ class Sprite {
         this.framerate = options.framerate || 100;
         this.state = 'idle';
         this.direction = '';
+
+        this.animate();
+    }
+
+    animate() {
         this.pos = 1;
         this.interval = setInterval(() => {
             let state = this.state == 'idle' ? this.state : this.state + this.direction;
             if (this.pos == this.states[state].length) { this.pos = 1; }
             else { ++this.pos; }
-            this.offset = [ (this.pos - 1)*this.size, this.states[state].line*this.size ]
+            this.offset = [ (this.pos - 1)*this.width, this.states[state].line*this.height ]
             this.draw();
         }, this.framerate);
     }
 
+    stop() {
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+    }
+
     draw() {
         var ctx = this.icon.getImage().getContext("2d");
-        ctx.clearRect(0, 0, this.size, this.size);
-        ctx.drawImage(this.icon.img_, this.offset[0], this.offset[1], this.size, this.size, 0, 0, this.size, this.size);
+        ctx.clearRect(0, 0, this.width, this.height);
+        ctx.drawImage(this.icon.img_, this.offset[0], this.offset[1], this.width, this.height, 0, 0, this.width, this.height);
         this.options.layer.values_.map.render();
     }
 
@@ -75,8 +90,13 @@ class Sprite {
         }
     }
 
+    getDirection() {
+        return this.direction;
+    }
+
     setState(state) {
         this.state = state;
+        this.pos = 1;
         this.draw();
     }
 
@@ -95,18 +115,10 @@ class Sprite {
     setCoordinates(coords) {
         this.feature.coords = coords;
     }
-}
 
-Sprite.prototype.states = {
-    idle: { line: 2, length: 3 },
-    moveW: { line: 0, length: 3 },
-    moveN: { line: 1, length: 3 },
-    moveS: { line: 2, length: 3 },
-    moveE: { line: 3, length: 3 },
-    walkW: { line: 4, length: 3 },
-    walkN: { line: 5, length: 3 },
-    walkS: { line: 6, length: 3 },
-    walkE: { line: 7, length: 3 },
-};
+    getFramerate() {
+        return this.framerate;
+    }
+}
 
 export { Sprite }
