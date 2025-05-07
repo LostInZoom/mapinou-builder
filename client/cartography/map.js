@@ -10,12 +10,17 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 
 import { buffer, middle, project, within } from './analysis.js';
 import { addClass, addSVG, makeDiv, removeClass, wait } from '../utils/dom.js';
-import { MapLayers, Player, Enemy, Target } from './layers.js';
+// import { MapLayers, Player, Enemy, Target } from './layers.js';
 import { unByKey } from 'ol/Observable.js';
 import { inAndOut } from 'ol/easing.js';
 import Score from './score.js';
 import Router from './routing.js';
 import { getVectorContext } from 'ol/render.js';
+
+import { Enemies } from '../characters/enemies.js';
+import Player from '../characters/player.js';
+import Target from '../characters/target.js';
+import { Helpers } from '../characters/helpers.js';
 
 class Basemap {
     constructor(page) {
@@ -232,7 +237,7 @@ class MenuMap extends Basemap {
 class GameMap extends Basemap {
     constructor(page, options) {
         super(page);
-        this.options = options;
+        this.options = options || {};
         this.type = 'game';
         this.phase;
         this.travelled = 0;
@@ -252,11 +257,27 @@ class GameMap extends Basemap {
             coordinates: this.options.player,
             zindex: 50
         });
+
         this.target = new Target({
             basemap: this,
             coordinates: this.options.target,
             zindex: 40
         });
+
+        this.helpers = new Helpers({
+            basemap: this,
+            coordinates: this.options.bonus,
+            zindex: 30
+        });
+
+        this.enemies = new Enemies({
+            basemap: this,
+            coordinates: this.options.pitfalls,
+            zindex: 20
+        });
+
+        this.player.setOrientation(this.target.getCoordinates());
+        this.enemies.setOrientation(this.player.getCoordinates());
 
         // this.layers.add('player', 50);
         // this.layers.add('target', 51);
@@ -339,6 +360,8 @@ class GameMap extends Basemap {
         this.phase = 2;
         this.player.display();
         this.target.display();
+        this.enemies.display();
+        this.helpers.display();
 
         this.pitfall = false;
         this.bonus = false;

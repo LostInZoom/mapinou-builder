@@ -18,4 +18,14 @@ function getColorsByClassNames(...className) {
     return colors;
 }
 
-export { getColorsByClassNames }
+/**
+ * Generate a random integer in a given range.
+ * @param  {int} min - Min int.
+ * @param  {int} max - Max int.
+ * @return {int} - Random int.
+ */
+function generateRandomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export { getColorsByClassNames, generateRandomInteger }

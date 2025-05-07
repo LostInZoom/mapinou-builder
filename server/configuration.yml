@@ -33,7 +33,7 @@ game:
     bonus: 1500
   speed:
     travel: 5000 # in km/h
-    roaming: 10 # in px/s
+    roaming: 20 # in px/s
   routing: 13.5
 ###########################
 #### FORM DEFINITION ######
