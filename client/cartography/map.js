@@ -255,25 +255,26 @@ class GameMap extends Basemap {
         this.player = new Player({
             basemap: this,
             coordinates: this.options.player,
-            zindex: 50
+            zIndex: 50
         });
 
         this.target = new Target({
             basemap: this,
             coordinates: this.options.target,
-            zindex: 40
+            zIndex: 40
         });
 
         this.helpers = new Helpers({
             basemap: this,
             coordinates: this.options.bonus,
-            zindex: 30
+            zIndex: 30,
+            minZoom: 13.5,
         });
 
         this.enemies = new Enemies({
             basemap: this,
             coordinates: this.options.pitfalls,
-            zindex: 20
+            zIndex: 20,
         });
 
         this.player.setOrientation(this.target.getCoordinates());
@@ -399,20 +400,6 @@ class GameMap extends Basemap {
         });
     }
 
-    addPitfall(coordinates) {
-        for (let i = 0; i < coordinates.length; i++) {
-            this.addZone('pitfallsArea', coordinates[i], this.params.game.tolerance.pitfalls, i);
-            this.addPoint('pitfalls', coordinates[i], i);
-        }
-    }
-
-    addBonus(coordinates) {
-        for (let i = 0; i < coordinates.length; i++) {
-            this.addZone('bonusArea', coordinates[i], this.params.game.tolerance.bonus, i);
-            this.addPoint('bonus', coordinates[i], i);
-        }
-    }
-
     /**
      * This method activate a listener on the map click that allows
      * the player to move.
@@ -431,121 +418,6 @@ class GameMap extends Basemap {
                     });
                 });
             }
-
-        //     // Allow movement only if routing is active
-        //     if (this.routable && !this.moving) {
-        //         this.routable = false;
-        //         this.moving = true;
-        //         // Get the destination position
-        //         let target = this.map.getEventCoordinate(event);
-        //         console.log('start');
-
-        //         // Calculate the route towards the destination
-        //         this.router.calculateRoute(target, (result) => {
-        //             console.log('routing...');
-        //             let increment = this.params.game.score.increments.movement;
-        //             let interval = this.params.game.score.intervals.movement; 
-        //             this.score.change(increment, interval);
-                    
-        //             // Retrieve the vertexes composing the calculated route
-        //             const vertexes = [];
-        //             const nodes = result.geometry.coordinates;
-        //             for (let i = 0; i < nodes.length; i++) {
-        //                 vertexes.push(project('4326', '3857', nodes[i]));
-        //             }
-        //             let destination = vertexes[vertexes.length - 1]
-                    
-        //             // Create the path line and calculate its length
-        //             const line = new LineString(vertexes);
-        //             const length = line.getLength();
-
-        //             let lastTime = Date.now();
-        //             let distance = 0;
-
-        //             // Get the speed in meters/second
-        //             const speed = this.params.game.speed / 3.6;
-        //             const position = this.layers.getGeometry('player').clone();
-
-        //             let path = this.layers.getGeometry('path');
-        //             if (path !== undefined) { path = path.clone(); }
-
-        //             self = this;
-        //             function stopAnimation(context, end) {
-        //                 // Redraw on context to avoid flickering
-        //                 context.setStyle(self.layers.getStyle(['path']));
-        //                 context.drawGeometry(path);
-        //                 context.setStyle(self.layers.getStyle(['player']));
-        //                 context.drawGeometry(position);
-
-        //                 self.layers.setGeometry('player', position);
-        //                 self.layers.setGeometry('path', path);
-
-        //                 self.router.setPosition(destination);
-
-        //                 // Removing the render listener
-        //                 self.layers.getLayer('path').un('postrender', animatePlayer);
-        //                 let increment = self.params.game.score.increments.default;
-        //                 let interval = self.params.game.score.intervals.default; 
-        //                 self.score.change(increment, interval);
-        //                 self.travelled += distance;
-        //                 console.log('end');
-
-        //                 if (end) {
-        //                     unByKey(movement);
-        //                     callback();
-        //                 }
-        //                 else {
-        //                     self.routable = true;
-        //                     self.moving = false;
-        //                 }
-        //             }
-
-        //             function animatePlayer(event) {
-        //                 // Get the current time
-        //                 const time = event.frameState.time;
-        //                 const context = getVectorContext(event);
-        //                 // Calculate the elapsed time in seconds
-        //                 const elapsed = (time - lastTime) / 1000;
-        //                 // Calculate the distance traveled depending on the elapsed time and the speed
-        //                 distance = distance + (elapsed * speed);
-        //                 // Set the previous time as the current one
-        //                 lastTime = time;
-
-        //                 // If the travelled distance is below the length of the route, continue the animation
-        //                 if (distance < length) {
-        //                     // Calculate the position of the point along the route line
-        //                     let newPosition = line.getCoordinateAt(distance / length);
-
-        //                     self.pitfallsHandling(newPosition);
-        //                     self.bonusHandling(newPosition);
-
-        //                     let win = false;
-        //                     if (within(newPosition, self.options.target, self.params.game.tolerance.target)) { win = true; }
-
-        //                     if (path === undefined) { path = new LineString([ vertexes[0], newPosition ]); }
-        //                     else { path.appendCoordinate(newPosition); }
-
-        //                     context.setStyle(self.layers.getStyle(['path']));
-        //                     context.drawGeometry(path);
-
-        //                     position.setCoordinates(newPosition);
-        //                     context.setStyle(self.layers.getStyle(['player']));
-        //                     context.drawGeometry(position);
-
-        //                     // Render the map to trigger the listener
-        //                     self.map.render();
-
-        //                     if (win) { stopAnimation(context, true); }
-        //                 }
-        //                 // Here, the journey is over
-        //                 else { stopAnimation(context, false); }
-        //             }
-
-        //             this.layers.setGeometry('player', null);
-        //             this.layers.setGeometry('path', null);
-        //             this.layers.getLayer('path').on('postrender', animatePlayer);
-        //         });
-        //     }
         });
     }
 

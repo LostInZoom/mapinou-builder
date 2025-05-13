@@ -5,7 +5,7 @@ import { Fill, Style } from "ol/style";
 import { getVectorContext } from "ol/render";
 import { LineString } from "ol/geom";
 
-import { StaticSprite } from "../cartography/sprite.js";
+import { Sprite } from "../cartography/sprite.js";
 import { getColorsByClassNames, generateRandomInteger } from "../utils/parse.js";
 import Character from "./character.js";
 import { buffer } from "../cartography/analysis.js";
@@ -16,11 +16,9 @@ class Helpers {
         this.helpers = [];
         if (this.options.coordinates) {
             this.options.coordinates.forEach((coords) => {
-                this.helpers.push(new Helper({
-                    basemap: this.options.basemap,
-                    coordinates: coords,
-                    zindex: this.options.zindex
-                }));
+                let o = this.options;
+                o['coordinates'] = coords;
+                this.helpers.push(new Helper(o));
             });
         }
     }
@@ -33,46 +31,53 @@ class Helpers {
         this.helpers.forEach((helper) => { helper.hide(); })
     }
 
-    getHelpers() {
-        return this.helpers;
+    getActiveHelpers() {
+        let a = [];
+        this.helpers.forEach((helper) => {
+            if (helper.isActive()) { a.push(helper); }
+        });
+        return a;
     }
 }
 
 class Helper extends Character {
     constructor(options) {
         super(options);
-        this.sprite = new StaticSprite({
+        this.sprite = new Sprite({
+            type: 'static',
             layer: this.layer,
             src: './assets/sprites/vegetables.png',
-            width: 32,
-            height: 32,
-            scale: 2,
-            framerate: 100,
-            offset: [ generateRandomInteger(0, 9) * 32, 0 ],
+            width: 64,
+            height: 64,
+            scale: 1,
+            framerate: 50,
+            // The image is a random sprite inside the provided vegetables
+            offset: [ generateRandomInteger(0, 9) * 64, 0 ],
             coordinates: this.coordinates,
+            maxScale: 1,
+            minScale: 0.6,
+            increment: 0.05,
         });
+    }
 
-        let sizeArea = this.basemap.params.game.tolerance.bonus;
-        this.area = new VectorLayer({
-            source: new VectorSource({
-                features: [
-                    new Feature({ geometry: buffer(this.coordinates, sizeArea) })
-                ],
-            }),
-            style: new Style({
-                fill: new Fill({
-                    color: getColorsByClassNames('bonus-transparent')['bonus-transparent']
-                })
-            }),
-            zIndex: this.zindex - 1,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-            minZoom: 13,
-            opacity: 0,
+    consume() {
+        this.deactivate();
+        console.log('burst')
+
+        this.sprite.makeDynamic({
+            src: './assets/sprites/burst.png',
+            loop: false,
+            width: 64,
+            height: 64,
+            framerate: 100,
+            scale: 0.5,
+            state: 'burst',
+            states: {
+                burst: {
+                    south: { line: 0, length: 7 },
+                }
+            }
         });
-
-        this.basemap.map.addLayer(this.area);
-        this.basemap.layers.push(this.area);
     }
 }
 

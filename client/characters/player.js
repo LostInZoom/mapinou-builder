@@ -1,21 +1,22 @@
 import { LineString } from "ol/geom.js";
 
 import Character from "./character.js";
-import { DynamicSprite } from "../cartography/sprite.js";
+import { Sprite } from "../cartography/sprite.js";
 import { angle, project } from "../cartography/analysis.js";
 import { getVectorContext } from "ol/render.js";
 
 class Player extends Character {
     constructor(options) {
         super(options);
-        this.sprite = new DynamicSprite({
+        this.sprite = new Sprite({
+            type: 'dynamic',
             layer: this.layer,
             src: './assets/sprites/rabbit-white.png',
-            width: 35,
-            height: 35,
-            scale: 1,
+            width: 64,
+            height: 64,
+            scale: .8,
             anchor: [0.5, 0.8],
-            framerate: 200,
+            framerate: 150,
             coordinates: this.coordinates,
             states: {
                 idle: {
@@ -69,7 +70,7 @@ class Player extends Character {
             const speed = this.params.game.speed.travel / 3.6;
             const position = this.sprite.getGeometryClone();
 
-            this.sprite.setGeometry(null);
+            this.sprite.hide();
             this.layer.on('postrender', animatePlayer);
 
             let self = this;
@@ -91,6 +92,13 @@ class Player extends Character {
 
                     let a = angle(position.getCoordinates(), coords);
                     self.sprite.setDirection(a);
+                    self.sprite.setCoordinates(coords);
+
+                    let close = self.getWithin(self.basemap.helpers.getActiveHelpers(), self.params.game.tolerance.bonus);
+
+                    close.forEach((helper) => {
+                        helper.consume();
+                    });
 
                     // self.pitfallsHandling(coords);
                     // self.bonusHandling(coords);
@@ -123,24 +131,17 @@ class Player extends Character {
             }
 
             function stopAnimation(context, end) {
-                // Redraw on context to avoid flickering
-                // context.setStyle(self.layers.getStyle(['path']));
-                // context.drawGeometry(path);
-
                 context.setStyle(self.sprite.style);
                 context.drawGeometry(position);
-
-                // self.layers.setGeometry('player', position);
-                self.sprite.setGeometry(position);
+                self.sprite.setCoordinates(destination);
+                self.sprite.display();
                 self.sprite.setState('idle');
-                // self.layers.setGeometry('path', path);
 
                 // Removing the render listener
                 self.layer.un('postrender', animatePlayer);
 
-                let increment = self.params.game.score.increments.default;
-                let interval = self.params.game.score.intervals.default; 
-                self.basemap.score.change(increment, interval);
+                let score = self.params.game.score;
+                self.basemap.score.change(score.increments.default, score.intervals.default);
                 self.travelled += distance;
                 console.log('end');
 

@@ -6,7 +6,7 @@ import { getVectorContext } from "ol/render";
 import { LineString } from "ol/geom";
 
 import Character from "./character.js";
-import { DynamicSprite } from "../cartography/sprite.js";
+import { Sprite } from "../cartography/sprite.js";
 import { getColorsByClassNames } from "../utils/parse.js";
 import { angle, buffer, randomPointInCircle } from "../cartography/analysis.js";
 
@@ -16,11 +16,9 @@ class Enemies {
         this.enemies = [];
         if (this.options.coordinates) {
             this.options.coordinates.forEach((coords) => {
-                this.enemies.push(new Enemy({
-                    basemap: this.options.basemap,
-                    coordinates: coords,
-                    zindex: this.options.zindex,
-                }));
+                let o = this.options;
+                o['coordinates'] = coords;
+                this.enemies.push(new Enemy(o));
             });
         }
     }
@@ -45,14 +43,15 @@ class Enemies {
 class Enemy extends Character {
     constructor(options) {
         super(options);
-        this.sprite = new DynamicSprite({
+        this.sprite = new Sprite({
+            type: 'dynamic',
             layer: this.layer,
             src: './assets/sprites/snake.png',
-            width: 32,
-            height: 32,
-            scale: 1,
+            width: 64,
+            height: 64,
+            scale: .8,
             anchor: [0.5, 0.7],
-            framerate: 200,
+            framerate: 300,
             coordinates: this.coordinates,
             states: {
                 idle: {
@@ -76,7 +75,7 @@ class Enemy extends Character {
                     color: getColorsByClassNames('pitfalls-transparent')['pitfalls-transparent']
                 })
             }),
-            zIndex: this.zindex - 1,
+            zIndex: this.zIndex - 1,
             updateWhileAnimating: true,
             updateWhileInteracting: true,
             minZoom: 13,

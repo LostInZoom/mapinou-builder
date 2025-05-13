@@ -6,19 +6,20 @@ import { getVectorContext } from "ol/render";
 import { LineString } from "ol/geom";
 
 import Character from "./character.js";
-import { DynamicSprite } from "../cartography/sprite.js";
+import { Sprite } from "../cartography/sprite.js";
 import { getColorsByClassNames } from "../utils/parse.js";
 import { angle, buffer, randomPointInCircle } from "../cartography/analysis.js";
 
 class Target extends Character {
     constructor(options) {
         super(options);
-        this.sprite = new DynamicSprite({
+        this.sprite = new Sprite({
+            type: 'dynamic',
             layer: this.layer,
             src: './assets/sprites/rabbit-brown.png',
-            width: 35,
-            height: 35,
-            scale: 1,
+            width: 64,
+            height: 64,
+            scale: .8,
             framerate: 200,
             coordinates: this.coordinates,
             anchor: [0.5, 0.8],
@@ -44,29 +45,7 @@ class Target extends Character {
             }
         });
         
-        let sizeArea = this.basemap.params.game.tolerance.target;
-
-        // this.area = new VectorLayer({
-        //     source: new VectorSource({
-        //         features: [
-        //             new Feature({ geometry: buffer(this.coordinates, sizeArea) })
-        //         ],
-        //     }),
-        //     style: new Style({
-        //         fill: new Fill({
-        //             color: getColorsByClassNames('bonus-transparent')['bonus-transparent']
-        //         })
-        //     }),
-        //     zIndex: this.zindex - 1,
-        //     updateWhileAnimating: true,
-        //     updateWhileInteracting: true,
-        //     opacity: 0,
-        // });
-
-        // this.basemap.map.addLayer(this.area);
-        // this.basemap.layers.push(this.area);
-
-        this.roam(this.coordinates, sizeArea);
+        this.roam(this.coordinates, this.basemap.params.game.tolerance.target);
     }
 
     display() {
@@ -88,11 +67,10 @@ class Target extends Character {
         const length = line.getLength();
         const speed = this.params.game.speed.roaming;
         const position = this.sprite.getGeometryClone();
-        this.sprite.setGeometry(null);
+        this.sprite.hide();
 
         let lastTime = Date.now();
         let distance = 0;
-        let newPosition = position.getCoordinates();
 
         this.layer.on('postrender', animate);
 
@@ -109,8 +87,10 @@ class Target extends Character {
 
             // If the travelled distance is below the length of the route, continue the animation
             if (distance < length) {
-                newPosition = line.getCoordinateAt(distance / length);
-                position.setCoordinates(newPosition);
+                let coords = line.getCoordinateAt(distance / length);
+                self.sprite.setCoordinates(coords);
+
+                position.setCoordinates(coords);
                 context.drawGeometry(position);
                 self.basemap.map.render();
             }
@@ -119,7 +99,8 @@ class Target extends Character {
                 position.setCoordinates(destination);
                 context.drawGeometry(position);
 
-                self.sprite.setGeometry(position);
+                self.sprite.setCoordinates(destination);
+                self.sprite.display();
                 
                 self.sprite.setState('graze');
 
