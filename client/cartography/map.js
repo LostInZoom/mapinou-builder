@@ -21,6 +21,7 @@ import { Enemies } from '../characters/enemies.js';
 import Player from '../characters/player.js';
 import Target from '../characters/target.js';
 import { Helpers } from '../characters/helpers.js';
+import { Music } from '../utils/audio.js';
 
 class Basemap {
     constructor(page) {
@@ -359,6 +360,12 @@ class GameMap extends Basemap {
 
     phase2(callback) {
         this.phase = 2;
+        // this.music = new Music({
+        //     src: './assets/sounds/theme',
+        //     format: 'mp3',
+        // });
+        // this.music.play(true);
+
         this.player.display();
         this.target.display();
         this.enemies.display();

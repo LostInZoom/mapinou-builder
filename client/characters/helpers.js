@@ -9,6 +9,7 @@ import { Sprite } from "../cartography/sprite.js";
 import { getColorsByClassNames, generateRandomInteger } from "../utils/parse.js";
 import Character from "./character.js";
 import { buffer } from "../cartography/analysis.js";
+import { SoundEffect } from "../utils/audio.js";
 
 class Helpers {
     constructor(options) {
@@ -62,19 +63,24 @@ class Helper extends Character {
 
     consume() {
         this.deactivate();
-        console.log('burst')
+        let sound = new SoundEffect({
+            src: './assets/sounds/crounch',
+            format: 'mp3',
+            amount: 3,
+        });
+        sound.play(false);
 
         this.sprite.makeDynamic({
             src: './assets/sprites/burst.png',
             loop: false,
             width: 64,
             height: 64,
-            framerate: 100,
-            scale: 0.5,
+            framerate: 80,
+            scale: 0.8,
             state: 'burst',
             states: {
                 burst: {
-                    south: { line: 0, length: 7 },
+                    south: { line: 0, length: 6 },
                 }
             }
         });
