@@ -1,0 +1,59 @@
+@use '../colors';
+
+.title {
+    position: absolute;
+    top: 20%;
+    width: 200%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: colors.$main-color-light;
+
+    font-family: 'Vincendo';
+    font-size: 14vw;
+    text-transform: uppercase;
+    color: colors.$main-color-dark;
+
+    transform: perspective(10rem) rotateX(30deg) rotateZ(-5deg) scaleX(0.8);
+}
+
+.title-letter {
+    transition: transform .3s ease-in;
+}
+
+.button-title-container {
+    position: absolute;
+    bottom: 20%;
+    right: -5rem;
+}
+
+.button-title {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    transform: perspective(10rem) rotateX(30deg) rotateZ(5deg) scale(0.8);
+}
+
+.button-title-label {
+    padding: .5rem 5rem .5rem 1rem;
+    border-radius: .4rem;
+
+    font-family: 'Vincendo';
+    font-size: 10vw;
+    text-transform: uppercase;
+    color: colors.$main-color-dark;
+    background-color: colors.$main-color-light;
+
+    transform: translateX(100%);
+
+    &.slide {
+        animation: title-button-animation .3s linear;
+        transform: translateX(0%);
+    }
+}
+
+@media screen and (min-width: 500px) {
+    .title { font-size: 4rem; }
+    .button-title-label { font-size: 3rem; }
+}

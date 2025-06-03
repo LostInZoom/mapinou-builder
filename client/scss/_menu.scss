@@ -12,12 +12,34 @@
 
 .title {
     font-family: 'Vincendo';
-    font-size: 15vw;
+    font-size: 12vw;
     text-transform: uppercase;
 
     user-select: none;
     transition: color .2s ease-in-out;
 }
+
+@media screen and (min-width: 600px) {
+    .title {
+        font-size: 5rem;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .level-selection {
     display: flex;

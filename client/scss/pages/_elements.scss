@@ -1,0 +1,31 @@
+.page-element {
+    width: 100%;
+    overflow: hidden;
+
+    display: flex;
+}
+
+.banner {
+    justify-content: space-between;
+    align-items: center;
+
+    &.line { flex-direction: row; }
+    &.column { flex-direction: column; }
+
+    &.center { justify-content: center; }
+    &.left { justify-content: start; }
+    &.right { justify-content: end; }
+}
+
+.content {
+    flex: 1;
+
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 1rem;
+
+    &.center { align-items: center; }
+    &.left { align-items: end; }
+    &.right { align-items: start; }
+}

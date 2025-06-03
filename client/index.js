@@ -1,4 +1,4 @@
-import Application from "./interface/application.js";
+import Application from "./game/application.js";
 import { ajaxGet } from "./utils/ajax.js";
 
 window.addEventListener("DOMContentLoaded", () => {

@@ -1,0 +1,10 @@
+@use '../colors';
+
+.button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: colors.$main-color-light;
+
+    cursor: pointer;
+}

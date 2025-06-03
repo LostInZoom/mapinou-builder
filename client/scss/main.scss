@@ -1,7 +1,13 @@
-@use 'menu';
-@use 'cartography';
+@use 'fonts';
+@use 'colors';
+@use 'animations';
+
+@use 'interface';
 
 body {
+    font-family: 'Cabin';
+    user-select: none;
+
     overflow: hidden;
     -webkit-touch-callout:none;
     -webkit-user-select:none;
