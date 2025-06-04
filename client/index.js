@@ -1,5 +1,6 @@
 import Application from "./game/application.js";
 import { ajaxGet } from "./utils/ajax.js";
+import { wait } from "./utils/dom.js";
 
 window.addEventListener("DOMContentLoaded", () => {
     async function activatePersistence() {
@@ -9,6 +10,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     activatePersistence();
 
+    
     ajaxGet('configuration/', (params) => {
         new Application(params);
     });

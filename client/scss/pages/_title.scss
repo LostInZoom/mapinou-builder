@@ -1,31 +1,118 @@
 @use '../colors';
 
-.title {
+.map-title {
     position: absolute;
-    top: 20%;
-    width: 200%;
+    top: 0;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-color: colors.$main-color-light;
 
+    &.active {
+        pointer-events: all;
+    }
+}
+
+.title-decoration {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.title-corner {
+    position: absolute;
+
+    width: 0;
+    aspect-ratio: 1/1;
+    background-color: colors.$main-color-dark;
+    &.north {
+        top: 1rem;
+        &.east { border-bottom-left-radius: 100%; }
+        &.west { border-bottom-right-radius: 100%; }
+    }
+    &.south {
+        bottom: 1rem;
+        &.east { border-top-left-radius: 100%; }
+        &.west { border-top-right-radius: 100%; }
+    }
+    &.east { right: 1rem; }
+    &.west { left: 1rem; }
+
+    transition: width .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    &.slide { width: 2rem; }
+}
+
+.title-border {
+    position: absolute;
+    z-index: 200;
+
+    background-color: colors.$main-color-dark;
+
+    &.parallel {
+        width: 100%;
+        height: 0;
+        left: 0;
+        transition: height .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        &.north { top: 0; }
+        &.south { bottom: 0; }
+        &.slide { height: 1rem; }
+    }
+
+    &.meridian {
+        height: 100%;
+        width: 0;
+        top: 0;
+        transition: width .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        &.east { right: 0; }
+        &.west { left: 0; }
+        &.slide { width: 1rem; }
+    }
+}
+
+.title-name {
+    position: absolute;
+    z-index: 150;
+
+    top: 20%;
+    width: 0%;
+    background-color: colors.$main-color-dark;
+
+    transition: width .5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: perspective(10rem) rotateX(30deg) rotateZ(-5deg) scaleX(0.8);
+
+    &.slide {
+        width: 200%;
+    }
+}
+
+.title-letters {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: colors.$main-color-light;
 
     font-family: 'Vincendo';
     font-size: 14vw;
     text-transform: uppercase;
-    color: colors.$main-color-dark;
+    color: colors.$main-color-light;
 
-    transform: perspective(10rem) rotateX(30deg) rotateZ(-5deg) scaleX(0.8);
+    transform-origin: center right;
+    &.bounce {
+        animation: title-bounce .4s linear;
+    }
 }
 
 .title-letter {
-    transition: transform .3s ease-in;
+    transition: transform .3s cubic-bezier(0.64, 0, 0.78, 0);
 }
 
 .button-title-container {
     position: absolute;
+    z-index: 150;
     bottom: 20%;
-    right: -5rem;
+    right: -6rem;
 }
 
 .button-title {
@@ -36,20 +123,45 @@
 }
 
 .button-title-label {
-    padding: .5rem 5rem .5rem 1rem;
+    padding: .5rem 7rem .5rem 1rem;
     border-radius: .4rem;
 
     font-family: 'Vincendo';
     font-size: 10vw;
     text-transform: uppercase;
-    color: colors.$main-color-dark;
-    background-color: colors.$main-color-light;
+    color: colors.$main-color-light;
+    background-color: colors.$main-color-dark;
 
+    transform-origin: center left;
     transform: translateX(100%);
 
     &.slide {
-        animation: title-button-animation .3s linear;
+        animation: title-button-animation .3s cubic-bezier(0.34, 1.56, 0.64, 1);
         transform: translateX(0%);
+    }
+}
+
+.title-credits {
+    position: absolute;
+    z-index: 150;
+    bottom: 2rem;
+
+    left: 50%;
+    transform: translate(-50%, 300%);
+
+    font-family: 'Vincendo';
+    font-size: .9rem;
+    padding: .2rem .4rem;
+
+    color: colors.$main-color-light;
+    background-color: colors.$main-color-dark;
+
+    border-radius: .4rem;
+
+    transform-origin: top center;
+    &.slide {
+        animation: title-credits-animation .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform: translate(-50%, 0%);
     }
 }
 
