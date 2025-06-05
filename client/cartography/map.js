@@ -24,16 +24,15 @@ import { Helpers } from '../characters/helpers.js';
 import { Music } from '../utils/audio.js';
 
 class Basemap {
-    constructor(options, loaded) {
+    constructor(options, callback) {
+        callback = callback || function () {};
         this.options = options || {};
-        loaded = loaded || function () {};
-
-        let page = this.options.page;
-        this.params = page.app.params;
+        this.layers = [];
+        this.page = this.options.page;
 
         this.container = makeDiv(null, 'map');
         if (options.class) { addClass(this.container, options.class); }
-        page.container.append(this.container);
+        this.page.container.append(this.container);
 
         this.mask = makeDiv(null, 'mask mask-map');
         this.loader = makeDiv(null, 'loader');
@@ -88,9 +87,7 @@ class Basemap {
 
         this.map.once('loadend', () => {
             this.loaded();
-            wait(200, () => {
-                loaded();
-            });
+            wait(200, () => { callback(); });
         });
     }
 
@@ -109,13 +106,23 @@ class Basemap {
     loaded() {
         addClass(this.mask, 'loaded');
     }
+}
 
-    initialize(callback) {
-        
-
-        
+class TitleMap extends Basemap {
+    constructor(options, callback) {
+        super(options, callback);
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 class Basemap1 {
     constructor(page) {
@@ -586,4 +593,4 @@ class GameMap extends Basemap {
     }
 }
 
-export { Basemap, GameMap, MenuMap };
+export { Basemap, TitleMap, GameMap, MenuMap };

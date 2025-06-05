@@ -6,7 +6,8 @@ import { getVectorContext } from "ol/render";
 import { LineString } from "ol/geom";
 
 import { Sprite } from "../cartography/sprite.js";
-import { getColorsByClassNames, generateRandomInteger } from "../utils/parse.js";
+import { getColorsByClassNames } from "../utils/parse.js";
+import { generateRandomInteger } from "../utils/math.js";
 import Character from "./character.js";
 import { buffer } from "../cartography/analysis.js";
 import { SoundEffect } from "../utils/audio.js";

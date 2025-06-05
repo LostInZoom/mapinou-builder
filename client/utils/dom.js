@@ -140,16 +140,8 @@ function wait(duration, callback) {
     setTimeout(callback, duration);
 };
 
-function remToPx(rem) {
-    return rem * parseInt(window.getComputedStyle(document.body.parentNode).getPropertyValue('font-size'));
-}
-
-function pxToRem(px) {
-    return px / parseInt(window.getComputedStyle(document.body.parentNode).getPropertyValue('font-size'))
-}
-
 export {
     makeDiv, hasClass, addClass, removeClass, addClassList, removeClassList,
     activate, deactivate,
-    clearElement, addSVG, getCSSColors, remove, wait, remToPx, pxToRem
+    clearElement, addSVG, getCSSColors, remove, wait
 }

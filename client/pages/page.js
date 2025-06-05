@@ -2,14 +2,17 @@ import { Content, Footer, Header } from "../interface/elements.js";
 import { addClass, clearElement, makeDiv, removeClass } from "../utils/dom.js";
 
 class Page {
-    constructor(app, position) {
-        this.app = app;
+    constructor(options) {
+        this.options = options || {};
+
+        this.app = this.options.app;
+        this.position = this.options.position;
 
         // Create DOM Element
-        this.container = makeDiv(null, 'page ' + position);
+        this.container = makeDiv(null, 'page ' + this.position);
 
         // Add the element to the start or the end depending on the position
-        if (position === 'previous' && this.app.container.children.length > 0) {
+        if (this.position === 'previous' && this.app.container.children.length > 0) {
             this.app.container.insertBefore(this.container, this.app.container.firstChild);
         }
         else { this.app.container.append(this.container); }

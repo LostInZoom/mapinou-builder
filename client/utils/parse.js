@@ -18,15 +18,12 @@ function getColorsByClassNames(...className) {
     return colors;
 }
 
-/**
- * Generate a random integer in a given range.
- * @param  {int} min - Min int.
- * @param  {int} max - Max int.
- * @return {int} - Random int.
- */
-function generateRandomInteger(min, max) {
-    if (min == max) { return min; }
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function remToPx(rem) {
+    return rem * parseInt(window.getComputedStyle(document.body.parentNode).getPropertyValue('font-size'));
 }
 
-export { getColorsByClassNames, generateRandomInteger }
+function pxToRem(px) {
+    return px / parseInt(window.getComputedStyle(document.body.parentNode).getPropertyValue('font-size'))
+}
+
+export { getColorsByClassNames, remToPx, pxToRem };

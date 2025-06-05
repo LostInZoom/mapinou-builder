@@ -1,4 +1,4 @@
-import { generateRandomInteger } from "./parse";
+import { generateRandomInteger } from "./math.js";
 
 class Sound {
     constructor(options) {

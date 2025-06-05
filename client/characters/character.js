@@ -14,9 +14,8 @@ class Character {
         this.minZoom = this.options.minZoom || null;
         this.maxZoom = this.options.maxZoom || null;
 
-        this.basemap = options.basemap;
-        this.coordinates = options.coordinates;
-        this.params = this.basemap.params;
+        this.basemap = this.options.basemap;
+        this.coordinates = this.options.coordinates;
         
         this.layer = new VectorLayer({
             source: new VectorSource(),
@@ -34,6 +33,10 @@ class Character {
         this.moving = false;
         this.active = true;
         this.travelled = 0;
+    }
+
+    spawn() {
+        
     }
 
     display() {

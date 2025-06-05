@@ -14,11 +14,22 @@ class Application {
         this.sliding = false;
         
         // Storage fot the previous page
-        this.previous = new Page(this, 'previous');
+        this.previous = new Page({
+            app: this,
+            position: 'previous'
+        });
+
         // Create the current page
-        this.current = new Title(this, 'current');
+        this.current = new Title({
+            app: this,
+            position: 'current'
+        });
+
         // Create the next page
-        this.next = new Page(this, 'next');
+        this.next = new Page({
+            app: this,
+            position: 'next'
+        });
 
         this.done = 0;
         this.tutodone = true;
