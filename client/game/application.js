@@ -12,66 +12,26 @@ class Application {
 
         // Boolean to flag if the page is sliding
         this.sliding = false;
-        
-        // Storage fot the previous page
-        this.previous = new Page({
-            app: this,
-            position: 'previous'
-        });
 
         // Create the current page
         this.current = new Title({
             app: this,
             position: 'current'
         });
-
-        // Create the next page
-        this.next = new Page({
-            app: this,
-            position: 'next'
-        });
-
-        this.done = 0;
-        this.tutodone = true;
-
-        // this.phase2(this.current);
-        // this.title(this.current);
     }
 
-    slideNext(callback) {
+    slide(position, page, callback) {
         if (!this.sliding) {
             this.sliding = true;
-
-            this.next.setCurrent();
-            this.current.setPrevious();
-
-            this.previous = this.current;
-            this.current = this.next;
-
-            wait(this.params.interface.transition.page, () => {
-                this.previous.clear();
-                this.container.firstChild.remove();
+            this.current.setPosition(position);
+            page.setPosition('current');
+            wait(this.options.interface.transition.page, () => {
+                this.current.destroy();
+                this.current = page;
                 this.sliding = false;
                 callback();
             })
         }
-    }
-
-    slidePrevious(callback) {
-        this.sliding = true;
-
-        this.previous.setCurrent();
-        this.current.setNext();
-        
-        this.next = this.current;
-        this.current = this.previous;
-
-        wait(this.params.interface.transition.page, () => {
-            this.next.clear();
-            this.container.lastChild.remove();
-            this.sliding = false;
-            callback();
-        })
     }
 }
 

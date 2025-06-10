@@ -1,8 +1,9 @@
 import { Basemap } from "../cartography/map";
 import { Roamer } from "../characters/rabbit";
-import { addClass, makeDiv, wait } from "../utils/dom";
+import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
 import { remap, easeOutCubic } from "../utils/math";
 import { pxToRem } from "../utils/parse";
+import Consent from "./consent";
 import Page from "./page";
 
 class Title extends Page {
@@ -44,7 +45,11 @@ class Title extends Page {
             // Loop through the name to get individual letters
             for (let i = (this.name.length - 1), j = 0; i >= 0; i--, j++) {
                 // Create the letter element translated by the width of the page * 1.1
-                let character = makeDiv(null, 'title-letter', this.name.charAt(j));
+                let value = this.name.charAt(j);
+
+                let character = makeDiv(null, 'title-letter', value);
+                if (value.trim().length === 0) { addClass(character, 'empty'); };
+
                 character.style.transform = `translateX(-${width*1.1}rem)`;
                 this.letters.append(character);
 
@@ -90,16 +95,47 @@ class Title extends Page {
             // Add every element to the page
             this.container.append(this.title, this.buttoncontainer, this.buildinfos);
 
+            let listen = true;
             this.basemap.map.on('click', (e) => {
-                let coords = this.basemap.map.getEventCoordinate(event);
-                
-                let rabbit = new Roamer({
-                    basemap: this.basemap,
-                    coordinates: coords,
-                    color: 'random',
-                });
+                if (listen) {
+                    listen = false;
+                    let coords = this.basemap.map.getEventCoordinate(event);
+                    let rabbit = new Roamer({
+                        basemap: this.basemap,
+                        coordinates: coords,
+                        color: 'random',
+                    });
+    
+                    rabbit.spawn(() => {
+                        rabbit.roam();
+                        listen = true;
+                    });
+                }
+            });
 
-                rabbit.display();
+            this.titlelisten = true;
+            this.title.addEventListener('click', () => {
+                if (this.titlelisten) {
+                    this.titlelisten = false;
+                    addClass(this.title, 'animate');
+                    wait(800, () => {
+                        removeClass(this.title, 'animate');
+                        wait(500, () => {
+                            this.titlelisten = true;
+                        });
+                    });
+                }
+            });
+
+            this.startlabel.addEventListener('click', () => {
+                let next = new Consent({
+                    app: this.app,
+                    position: 'previous'
+                })
+
+                this.app.slide('next', next, () => {
+                    console.log('fdp')
+                });
             });
         });
     }

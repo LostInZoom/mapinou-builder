@@ -26,8 +26,20 @@ function easeOutCubic(x) {
     return 1 - Math.pow(1 - x, 3);
 }
 
+function easeOutSine(x) {
+    return Math.sin((x * Math.PI) / 2);
+}
+
+function easeInCubic(x) {
+    return x * x * x;
+}
+
+function easeInSine(x) {
+    return 1 - Math.cos((x * Math.PI) / 2);
+}
+
 function remap(value, xmin, xmax, dmin=0, dmax=1) {
     return dmin + ((value - xmin) / (xmax - xmin)) * (dmax - dmin);
 }
 
-export { generateRandomInteger, weightedRandom, easeOutCubic, remap };
+export { generateRandomInteger, weightedRandom, easeOutSine, easeInSine, easeOutCubic, easeInCubic, remap };

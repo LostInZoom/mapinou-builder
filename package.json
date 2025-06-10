@@ -13,7 +13,7 @@
     "build-watch": "parcel watch ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
     "start-watch": "npm run copy-assets && nodemon ./server/index.js",
     "dev": "concurrently --kill-others \"npm run start-watch\" \"npm run build-watch\"",
-    "build": "parcel build ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
+    "build": "parcel build ./client/index.html --public-url /cartogame --dist-dir dist/cartogame && cp -r ./client/assets ./dist/cartogame",
     "start": "npm run build-img && npm run build && node server/index.js",
     "deploy": "node server/index.js"
   },

@@ -43,19 +43,21 @@ class Rabbit extends Character {
         }
 
         this.statespool = [ 'move', 'graze', 'idle' ];
-        this.weights = [ 1, 2, 3 ];
+        this.weights = [ 1, 2, 5 ];
 
         this.sprite = new Sprite({
             type: 'dynamic',
             layer: this.layer,
             src: `./assets/sprites/rabbit-${this.color}.png`,
-            width: 64,
-            height: 64,
-            scale: .8,
+            width: 52,
+            height: 52,
+            scale: 1,
             framerate: 200,
             coordinates: this.coordinates,
             anchor: [0.5, 0.8],
-            states: this.states
+            states: this.states,
+        }, () => {
+            this.sprite.animate();
         });
     }
 
@@ -124,7 +126,6 @@ class Roamer extends Rabbit {
     constructor(options) {
         super(options);
         this.setRandomDirection();
-        this.roam();
     }
 
     setRandomDirection() {
@@ -134,15 +135,13 @@ class Roamer extends Rabbit {
     }
 
     roam() {
-        if (generateRandomInteger(0, 4) === 4) {
-            this.setRandomDirection();
-        }
+        if (generateRandomInteger(0, 4) === 4) { this.setRandomDirection(); }
 
         let choice = weightedRandom(this.statespool, this.weights.slice());
         if (choice === 'move') {
             let e = this.basemap.container;
-            let x = generateRandomInteger(0, e.offsetWidth);
-            let y = generateRandomInteger(0, e.offsetHeight);
+            let x = generateRandomInteger(0, e.offsetWidth - this.sprite.width);
+            let y = generateRandomInteger(0, e.offsetHeight - this.sprite.height);
             let destination = this.basemap.map.getCoordinateFromPixel([x, y]);
 
             this.move(destination, () => {

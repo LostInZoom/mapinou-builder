@@ -19,15 +19,21 @@
 
     top: 20%;
     width: 0%;
-    background-color: colors.$main-color-dark;
+    background-color: colors.$secondary-color-dark;
+    border-top: .4rem solid colors.$main-color-light;
+    border-bottom: .4rem solid colors.$main-color-light;
 
     padding: 1rem 0;
 
-    transition: width .5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all .5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     transform: perspective(10rem) rotateX(30deg) rotateZ(-5deg) scaleX(0.8);
 
     &.slide {
         width: 200%;
+    }
+
+    &.animate {
+        transform: unset;
     }
 }
 
@@ -36,8 +42,8 @@
     justify-content: center;
     align-items: center;
 
-    font-family: 'Pearsoda';
-    font-size: 18vw;
+    font-family: 'Vincendo';
+    font-size: 14vw;
     text-transform: uppercase;
     color: colors.$main-color-light;
 
@@ -55,6 +61,9 @@
 
 .title-letter {
     transition: transform .3s cubic-bezier(0.64, 0, 0.78, 0);
+    &.empty {
+        width: 1rem;
+    }
 }
 
 .button-title-container {
@@ -62,25 +71,28 @@
     z-index: 150;
     bottom: 20%;
     right: -6rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .button-title {
     display: flex;
     justify-content: end;
     align-items: center;
-    transform: perspective(10rem) rotateX(30deg) rotateZ(5deg) scale(0.8);
+    // transform: perspective(10rem) rotateX(30deg) rotateZ(5deg) scale(0.8);
 }
 
 .button-title-label {
     padding: .5rem 6.5rem .5rem 1rem;
     border-radius: .4rem;
 
-    // font-family: 'Vincendo';
-    font-family: 'Pearsoda';
-    font-size: 12vw;
+    font-family: 'Vincendo';
+    font-size: 7vw;
     text-transform: uppercase;
     color: colors.$main-color-light;
-    background-color: colors.$main-color-dark;
+    background-color: colors.$secondary-color-dark;
 
     transform-origin: center left;
     transform: translateX(100%);
@@ -99,13 +111,12 @@
     left: 50%;
     transform: translate(-50%, 200%);
 
-    // font-family: 'Vincendo';
-    font-family: 'Pearsoda';
-    font-size: 1.2rem;
+    font-family: 'Vincendo';
+    font-size: .9rem;
     padding: .2rem .4rem;
 
     color: colors.$main-color-light;
-    background-color: colors.$main-color-dark;
+    background-color: colors.$secondary-color-dark;
 
     border-radius: .4rem;
 
@@ -118,7 +129,7 @@
 
 @media screen and (min-width: 500px) {
     .title-letters { font-size: 4rem; }
-    .button-title-label { font-size: 3rem; }
+    .button-title-label { font-size: 2rem; }
 }
 
 @media screen and (min-width: 800px) {

@@ -10,12 +10,10 @@ class Page {
 
         // Create DOM Element
         this.container = makeDiv(null, 'page ' + this.position);
+        this.app.container.append(this.container);
 
-        // Add the element to the start or the end depending on the position
-        if (this.position === 'previous' && this.app.container.children.length > 0) {
-            this.app.container.insertBefore(this.container, this.app.container.firstChild);
-        }
-        else { this.app.container.append(this.container); }
+        this.width = this.container.offsetWidth;
+        this.height = this.container.offsetHeight;
     }
 
     addHeader(justification='center') {
@@ -33,22 +31,21 @@ class Page {
         this.footer.setJustification(justification);
     }
 
-    setPrevious() {
-        removeClass(this.container, 'next');
-        removeClass(this.container, 'current');
-        addClass(this.container, 'previous');
+    setPosition(position) {
+        ['previous', 'current', 'next'].forEach((p) => { removeClass(this.container, p); })
+        addClass(this.container, position);
     }
 
-    setCurrent() {
-        removeClass(this.container, 'previous');
-        removeClass(this.container, 'next');
-        addClass(this.container, 'current');
+    slidePrevious() {
+        this.app.slidePrevious(() => {
+            this.app.previous = new Page(this, 'previous');
+        });
     }
 
-    setNext() {
-        removeClass(this.container, 'previous');
-        removeClass(this.container, 'current');
-        addClass(this.container, 'next');
+    slideNext() {
+        this.app.slideNext(() => {
+            this.app.next = new Page(this, 'next');
+        });
     }
 
     clear() {

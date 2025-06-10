@@ -36,8 +36,10 @@ class Character {
         this.travelled = 0;
     }
 
-    spawn() {
-        
+    spawn(callback) {
+        if (this.sprite) {
+            this.sprite.spawn(callback);
+        }
     }
 
     animate(state, callback) {
