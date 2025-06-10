@@ -4,14 +4,13 @@ import Character from "./character.js";
 import { Sprite } from "../cartography/sprite.js";
 import { angle, project } from "../cartography/analysis.js";
 import { getVectorContext } from "ol/render.js";
-import { generateRandomInteger } from "../utils/math.js";
-import { wait } from "../utils/dom.js";
+import { generateRandomInteger, weightedRandom } from "../utils/math.js";
 
 class Rabbit extends Character {
     constructor(options) {
         super(options);
 
-        this.colors = [ 'white', 'black', 'grey', 'brown', 'sand' ]
+        this.colors = [ 'white', 'grey', 'brown', 'sand' ]
         this.color = options.color || 'white';
 
         if (this.color === 'random') {
@@ -21,6 +20,30 @@ class Rabbit extends Character {
 
         this.width = 64;
         this.height = 64;
+
+        this.states = {
+            idle: {
+                north: { line: 9, length: 4 },
+                east: { line: 10, length: 4 },
+                south: { line: 8, length: 4 },
+                west: { line: 11, length: 4 },
+            },
+            move: {
+                north: { line: 1, length: 4 },
+                east: { line: 2, length: 4 },
+                south: { line: 0, length: 4 },
+                west: { line: 3, length: 4 },
+            },
+            graze: {
+                north: { line: 5, length: 4 },
+                east: { line: 6, length: 4 },
+                south: { line: 4, length: 4 },
+                west: { line: 7, length: 4 },
+            }
+        }
+
+        this.statespool = [ 'move', 'graze', 'idle' ];
+        this.weights = [ 1, 2, 3 ];
 
         this.sprite = new Sprite({
             type: 'dynamic',
@@ -32,40 +55,15 @@ class Rabbit extends Character {
             framerate: 200,
             coordinates: this.coordinates,
             anchor: [0.5, 0.8],
-            states: {
-                idle: {
-                    north: { line: 9, length: 4 },
-                    east: { line: 10, length: 4 },
-                    south: { line: 8, length: 4 },
-                    west: { line: 11, length: 4 },
-                },
-                move: {
-                    north: { line: 1, length: 4 },
-                    east: { line: 2, length: 4 },
-                    south: { line: 0, length: 4 },
-                    west: { line: 3, length: 4 },
-                },
-                graze: {
-                    north: { line: 5, length: 4 },
-                    east: { line: 6, length: 4 },
-                    south: { line: 4, length: 4 },
-                    west: { line: 7, length: 4 },
-                }
-            }
+            states: this.states
         });
     }
 
-    idle() {
-        
-    }
-
-    graze() {
-
-    }
-
     move(destination, callback) {
+        callback = callback || function () {};
+
         this.sprite.setState('move');
-        this.sprite.setDirection(angle(this.coordinates, destination));
+        this.sprite.setDirectionFromAngle(angle(this.coordinates, destination));
 
         const line = new LineString([ this.coordinates, destination ]);
         const length = line.getLength();
@@ -111,7 +109,6 @@ class Rabbit extends Character {
         }
     }
     
-
     getNextPoint() {
         let destination;
         if (this.options.roamingRadius) {
@@ -126,22 +123,37 @@ class Rabbit extends Character {
 class Roamer extends Rabbit {
     constructor(options) {
         super(options);
+        this.setRandomDirection();
         this.roam();
     }
 
-    roam() {
-        let e = this.basemap.container;
-        let x = generateRandomInteger(0, e.offsetWidth);
-        let y = generateRandomInteger(0, e.offsetHeight);
-        let destination = this.basemap.map.getCoordinateFromPixel([x, y]);
+    setRandomDirection() {
+        let pool = Object.keys(this.states.idle);
+        let d = pool[pool.length * Math.random() | 0];
+        this.sprite.setDirection(d);
+    }
 
-        this.move(destination, () => {
-            this.sprite.setState('graze');
-            wait(4 * this.sprite.getFramerate(), () => {
+    roam() {
+        if (generateRandomInteger(0, 4) === 4) {
+            this.setRandomDirection();
+        }
+
+        let choice = weightedRandom(this.statespool, this.weights.slice());
+        if (choice === 'move') {
+            let e = this.basemap.container;
+            let x = generateRandomInteger(0, e.offsetWidth);
+            let y = generateRandomInteger(0, e.offsetHeight);
+            let destination = this.basemap.map.getCoordinateFromPixel([x, y]);
+
+            this.move(destination, () => {
                 this.coordinates = destination;
                 this.roam();
             });
-        });
+        } else {
+            this.animate(choice, () => {
+                this.roam();
+            })
+        }
     }
 }
 

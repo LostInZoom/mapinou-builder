@@ -218,7 +218,7 @@
 //                     let newPosition = line.getCoordinateAt(distance / length);
 
 //                     let a = angle(position.getCoordinates(), newPosition);
-//                     self.sprite.setDirection(a);
+//                     self.sprite.setDirectionFromAngle(a);
 
 //                     // self.pitfallsHandling(newPosition);
 //                     // self.bonusHandling(newPosition);
@@ -256,7 +256,7 @@
 
 //                 // self.layers.setGeometry('player', position);
 //                 self.sprite.setGeometry(position);
-//                 self.sprite.setDirection('');
+//                 self.sprite.setDirectionFromAngle('');
 //                 self.sprite.setState('idle');
 //                 // self.layers.setGeometry('path', path);
 
@@ -339,7 +339,7 @@
 
 //         let destination = randomPointInCircle(this.coordinates, radius);
 //         let a = angle(coordinates, destination);
-//         this.sprite.setDirection(a);
+//         this.sprite.setDirectionFromAngle(a);
 
 //         const line = new LineString([ coordinates, destination ]);
 //         const length = line.getLength();
@@ -449,7 +449,7 @@
 
 //         let destination = randomPointInCircle(this.coordinates, radius);
 //         let a = angle(coordinates, destination);
-//         this.sprite.setDirection(a);
+//         this.sprite.setDirectionFromAngle(a);
 
 //         const line = new LineString([ coordinates, destination ]);
 //         const length = line.getLength();

@@ -1,5 +1,5 @@
 import { Basemap } from "../cartography/map";
-import { Roamer } from "../characters/roamer";
+import { Roamer } from "../characters/rabbit";
 import { addClass, makeDiv, wait } from "../utils/dom";
 import { remap, easeOutCubic } from "../utils/math";
 import { pxToRem } from "../utils/parse";

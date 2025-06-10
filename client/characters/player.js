@@ -91,7 +91,7 @@ class Player extends Character {
                     let coords = line.getCoordinateAt(distance / length);
 
                     let a = angle(position.getCoordinates(), coords);
-                    self.sprite.setDirection(a);
+                    self.sprite.setDirectionFromAngle(a);
                     self.sprite.setCoordinates(coords);
 
                     let close = self.getWithin(self.basemap.helpers.getActiveHelpers(), self.params.game.tolerance.bonus);

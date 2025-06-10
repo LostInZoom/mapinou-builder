@@ -122,11 +122,15 @@ class Sprite {
         this.feature.setGeometry(new Point(this.coordinates));
     }
 
-    setDirection(angle) {
+    setDirectionFromAngle(angle) {
         if (angle >= Math.PI/4 && angle <= 3*Math.PI/4) { this.direction = 'north'; }
         else if (angle > 3*Math.PI/4 && angle < 5*Math.PI/4) { this.direction = 'west'; }
         else if (angle >= 5*Math.PI/4 && angle <= 7*Math.PI/4) { this.direction = 'south'; }
         else { this.direction = 'east'; }
+    }
+
+    setDirection(direction) {
+        this.direction = direction;
     }
 
     getDirection() {
@@ -145,6 +149,12 @@ class Sprite {
 
     getFramerate() {
         return this.framerate;
+    }
+
+    getLength() {
+        let d = this.getDirection();
+        let frameNumber = this.states.graze[d].length;
+        return frameNumber * this.getFramerate();
     }
 
     animate(callback) {

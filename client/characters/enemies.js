@@ -103,7 +103,7 @@ class Enemy extends Character {
 
         let destination = randomPointInCircle(this.coordinates, radius);
         let a = angle(coordinates, destination);
-        this.sprite.setDirection(a);
+        this.sprite.setDirectionFromAngle(a);
 
         const line = new LineString([ coordinates, destination ]);
         const length = line.getLength();

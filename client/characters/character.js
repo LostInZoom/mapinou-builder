@@ -2,6 +2,7 @@ import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
 
 import { angle, within } from "../cartography/analysis.js";
+import { wait } from "../utils/dom.js";
 
 /**
  * Base class to create a new character on the map.
@@ -39,6 +40,12 @@ class Character {
         
     }
 
+    animate(state, callback) {
+        callback = callback || function () {};
+        this.sprite.setState(state);
+        wait(this.sprite.getLength(), callback);
+    }
+
     display() {
         this.sprite.icon.setOpacity(1);
     }
@@ -68,7 +75,7 @@ class Character {
     }
 
     setOrientation(coordinates) {
-        this.sprite.setDirection(angle(this.coordinates, coordinates));
+        this.sprite.setDirectionFromAngle(angle(this.coordinates, coordinates));
     }
 
     getWithin(objects, distance) {
