@@ -14,6 +14,11 @@ app.use('/cartogame/configuration', (req, res) => {
 	return res;
 });
 
+app.use('/cartogame/registration', (req, res) => {
+	res.json({ sessionId: 512 });
+	return 512;
+});
+
 app.use('/', express.static('dist'));
 
 app.listen(port, () => {

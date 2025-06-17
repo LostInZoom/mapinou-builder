@@ -28,11 +28,11 @@ class Basemap {
         callback = callback || function () {};
         this.options = options || {};
         this.layers = [];
-        this.page = this.options.page;
+        this.parent = this.options.parent;
 
         this.container = makeDiv(null, 'map');
         if (options.class) { addClass(this.container, options.class); }
-        this.page.container.append(this.container);
+        this.parent.container.append(this.container);
 
         this.mask = makeDiv(null, 'mask mask-map');
         this.loader = makeDiv(null, 'loader');
@@ -95,8 +95,20 @@ class Basemap {
         this.view.setCenter(center);
     }
 
+    getCenter() {
+        return this.view.getCenter();
+    }
+
     setZoom(zoom) {
         this.view.setZoom(zoom);
+    }
+
+    getZoom() {
+        return this.view.getZoom();
+    }
+
+    getResolution() {
+        return this.view.getResolution();
     }
 
     loading() {
@@ -105,6 +117,11 @@ class Basemap {
 
     loaded() {
         addClass(this.mask, 'loaded');
+    }
+
+    animate(options, callback) {
+        callback = callback || function () {};
+        this.view.animate(options, callback);
     }
 }
 

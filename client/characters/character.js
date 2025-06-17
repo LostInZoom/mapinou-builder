@@ -42,6 +42,12 @@ class Character {
         }
     }
 
+    despawn(callback) {
+        if (this.sprite) {
+            this.sprite.despawn(callback);
+        }
+    }
+
     animate(state, callback) {
         callback = callback || function () {};
         this.sprite.setState(state);

@@ -2,7 +2,7 @@ import { LineString } from "ol/geom.js";
 
 import Character from "./character.js";
 import { Sprite } from "../cartography/sprite.js";
-import { angle, project } from "../cartography/analysis.js";
+import { angle } from "../cartography/analysis.js";
 import { getVectorContext } from "ol/render.js";
 import { generateRandomInteger, weightedRandom } from "../utils/math.js";
 
@@ -12,6 +12,8 @@ class Rabbit extends Character {
 
         this.colors = [ 'white', 'grey', 'brown', 'sand' ]
         this.color = options.color || 'white';
+
+        this.speed = options.speed || 20;
 
         if (this.color === 'random') {
             let i = generateRandomInteger(0, this.colors.length - 1);
@@ -43,7 +45,7 @@ class Rabbit extends Character {
         }
 
         this.statespool = [ 'move', 'graze', 'idle' ];
-        this.weights = [ 1, 2, 5 ];
+        this.weights = [ 1, 10, 30 ];
 
         this.sprite = new Sprite({
             type: 'dynamic',
@@ -69,7 +71,7 @@ class Rabbit extends Character {
 
         const line = new LineString([ this.coordinates, destination ]);
         const length = line.getLength();
-        const speed = this.basemap.page.app.options.game.speed.roaming;
+        const speed = this.speed;
         const position = this.sprite.getGeometryClone();
         this.sprite.hide();
 

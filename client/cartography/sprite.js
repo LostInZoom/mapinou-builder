@@ -23,6 +23,9 @@ class Sprite {
         this.minScale = options.minScale || 0.5;
         this.increment = options.increment || 0.05;
 
+        this.spawnIncrement = options.spawnIncrement || 0.15;
+        this.spawnFramerate = options.spawnFramerate || 50;
+
         this.options.layer.getSource().addFeature(this.feature);
         this.canvas = document.createElement('canvas');
 
@@ -92,45 +95,20 @@ class Sprite {
 
     spawn(callback) {
         callback = callback || function() {};
-        let goal = this.scale * 1.2;
-        let scale = 0;
-        let increment = 0.15;
-        self = this;
-
+        let goal = this.scale;
         this.setScale(0);
         this.icon.setOpacity(1);
+        this.animateScale(goal * 1.2, easeInSine, () => {
+            this.animateScale(goal, easeOutSine, callback);
+        });
+    }
 
-        inflate(callback);
-
-        function inflate(callback) {
-            let animation = setInterval(() => {
-                scale += increment;
-                if (scale >= goal) {
-                    self.setScale(goal);
-                    clearInterval(animation);
-                    deflate(callback);
-                } else {
-                    // Remap the scale value, from [0, max] to [0, 1]
-                    let remapped = remap(scale, 0, goal);
-                    // Calculate the remapped easing out cubic value 
-                    let eased = easeOutSine(remapped) * goal;
-                    self.setScale(eased);
-                }
-            }, 50);
-        }
-
-        function deflate(callback) {
-            let animation = setInterval(() => {
-                scale -= increment;
-                if (scale <= self.scale) {
-                    self.setScale(self.scale);
-                    clearInterval(animation);
-                    callback();
-                } else {
-                    self.setScale(scale);
-                }
-            }, 50);
-        }
+    despawn(callback) {
+        callback = callback || function() {};
+        let goal = this.scale;
+        this.animateScale(goal * 1.2, easeOutSine, () => {
+            this.animateScale(0, easeInSine, callback);
+        });
     }
 
     draw() {
@@ -228,21 +206,60 @@ class Sprite {
         }
     }
 
-    breathe() {        
+    breathe(goal, callback) {
         let scale = this.scale;
-        let i = this.increment;
-        this.breathing = setInterval(() => {
-            scale += i;
-            if (scale > this.maxScale) { i = -this.increment; }
-            else if (scale < this.minScale) { i = this.increment; }
-            this.setScale(scale);
-        }, this.framerate);
+
+        let inflation = setInterval(() => {
+            scale += this.spawnIncrement;
+            if (scale >= goal * 1.2) {
+                this.setScale(goal * 1.2);
+                clearInterval(inflation);
+                let deflation = setInterval(() => {
+                    scale -= this.spawnIncrement;
+                    if (scale <= goal) {
+                        this.setScale(goal);
+                        clearInterval(deflation);
+                        callback();
+                    } else {
+                        this.setScale(scale);
+                    }
+                }, this.spawnFramerate);
+            } else {
+                // Remap the scale value, from [0, max] to [0, 1]
+                let remapped = remap(scale, 0, goal * 1.2);
+                // Calculate the remapped easing out cubic value 
+                let eased = easeOutSine(remapped) * goal * 1.2;
+                this.setScale(eased);
+            }
+        }, this.spawnFramerate);
     }
 
-    freezeBreath() {
-        if (this.breathing) {
-            clearInterval(this.breathing);
-            this.setScale(this.scale);
+    animateScale(value, easing, callback) {
+        callback = callback || function () {};
+        let scale = this.scale;
+        if (scale !== value) {
+            let inflate = scale < value ? true : false;
+            let animation = setInterval(() => {
+                if (inflate) { scale += this.spawnIncrement } else { scale -= this.spawnIncrement }
+                let done = false;
+                
+                if (inflate && scale >= value) { done = true; }
+                if (!inflate && scale <= value) { done = true; }
+
+                if (done) {
+                    this.setScale(value);
+                    clearInterval(animation);
+                    callback();
+                } else {
+                    // Remap the scale value, from [min, max] to [0, 1]
+                    let max = Math.max(scale, value);
+                    let min = Math.min(scale, value);
+                    let remapped = remap(scale, min, max);
+                    // Calculate the remapped easing out cubic value
+                    let eased = easing(remap(remapped, 0, 1, min, max));
+                    this.setScale(eased);
+                }
+            }, this.spawnFramerate);
         }
     }
 
@@ -252,7 +269,8 @@ class Sprite {
      */
     setScale(scale) {
         this.currentSize = [ this.width * scale, this.height * scale ];
-        this.shift = [ (this.width - this.currentSize[0]) / 2, (this.height - this.currentSize[1]) / 2 ]
+        this.shift = [ (this.width - this.currentSize[0]) / 2, (this.height - this.currentSize[1]) / 2 ];
+        this.scale = scale;
         this.draw();
     }
 }

@@ -38,8 +38,15 @@ function easeInSine(x) {
     return 1 - Math.cos((x * Math.PI) / 2);
 }
 
+function easeInOutCubic(x) {
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
 function remap(value, xmin, xmax, dmin=0, dmax=1) {
     return dmin + ((value - xmin) / (xmax - xmin)) * (dmax - dmin);
 }
 
-export { generateRandomInteger, weightedRandom, easeOutSine, easeInSine, easeOutCubic, easeInCubic, remap };
+export { generateRandomInteger, weightedRandom,
+    easeOutSine, easeInSine, easeOutCubic, easeInCubic, easeInOutCubic,
+    remap
+};
