@@ -1,5 +1,5 @@
 import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
-import { remap, easeOutCubic } from "../utils/math";
+import { remap, easeOutCubic, easeInCubic, easeOutSine } from "../utils/math";
 import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
 import Page from "./page";
@@ -46,19 +46,22 @@ class Title extends Page {
             let character = makeDiv(null, 'title-letter', value);
             if (value.trim().length === 0) { addClass(character, 'empty'); };
 
-            character.style.transform = `translateX(-${width*1.2}rem)`;
+            character.style.transform = `translateX(-${width*1.1}rem)`;
             this.letters.append(character);
 
             // Remap the delay, from [0, animationtime] to [0, 1]
             let remapped = remap(i * lettertime, 0, animationtime);
-            // Calculate the remapped easing out cubic value 
-            let easing = easeOutCubic(remapped) * animationtime;
+            // Calculate the remapped easing
+            let easing = remap(easeOutCubic(remapped), 0, 1, 0, animationtime);
             // Wait the easing value for each letter before the translation
-            wait(easing + delay, () => { character.style.transform = `translateX(0)`; });
+            wait(easing + delay, () => {
+                character.style.opacity = 1;
+                character.style.transform = `translateX(0)`;
+            });
         }
 
         // Increment the delay by the letters animation time
-        delay += 300 + animationtime;
+        delay += 400 + animationtime;
         // Bounce the whole title letters and add the time of the animation to the delay
         wait(delay, () => { addClass(this.letters, 'bounce'); })
         delay += 400;
@@ -67,18 +70,23 @@ class Title extends Page {
         this.buttons = makeDiv(null, 'title-buttons');
 
         this.start = makeDiv(null, 'title-button title-button-start');
-        this.startlabel = makeDiv(null, 'title-button-label', 'Play');
+        this.startlabel = makeDiv(null, 'title-button-label', 'Jouer');
         this.start.append(this.startlabel);
 
         this.credits = makeDiv(null, 'title-button title-button-credits');
-        this.creditslabel = makeDiv(null, 'title-button-label', 'Credits');
+        this.creditslabel = makeDiv(null, 'title-button-label', 'Crédits');
         this.credits.append(this.creditslabel);
 
         this.buttons.append(this.start, this.credits);
 
         // For each button slide and increment the delay
         [ this.start, this.credits ].forEach((button) => {
-            wait(delay, () => { addClass(button, 'slide'); });
+            wait(delay, () => {
+                addClass(button, 'slide');
+                wait(300, () => {
+                    addClass(button, 'bounce');
+                });
+            });
             delay += 300
         });
 
@@ -86,7 +94,7 @@ class Title extends Page {
         delay += 400;
 
         // Create the bottom build info
-        this.buildinfos = makeDiv(null, 'title-build', `alpha build - ${new Date().getFullYear()}`);
+        this.buildinfos = makeDiv(null, 'title-build', `version alpha - ${new Date().getFullYear()}`);
 
         // Slide the build button
         wait(delay, () => { addClass(this.buildinfos, 'slide'); });

@@ -10,9 +10,7 @@
     transition: transform .5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     transform: perspective(10rem) rotateX(30deg) rotateZ(-5deg) scaleX(0.8);
 
-    &.animate {
-        transform: unset;
-    }
+    &.animate { transform: unset; }
 }
 
 .title-letters {
@@ -26,21 +24,22 @@
     color: colors.$main-color-light;
 
     padding: .2rem 1.2rem;
-    border-radius: .4rem;
+    border-radius: .8rem;
     background-color: colors.$secondary-color-dark;
     border: solid .3rem colors.$main-color-light;
 
     transform: scale(0);
     transform-origin: center center;
     transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: hidden;
+    // overflow: hidden;
 
     &.pop {
         transform: scale(1);
-        &.bounce {
-            transform-origin: center right;
-            animation: title-bounce .4s linear;
-        }
+    }
+
+    &.bounce {
+        transform-origin: center right;
+        animation: title-horizontal-bounce .4s linear;
     }
 
     text-shadow:
@@ -51,10 +50,9 @@
 }
 
 .title-letter {
-    transition: transform .3s cubic-bezier(0.64, 0, 0.78, 0);
-    &.empty {
-        width: 1rem;
-    }
+    opacity: 0;
+    transition: transform .4s cubic-bezier(0.5, 0, 0.75, 0);
+    &.empty { width: 1rem; }
 }
 
 .title-buttons {
@@ -75,24 +73,21 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    transition: transform .3s cubic-bezier(0.5, 0, 0.75, 0);
+
+    &.slide { transform: translateX(0%); }
+    &.bounce { animation: title-horizontal-bounce .4s linear; }
 }
 
 .title-button-start {
     transform-origin: center left;
     transform: translateX(100%);
-    &.slide {
-        animation: title-start-animation .5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        transform: translateX(0%);
-    }
 }
 
 .title-button-credits {
     transform-origin: center right;
-    transform: translateX(calc(100% + 1rem));
-    &.slide {
-        animation: title-credits-animation .5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        transform: translateX(0%);
-    }
+    transform: translateX(-100%);
 }
 
 .title-button-label {
@@ -119,7 +114,7 @@
     transform: translate(-50%, 200%);
 
     font-family: 'Vincendo';
-    font-size: .9rem;
+    font-size: 3vw;
     padding: .2rem .4rem;
 
     color: colors.$main-color-light;
@@ -137,4 +132,5 @@
 @media screen and (min-width: 500px) {
     .title-letters { font-size: 5rem; }
     .title-button-label { font-size: 2rem; }
+    .title-build { font-size: .9rem; }
 }
