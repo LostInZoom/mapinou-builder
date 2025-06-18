@@ -18,6 +18,11 @@ async function createTables() {
         CREATE TABLE IF NOT EXISTS data.sessions (
             id serial,
             user_agent character varying(500),
+            device character varying(100),
+            orientation character varying(100),
+            os character varying(100),
+            width integer,
+            height integer,
             CONSTRAINT sessions_pkey PRIMARY KEY (id)
         );
 

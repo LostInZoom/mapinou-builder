@@ -83,9 +83,7 @@ class Title extends Page {
         [ this.start, this.credits ].forEach((button) => {
             wait(delay, () => {
                 addClass(button, 'slide');
-                wait(300, () => {
-                    addClass(button, 'bounce');
-                });
+                wait(300, () => { addClass(button, 'bounce'); });
             });
             delay += 300
         });
@@ -109,18 +107,14 @@ class Title extends Page {
                 addClass(this.title, 'animate');
                 wait(800, () => {
                     removeClass(this.title, 'animate');
-                    wait(500, () => {
-                        this.titlelisten = true;
-                    });
+                    wait(500, () => { this.titlelisten = true; });
                 });
             }
         });
 
         this.startlabel.addEventListener('click', () => {
             addClass(this.startlabel, 'clicked');
-            wait(200, () => {
-                this.app.slide('previous', this.next);
-            });
+            this.app.slide('previous', this.next);
         });
     }
 }

@@ -32,6 +32,7 @@ class Application {
             });
         });
 
+        // Rabbit spawner
         let listen = true;
         this.basemap.map.on('click', (e) => {
             if (listen) {

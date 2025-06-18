@@ -5,9 +5,17 @@
 
 function xhr(type, url, data, options) {
     options = options || {};
+
     var request = new XMLHttpRequest();
     request.open(type, url, true);
-    if (type === "POST") { request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); }
+
+    if (type === "POST") {
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.send(JSON.stringify(data));
+    } else {
+        request.send();
+    }
+
     request.onreadystatechange = function () {
         if (this.readyState === 4) {
             if (this.status >= 200 && this.status < 400) {
@@ -17,7 +25,6 @@ function xhr(type, url, data, options) {
             }
         }
     };
-    request.send(data);
 }
 
 function ajax(method, url, data, callback) {
