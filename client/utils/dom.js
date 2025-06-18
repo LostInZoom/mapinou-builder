@@ -140,8 +140,17 @@ function wait(duration, callback) {
     setTimeout(callback, duration);
 };
 
+/**
+ * Returns true or false whether the provided element overflows
+ * @param {DOMElement} element - DOM Element to check
+ * @returns {boolean} - Whetther the element overflows
+ */
+function isOverflown(element) {
+  return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+}
+
 export {
     makeDiv, hasClass, addClass, removeClass, addClassList, removeClassList,
     activate, deactivate,
-    clearElement, addSVG, getCSSColors, remove, wait
+    clearElement, addSVG, getCSSColors, remove, wait, isOverflown
 }

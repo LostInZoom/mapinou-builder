@@ -22,3 +22,13 @@ body {
 .ol-zoom {
     display: none;
 }
+
+.no-scrollbar {
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}

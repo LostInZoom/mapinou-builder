@@ -4,6 +4,8 @@ import Title from '../pages/title.js';
 import { Basemap } from '../cartography/map.js';
 import { Roamer } from '../characters/rabbit.js';
 import { easeInOutCubic } from '../utils/math.js';
+import { Header } from '../interface/elements.js';
+import Consent from '../pages/consent.js';
 
 class Application {
     constructor(options) {
@@ -56,6 +58,9 @@ class Application {
                 });
             }
         });
+
+        this.header = new Header(this);
+        this.header.setJustification('center');
     }
 
     /**

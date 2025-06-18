@@ -39,19 +39,19 @@ game:
 #### FORM DEFINITION ######
 ###########################
 form:
-  - question: 'Gender (select all relevant answers):'
+  - question: 'Genre (Sélectionnez les réponses applicables):'
     mandatory: false
     multiple: true
     answers:
-      - text: Woman
+      - text: Femme
         unique: false
-      - text: Man
+      - text: Homme
         unique: false
-      - text: Transgender
+      - text: Transgenre
         unique: false
-      - text: Prefer not to answer
+      - text: Ne se prononce pas
         unique: true
-  - question: 'Select your age category:'
+  - question: 'Catégorie d''âge:'
     mandatory: false
     multiple: false
     answers:
@@ -63,25 +63,50 @@ form:
         unique: true
       - text: 45-59
         unique: true
-      - text: 60 and above
+      - text: 60 et plus
         unique: true
-      - text: Prefer not to answer
+      - text: Ne se prononce pas
         unique: true
-  - question: 'You use interactive maps:'
+  - question: 'Vous utilisez une carte interactive (Google Maps, Apple Maps, OpenStreetMap, etc.):'
     mandatory: false
     multiple: false
     answers:
-      - text: Every day
+      - text: Tous les jours
         unique: true
-      - text: A few times a week
+      - text: Plusieurs fois par semaine
         unique: true
-      - text: A few times a month
+      - text: Plusieurs fois par mois
         unique: true
-      - text: Almost never
+      - text: Presque jamais
         unique: true
-      - text: Prefer not to answer
+      - text: Ne se prononce pas
         unique: true
-
+consent:
+  - type: paragraph
+    content: 'J''accepte que mes données de jeux
+      soient collectées et utilisées par l''équipe LostInZoom
+      afin de mieux comprendre comment nous naviguons dans
+      les cartes interactives.'
+  - type: list
+    title: 'Les données suivantes sont collectées:'
+    content:
+      - 'Les réponses aux formulaires sociologiques et cognitifs.'
+      - 'Le métriques de jeux, à savoir le temps passé, le score et la distance parcourue par niveau.'
+      - 'Les interactions avec la carte pendant un niveau, à savoir les déplacements latéraux,
+        les zooms en avant et en arrière.'
+      - 'Les informations sur votre appareil, à savoir le type (téléphone mobile ou tablette),
+        le système d''exploitation (Android, iOS, etc.) et taille de l''écran.'
+  - type: paragraph
+    content: 'Nous ne collectons aucune information personnelle tel que votre nom, votre
+      localisation ou votre adresse IP.'
+  - type: paragraph
+    content: 'Les données collectées ne seront jamais dévoilées au-delà de notre équipe
+      de recherche. Ceci étant dit, nous les utiliserons pour conduire des analyses
+      statistiques, et les résultats de ces analyses pourront être sujets à une ou
+      plusieurs publications scientifiques.'
+  - type: paragraph
+    content: 'En signant ce formulaire et en continuant le jeu, vous comprenez et acceptez
+      de partager ces données avec notre équipe.'
 #############################
 #### TUTORIAL DEFINITION ####
 #############################

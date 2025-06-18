@@ -1,8 +1,8 @@
 import { addClass, removeClass, makeDiv } from "../utils/dom.js";
 
 class Element {
-    constructor(page) {
-        this.page = page;
+    constructor(parent) {
+        this.parent = parent;
         this.justifications = ['center', 'left', 'right']
         this.justification = 'center';
     }
@@ -23,9 +23,9 @@ class Element {
 }
 
 class Banner extends Element {
-    constructor(page) {
-        super(page);
-        this.container = makeDiv(null, 'page-element banner');
+    constructor(parent) {
+        super(parent);
+        this.container = makeDiv(null, 'banner');
         this.directions = ['row', 'column']
         this.direction = 'row';
     }
@@ -40,30 +40,30 @@ class Banner extends Element {
 }
 
 class Header extends Banner {
-    constructor(page) {
-        super(page);
+    constructor(parent) {
+        super(parent);
         addClass(this.container, 'header');
-        this.page.container.insertBefore(this.container, this.page.container.firstChild);
+        this.parent.container.insertBefore(this.container, this.parent.container.firstChild);
     }
 }
 
 class Footer extends Banner {
-    constructor(page) {
-        super(page);
+    constructor(parent) {
+        super(parent);
         addClass(this.container, 'footer');
-        this.page.container.append(this.container);
+        this.parent.container.append(this.container);
         this.setDirection('column');
     }
 }
 
 class Content extends Element {
-    constructor(page) {
-        super(page);
+    constructor(parent) {
+        super(parent);
         this.container = makeDiv(null, 'page-element content');
-        if (this.page.footer) {
-            this.page.container.insertBefore(this.container, this.footer.container);
+        if (this.parent.footer) {
+            this.parent.container.insertBefore(this.container, this.footer.container);
         } else {
-            this.page.container.append(this.container);
+            this.parent.container.append(this.container);
         }
     }
 }

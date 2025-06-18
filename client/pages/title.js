@@ -9,12 +9,6 @@ class Title extends Page {
         super(options);
         addClass(this.container, 'page-title');
 
-        // Define the next page here
-        this.next = new Consent({
-            app: this.app,
-            position: 'next'
-        });
-
         // Create the title div and the container for the individual letters
         this.title = makeDiv(null, 'title-name');
         this.letters = makeDiv(null, 'title-letters');
@@ -22,49 +16,56 @@ class Title extends Page {
 
         // Start with a delay of 100 milliseconds to make sure the element is loaded by the DOM
         // and reveal the title background
-        let delay = 100;
+        let delay = this.app.options.interface.transition.page;
         wait(delay, () => { addClass(this.letters, 'pop'); })
         // Add a delay of 300 milliseconds to make sure the title background is revealed
         delay += 300;
         
         // Set the title name
         this.name = 'Mapinou';
+        this.container.append(this.title);
 
-        // Get the width of the page in rem
-        let width = pxToRem(this.container.offsetWidth);
-        // Set the time taken by the letters animation
-        let animationtime = width * 10;
-        
-        // Calculate individual letters animation time
-        let lettertime = animationtime / this.name.length;
+        this.letterArray = [];
         
         // Loop through the name to get individual letters
-        for (let i = (this.name.length - 1), j = 0; i >= 0; i--, j++) {
+        for (let i = 0; i < this.name.length; i++) {
             // Create the letter element translated by the width of the page * 1.1
-            let value = this.name.charAt(j);
+            let value = this.name.charAt(i);
 
             let character = makeDiv(null, 'title-letter', value);
             if (value.trim().length === 0) { addClass(character, 'empty'); };
 
-            character.style.transform = `translateX(-${width*1.1}rem)`;
             this.letters.append(character);
+            this.letterArray.push(character);
+        }
 
+        // Get the width of the page in rem
+        let width = pxToRem(this.title.offsetWidth);
+
+        // Set the time taken by the letters animation
+        let animationtime = width * 10;
+        // Calculate individual letters animation time
+        let lettertime = animationtime / this.name.length;
+
+        let j = this.letterArray.length - 1;
+        this.letterArray.forEach((l) => {
+            l.style.transform = `translateX(-${width}rem)`;
             // Remap the delay, from [0, animationtime] to [0, 1]
-            let remapped = remap(i * lettertime, 0, animationtime);
+            let remapped = remap(j * lettertime, 0, animationtime);
             // Calculate the remapped easing
             let easing = remap(easeOutCubic(remapped), 0, 1, 0, animationtime);
             // Wait the easing value for each letter before the translation
             wait(easing + delay, () => {
-                character.style.opacity = 1;
-                character.style.transform = `translateX(0)`;
+                l.style.opacity = 1;
+                l.style.transform = `translateX(0)`;
             });
-        }
+            j--;
+        })
 
         // Increment the delay by the letters animation time
         delay += 400 + animationtime;
         // Bounce the whole title letters and add the time of the animation to the delay
         wait(delay, () => { addClass(this.letters, 'bounce'); })
-        delay += 400;
 
         // Create the start and credits buttons
         this.buttons = makeDiv(null, 'title-buttons');
@@ -89,7 +90,7 @@ class Title extends Page {
         });
 
         // Delay the build infos by 400 milliseconds for dramatic effects
-        delay += 400;
+        delay += 400 + 300;
 
         // Create the bottom build info
         this.buildinfos = makeDiv(null, 'title-build', `version alpha - ${new Date().getFullYear()}`);
@@ -98,7 +99,7 @@ class Title extends Page {
         wait(delay, () => { addClass(this.buildinfos, 'slide'); });
 
         // Add every element to the page
-        this.container.append(this.title, this.buttons, this.buildinfos);
+        this.container.append(this.buttons, this.buildinfos);
 
         this.titlelisten = true;
         this.title.addEventListener('click', () => {
@@ -113,6 +114,12 @@ class Title extends Page {
         });
 
         this.startlabel.addEventListener('click', () => {
+            // Define the next page here
+            this.next = new Consent({
+                app: this.app,
+                position: 'next'
+            });
+            
             addClass(this.startlabel, 'clicked');
             this.app.slide('previous', this.next);
         });

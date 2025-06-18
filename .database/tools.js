@@ -23,6 +23,7 @@ async function createTables() {
             os character varying(100),
             width integer,
             height integer,
+            consent boolean DEFAULT False,
             CONSTRAINT sessions_pkey PRIMARY KEY (id)
         );
 
