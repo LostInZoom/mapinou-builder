@@ -1,4 +1,4 @@
-import { makeDiv, addClass, addSVG, removeClass } from "./dom.js";
+import { makeDiv, addClass, addSVG, removeClass, wait } from "./dom.js";
 import { generateRandomInteger } from "./math.js";
 
 class Sound {
@@ -12,7 +12,7 @@ class Sound {
         this.started = false;
         this.playing = false;
 
-        this.button = makeDiv(null, 'audio-button-container');
+        this.button = makeDiv(null, 'audio-button-container active');
         this.buttonchild = makeDiv(null, 'audio-button', this.svg);
         this.button.append(this.buttonchild);
 
@@ -34,6 +34,9 @@ class Sound {
 
     displayButton() {
         addClass(this.button, 'pop');
+        wait(300, () => {
+            removeClass(this.button, 'active');
+        });
     }
 }
 
@@ -51,6 +54,7 @@ class Music extends Sound {
         super(options);
         this.file = `${this.src}.${this.format}`;
         this.audio = new Audio(this.file);
+        this.volume = this.audio.volume;
 
         this.audio.addEventListener('pause', () => {
             removeClass(this.button, 'active');
@@ -63,14 +67,15 @@ class Music extends Sound {
     }
 
     play() {
-        if (this.started) { this.audio.play(); }
+        if (this.started) {
+            this.audio.play();
+        }
         else { this.start(true); }
     }
 
     pause() {
         if (this.started && this.playing) {
             this.audio.pause();
-            this.playing = false;
         }
     }
 
