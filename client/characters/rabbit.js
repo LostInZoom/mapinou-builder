@@ -50,7 +50,7 @@ class Rabbit extends Character {
         this.sprite = new Sprite({
             type: 'dynamic',
             layer: this.layer,
-            src: `./assets/sprites/rabbit-${this.color}.png`,
+            src: `./sprites/rabbit-${this.color}.png`,
             width: 52,
             height: 52,
             scale: 1,

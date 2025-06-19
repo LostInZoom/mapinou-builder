@@ -5,8 +5,10 @@ import Consent from "./consent";
 import Page from "./page";
 
 class Title extends Page {
-    constructor(options) {
+    constructor(options, callback) {
         super(options);
+        callback = callback || function() {};
+
         addClass(this.container, 'page-title');
 
         // Create the title div and the container for the individual letters
@@ -14,10 +16,9 @@ class Title extends Page {
         this.letters = makeDiv(null, 'title-letters');
         this.title.append(this.letters);
 
-        // Start with a delay of 100 milliseconds to make sure the element is loaded by the DOM
-        // and reveal the title background
         let delay = this.app.options.interface.transition.page;
         wait(delay, () => { addClass(this.letters, 'pop'); })
+        
         // Add a delay of 300 milliseconds to make sure the title background is revealed
         delay += 300;
         
@@ -96,7 +97,10 @@ class Title extends Page {
         this.buildinfos = makeDiv(null, 'title-build', `version alpha - ${new Date().getFullYear()}`);
 
         // Slide the build button
-        wait(delay, () => { addClass(this.buildinfos, 'slide'); });
+        wait(delay, () => {
+            addClass(this.buildinfos, 'slide');
+            callback();
+        });
 
         // Add every element to the page
         this.container.append(this.buttons, this.buildinfos);

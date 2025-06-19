@@ -48,7 +48,7 @@ class Helper extends Character {
         this.sprite = new Sprite({
             type: 'static',
             layer: this.layer,
-            src: './assets/sprites/vegetables.png',
+            src: './sprites/vegetables.png',
             width: 64,
             height: 64,
             scale: 1,
@@ -65,14 +65,14 @@ class Helper extends Character {
     consume() {
         this.deactivate();
         let sound = new SoundEffect({
-            src: './assets/sounds/crounch',
+            src: './sounds/crounch',
             format: 'mp3',
             amount: 3,
         });
         sound.play(false);
 
         this.sprite.makeDynamic({
-            src: './assets/sprites/burst.png',
+            src: './sprites/burst.png',
             loop: false,
             width: 64,
             height: 64,

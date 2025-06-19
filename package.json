@@ -9,12 +9,15 @@
   "scripts": {
     "initialize": "run-func .database/manage.js initialize",
     "update": "run-func .database/manage.js update",
-    "copy-assets": "rm -fr ./dist/cartogame/assets && cp -r ./client/assets ./dist/cartogame",
-    "build-watch": "parcel watch ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
-    "start-watch": "npm run copy-assets && nodemon ./server/index.js",
-    "dev": "concurrently --kill-others \"npm run start-watch\" \"npm run build-watch\"",
-    "build": "parcel build ./client/index.html --public-url /cartogame --dist-dir dist/cartogame && cp -r ./client/assets ./dist/cartogame",
-    "start": "npm run build-img && npm run build && node server/index.js",
+    "clean-dist": "rm -rf dist && mkdir dist && mkdir dist/cartogame",
+    "copy-img": "cp -vR ./client/img ./dist/cartogame",
+    "copy-sounds": "cp -vR ./client/sounds ./dist/cartogame",
+    "copy-sprites": "cp -vR ./client/sprites ./dist/cartogame",
+    "copy-assets": "npm run copy-img && npm run copy-sounds && npm run copy-sprites",
+    "watch": "parcel watch ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
+    "daemon": "nodemon ./server/index.js",
+    "dev": "npm run clean-dist && npm run copy-assets && concurrently --kill-others \"npm run watch\" \"npm run daemon\"",
+    "build": "parcel build ./client/index.html --public-url /cartogame --dist-dir dist/cartogame",
     "deploy": "node server/index.js"
   },
   "keywords": [

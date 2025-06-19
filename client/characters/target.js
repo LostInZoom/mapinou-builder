@@ -16,7 +16,7 @@ class Target extends Character {
         this.sprite = new Sprite({
             type: 'dynamic',
             layer: this.layer,
-            src: './assets/sprites/rabbit-brown.png',
+            src: './sprites/rabbit-brown.png',
             width: 64,
             height: 64,
             scale: .8,

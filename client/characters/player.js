@@ -11,7 +11,7 @@ class Player extends Character {
         this.sprite = new Sprite({
             type: 'dynamic',
             layer: this.layer,
-            src: './assets/sprites/rabbit-white.png',
+            src: './sprites/rabbit-white.png',
             width: 64,
             height: 64,
             scale: .8,

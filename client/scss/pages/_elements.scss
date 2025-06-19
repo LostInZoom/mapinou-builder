@@ -1,9 +1,13 @@
 .banner {
+    position: absolute;
+    z-index: 50;
+    left: 0;
+
     width: 100%;
     overflow: hidden;
+    pointer-events: none;
 
     display: flex;
-
     justify-content: space-between;
     align-items: center;
 
@@ -13,6 +17,10 @@
     &.center { justify-content: center; }
     &.left { justify-content: start; }
     &.right { justify-content: end; }
+}
+
+.header {
+    top: 0;
 }
 
 .content {

@@ -46,7 +46,7 @@ class Enemy extends Character {
         this.sprite = new Sprite({
             type: 'dynamic',
             layer: this.layer,
-            src: './assets/sprites/snake.png',
+            src: './sprites/snake.png',
             width: 64,
             height: 64,
             scale: .8,

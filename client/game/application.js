@@ -6,10 +6,13 @@ import { Roamer } from '../characters/rabbit.js';
 import { easeInOutCubic } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
 import Consent from '../pages/consent.js';
+import { Music } from '../utils/audio.js';
 
 class Application {
     constructor(options) {
         this.options = options;
+
+        console.log(options)
 
         // Create the DOM Element
         this.container = makeDiv('application', null);
@@ -21,6 +24,16 @@ class Application {
         // Boolean to flag if the page is sliding
         this.sliding = false;
 
+        this.header = new Header(this);
+        this.header.setJustification('right');
+
+        this.music = new Music({
+            parent: this.header,
+            svg: this.options.svgs.music,
+            src: './sounds/theme',
+            format: 'mp3',
+        });
+
         this.basemap = new Basemap({
             parent: this,
             class: 'basemap',
@@ -31,6 +44,8 @@ class Application {
             this.page = new Title({
                 app: this,
                 position: 'current'
+            }, () => {
+                this.music.displayButton();
             });
         });
 
@@ -58,9 +73,6 @@ class Application {
                 });
             }
         });
-
-        this.header = new Header(this);
-        this.header.setJustification('center');
     }
 
     /**

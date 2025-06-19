@@ -1,19 +1,39 @@
+import { makeDiv, addClass, addSVG, removeClass } from "./dom.js";
 import { generateRandomInteger } from "./math.js";
 
 class Sound {
     constructor(options) {
         this.options = options || {};
-        this.src = options.src !== undefined ? options.src : null;
+        this.parent = options.parent;
+        this.svg = options.svg;
+        this.src = options.src;
         this.format = options.format !== undefined ? options.format : 'mp3';
+
+        this.started = false;
+        this.playing = false;
+
+        this.button = makeDiv(null, 'audio-button-container');
+        this.buttonchild = makeDiv(null, 'audio-button', this.svg);
+        this.button.append(this.buttonchild);
+
+        this.parent.append(this.button);
+
+        this.button.addEventListener('click', () => { this.activate(); });
     }
 
-    play(loop, callback) {
+    start(loop, callback) {
         callback = callback || function() {};
         this.audio.play();
+        this.started = true;
+        this.playing = true;
         this.audio.addEventListener('ended', () => {
             if (loop) { this.play(loop); }
             else { callback(); }
         }, { once: true });
+    }
+
+    displayButton() {
+        addClass(this.button, 'pop');
     }
 }
 
@@ -31,6 +51,39 @@ class Music extends Sound {
         super(options);
         this.file = `${this.src}.${this.format}`;
         this.audio = new Audio(this.file);
+
+        this.audio.addEventListener('pause', () => {
+            removeClass(this.button, 'active');
+            this.playing = false;
+        });
+        this.audio.addEventListener('play', () => {
+            addClass(this.button, 'active');
+            this.playing = true;
+        });
+    }
+
+    play() {
+        if (this.started) { this.audio.play(); }
+        else { this.start(true); }
+    }
+
+    pause() {
+        if (this.started && this.playing) {
+            this.audio.pause();
+            this.playing = false;
+        }
+    }
+
+    stop() {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.started = false;
+        this.playing = false;
+    }
+
+    activate() {
+        if (this.playing) { this.pause(); }
+        else { this.play(); }
     }
 }
 

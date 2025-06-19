@@ -1,6 +1,7 @@
 import { db } from "../.database/credentials.js";
 
 import * as fs from 'fs';
+import * as path from 'path';
 import { load } from "js-yaml";
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -8,17 +9,19 @@ import bodyParser from 'body-parser';
 const file = fs.readFileSync('./server/configuration.yml', { encoding: 'utf-8' });
 const params = load(file);
 
+fs.readdir('./server/svg', (error, files) => {
+	params.svgs = {};
+
+	files.forEach((file) => {
+		let f = fs.readFileSync('./server/svg/' + file, { encoding: 'utf-8' })
+		params.svgs[file.replace(/\.[^/.]+$/, "")] = f;
+	})
+});
+
 const app = express();
 const port = 8001;
-const __dirname = import.meta.dirname;
 
-app.use(express.static(__dirname + 'dist'));
-app.use(bodyParser.json());
-app.use(
-	bodyParser.urlencoded({
-		extended: false,
-	}),
-);
+const jsonParser = bodyParser.json();
 
 app.use('/', express.static('dist'));
 
@@ -27,13 +30,13 @@ app.get('/cartogame/configuration', (req, res) => {
 	return res;
 });
 
-app.post('/cartogame/registration', (req, res) => {
+app.post('/cartogame/registration', jsonParser, (req, res) => {
 	createSession(req.body).then((index) => {
 		res.send(JSON.stringify({ sessionId: index }));
 	});
 });
 
-app.post('/cartogame/verification', (req, res) => {
+app.post('/cartogame/verification', jsonParser, (req, res) => {
 	verifySession(req.body.sessionId).then((isPresent) => {
 		res.send(JSON.stringify({ isPresent: isPresent }));
 	});

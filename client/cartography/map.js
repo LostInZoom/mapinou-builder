@@ -294,7 +294,7 @@ class Basemap1 {
         });
 
         this.modebutton = makeDiv(null, 'game-mode collapse');
-        addSVG(this.modebutton, new URL('../assets/routing.svg', import.meta.url));
+        // addSVG(this.modebutton, new URL('../svg/routing.svg', import.meta.url));
         this.container.append(this.modebutton);
 
         let interactions = {
