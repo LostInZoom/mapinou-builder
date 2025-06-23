@@ -1,24 +1,24 @@
 import { addClass, isOverflown, makeDiv, removeClass, wait } from "../utils/dom";
+import Form from "./form";
 import Page from "./page";
 import Title from "./title";
 
 class Consent extends Page {
-    constructor(app, position) {
-        super(app, position);
+    constructor(options, callback) {
+        super(options, callback);
         addClass(this.container, 'page-consent');
 
-        this.content = makeDiv(null, 'consent-content');
+        this.content = makeDiv(null, 'page-content');
+        this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
+        this.continue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
 
-        this.back = makeDiv(null, 'consent-button consent-button-back', 'Retour');
-        this.continue = makeDiv(null, 'consent-button consent-button-continue', 'Continuer');
-
-        this.form = makeDiv(null, 'consent-form');
+        this.text = makeDiv(null, 'consent-text');
         this.title = makeDiv(null, 'consent-title', 'Formulaire de consentement');
         this.elements = makeDiv(null, 'consent-elements no-scrollbar');
         this.scrollindicator = makeDiv(null, 'consent-scroll-indicator', '▼');
-        this.form.append(this.title, this.elements, this.scrollindicator);
+        this.text.append(this.title, this.elements, this.scrollindicator);
 
-        this.content.append(this.back, this.form, this.continue);
+        this.content.append(this.back, this.text, this.continue);
         this.container.append(this.content);
 
         this.app.options.consent.forEach((element) => {
@@ -86,13 +86,16 @@ class Consent extends Page {
 
             this.continue.addEventListener('click', () => {
                 // Define the next page here
-                this.next = new Title({
+                this.next = new Form({
                     app: this.app,
-                    position: 'next'
+                    position: 'next',
+                    question: 0
                 });
 
                 this.app.slide('previous', this.next);
             });
+
+            this.callback();
         });
     }
 

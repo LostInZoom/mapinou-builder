@@ -19,7 +19,6 @@ class Form {
 
     add(...questions) {
         for (let i = 0; i < questions.length; i++) {
-            let index = i;
             let q = questions[i];
             let mandatory = q.mandatory;
             let multiple = q.multiple;
@@ -52,6 +51,7 @@ class Form {
                         }
                         addClass(answer, 'selected');
                     }
+
                 });
             }
             qcontainer.append(acontainer);

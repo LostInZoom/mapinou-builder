@@ -39,7 +39,7 @@ game:
 #### FORM DEFINITION ######
 ###########################
 form:
-  - question: 'Genre (Sélectionnez les réponses applicables):'
+  - question: 'Genre<br>(Sélectionnez les réponses applicables):'
     mandatory: false
     multiple: true
     answers:
@@ -67,7 +67,7 @@ form:
         unique: true
       - text: Ne se prononce pas
         unique: true
-  - question: 'Vous utilisez une carte interactive (Google Maps, Apple Maps, OpenStreetMap, etc.):'
+  - question: 'Vous utilisez une carte interactive<br>(Google Maps, Apple Maps, OpenStreetMap, etc.):'
     mandatory: false
     multiple: false
     answers:

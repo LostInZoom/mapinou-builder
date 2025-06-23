@@ -1,12 +1,14 @@
 import Page from '../pages/page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
-import Title from '../pages/title.js';
 import { Basemap } from '../cartography/map.js';
 import { Roamer } from '../characters/rabbit.js';
 import { easeInOutCubic } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
-import Consent from '../pages/consent.js';
 import { Music } from '../utils/audio.js';
+
+import Title from '../pages/title.js';
+import Consent from '../pages/consent.js';
+import Form from '../pages/form.js';
 
 class Application {
     constructor(options) {
@@ -43,7 +45,9 @@ class Application {
             // Create the current page
             this.page = new Title({
                 app: this,
-                position: 'current'
+                position: 'current',
+                question: 0,
+                defaultLastAnswer: true
             }, () => {
                 this.music.displayButton();
             });

@@ -49,3 +49,37 @@
         width: inherit;
     }
 }
+
+.page-button {
+    font-family: 'Vincendo';
+    font-size: .9rem;
+    pointer-events: all;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: colors.$main-color-light;
+    color: colors.$main-color-dark;
+    padding: .5rem .8rem;
+
+    transform: scaleY(0);
+    transition: transform .1s cubic-bezier(0.33, 1, 0.68, 1);
+
+    &.pop {
+        transform: scaleY(1);
+    }
+}
+
+.page-button-back {
+    border-top-right-radius: .4rem;
+    border-top-left-radius: .4rem;
+    align-self: start;
+    transform-origin: left bottom;
+}
+
+.page-button-continue {
+    border-bottom-right-radius: .4rem;
+    border-bottom-left-radius: .4rem;
+    align-self: end;
+    transform-origin: right top;
+}

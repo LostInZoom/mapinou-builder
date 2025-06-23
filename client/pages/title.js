@@ -6,8 +6,7 @@ import Page from "./page";
 
 class Title extends Page {
     constructor(options, callback) {
-        super(options);
-        callback = callback || function() {};
+        super(options, callback);
 
         addClass(this.container, 'page-title');
 
@@ -99,7 +98,7 @@ class Title extends Page {
         // Slide the build button
         wait(delay, () => {
             addClass(this.buildinfos, 'slide');
-            callback();
+            this.callback();
         });
 
         // Add every element to the page

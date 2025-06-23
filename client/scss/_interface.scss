@@ -4,6 +4,7 @@
 @use 'pages/elements';
 @use 'pages/title';
 @use 'pages/consent';
+@use 'pages/form';
 
 .basemap {
     position: absolute;
@@ -14,9 +15,7 @@
     height: 100%;
     background-color: colors.$main-color-light;
 
-    &.active {
-        pointer-events: all;
-    }
+    &.active { pointer-events: all; }
 }
 
 .page {
@@ -36,17 +35,19 @@
     transition: transform .5s cubic-bezier(0.65, 0, 0.35, 1);
     pointer-events: none;
 
-    &.previous {
-        transform: translateX(-100%);
-    }
+    &.previous { transform: translateX(-100%); }
+    &.current { transform: translateX(0%); }
+    &.next { transform: translateX(100%); }
+}
 
-    &.current {
-        transform: translateX(0%);
-    }
-
-    &.next {
-        transform: translateX(100%);
-    }
+.page-content {
+    width: calc(100% - 20vw);
+    max-height: calc(100% - 5rem);
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .loader {

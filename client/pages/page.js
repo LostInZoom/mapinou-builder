@@ -2,8 +2,9 @@ import { Content, Footer, Header } from "../interface/elements.js";
 import { addClass, clearElement, makeDiv, removeClass } from "../utils/dom.js";
 
 class Page {
-    constructor(options) {
+    constructor(options, callback) {
         this.options = options || {};
+        this.callback = callback || function() {};
 
         this.app = this.options.app;
         this.position = this.options.position;

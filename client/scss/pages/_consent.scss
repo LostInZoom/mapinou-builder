@@ -1,51 +1,8 @@
 @use '../colors';
 
-.consent-button {
-    font-family: 'Vincendo';
-    font-size: .9rem;
-    pointer-events: all;
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: colors.$main-color-light;
-    color: colors.$main-color-dark;
-    padding: .5rem .8rem;
+.consent-text {
+    width: 100%;
 
-    transform: scaleY(0);
-    transition: transform .1s ease-in-out;
-
-    &.pop {
-        animation: button-pop .3s linear;
-        transform: scaleY(1);
-    }
-}
-
-.consent-button-back {
-    border-top-right-radius: .4rem;
-    border-top-left-radius: .4rem;
-    align-self: start;
-    transform-origin: left bottom;
-}
-
-.consent-button-continue {
-    border-bottom-right-radius: .4rem;
-    border-bottom-left-radius: .4rem;
-    align-self: end;
-    transform-origin: right top;
-}
-
-.consent-content {
-    width: calc(100% - 20vw);
-    max-height: calc(100% - 5rem);
-    
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.consent-form {
     pointer-events: all;
     border-top-right-radius: .4rem;
     border-bottom-left-radius: .4rem;
