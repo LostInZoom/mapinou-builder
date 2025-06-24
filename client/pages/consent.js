@@ -48,6 +48,8 @@ class Consent extends Page {
 
         this.checked = false;
         this.checkbox = makeDiv(null, 'consent-checkbox');
+        if (this.app.options.consentment) { addClass(this.checkbox, 'checked'); }
+
         this.checkboxbutton = makeDiv(null, 'consent-checkbox-button');
         this.checkboxlabel = makeDiv(null, 'consent-checkbox-label', `D'accord`);
 
@@ -58,6 +60,15 @@ class Consent extends Page {
 
         wait(this.app.options.interface.transition.page, () => {
             addClass(this.back, 'pop');
+            if (this.app.options.consentment) {
+                addClass(this.continue, 'pop');
+                wait(200, () => {
+                    this.elements.scrollBy({
+                        top: this.elements.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                });
+            }
 
             this.observer = new ResizeObserver(() => {
                 if (isOverflown(this.elements)) {
@@ -108,12 +119,14 @@ class Consent extends Page {
         addClass(this.checkbox, 'checked');
         addClass(this.continue, 'pop');
         this.checked = true;
+        this.app.options.consentment = true;
     }
 
     uncheck() {
         removeClass(this.checkbox, 'checked');
         removeClass(this.continue, 'pop');
         this.checked = false;
+        this.app.options.consentment = false;
     }
 
     isChecked() {

@@ -5,6 +5,7 @@
 @use 'pages/title';
 @use 'pages/consent';
 @use 'pages/form';
+@use 'pages/levels';
 
 .basemap {
     position: absolute;
@@ -30,6 +31,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 1rem;
     
     overflow: hidden;
     transition: transform .5s cubic-bezier(0.65, 0, 0.35, 1);
@@ -41,7 +43,7 @@
 }
 
 .page-content {
-    width: calc(100% - 20vw);
+    max-width: calc(100% - 20vw);
     max-height: calc(100% - 5rem);
     
     display: flex;

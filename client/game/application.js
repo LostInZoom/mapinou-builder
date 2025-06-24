@@ -9,6 +9,7 @@ import { Music } from '../utils/audio.js';
 import Title from '../pages/title.js';
 import Consent from '../pages/consent.js';
 import Form from '../pages/form.js';
+import Levels from '../pages/levels.js';
 
 class Application {
     constructor(options) {
@@ -46,8 +47,6 @@ class Application {
             this.page = new Title({
                 app: this,
                 position: 'current',
-                question: 0,
-                defaultLastAnswer: true
             }, () => {
                 this.music.displayButton();
             });

@@ -38,6 +38,22 @@ class Sound {
             removeClass(this.button, 'active');
         });
     }
+
+    fadeOut(duration, callback) {
+        callback = callback || function() {};
+        let increment = 10;
+        let gap = (this.audio.volume * 100) / increment;
+        let interval = setInterval(() => {
+            let newvolume = this.audio.volume - (increment / 100);
+            if (newvolume <= 0) {
+                this.audio.volume = 0;
+                clearInterval(interval);
+                callback();
+            } else {
+                this.audio.volume = newvolume;
+            }
+        }, duration / gap);
+    }
 }
 
 class SoundEffect extends Sound {

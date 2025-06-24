@@ -1,9 +1,7 @@
 import { addClass, makeDiv, hasClass, addClass, removeClass, wait } from "../utils/dom";
-import { remap, easeOutCubic, easeInCubic, easeOutSine } from "../utils/math";
-import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
+import Levels from "./levels";
 import Page from "./page";
-import Title from "./title";
 
 class Form extends Page {
     constructor(options, callback) {
@@ -21,23 +19,28 @@ class Form extends Page {
 
         this.text = makeDiv(null, 'form-text');
         this.questions = makeDiv(null, 'form-questions');
-        let q = this.options.app.options.form[this.options.question];
 
-        let mandatory = q.mandatory;
-        let multiple = q.multiple;
+        this.question = this.options.app.options.form[this.options.question];
+        let multiple = this.question.multiple;
 
-        this.question = makeDiv(null, 'form-question', q.question);
+        this.label = makeDiv(null, 'form-question', this.question.question);
         this.answerscontainer = makeDiv(null, 'form-answers');
 
-        this.text.append(this.question, this.answerscontainer);
+        this.text.append(this.label, this.answerscontainer);
 
         this.content.append(this.back, this.text, this.continue);
         this.container.append(this.content);
 
-        for (let i = 0; i < q.answers.length; i++) {
-            let a = q.answers[i];
-
+        for (let i = 0; i < this.question.answers.length; i++) {
+            let a = this.question.answers[i];
             let answer = makeDiv(null, 'form-answer', a.text);
+
+            if (this.question.answer) {
+                if (this.question.answer.includes(i)) {
+                    addClass(answer, 'selected');
+                }
+            }
+
             answer.setAttribute('unique', a.unique);
             this.answers.push(answer);
             this.answerscontainer.append(answer);
@@ -58,18 +61,18 @@ class Form extends Page {
 
         wait(this.app.options.interface.transition.page, () => {
             addClass(this.back, 'pop');
+            if (this.isAnswered()) { addClass(this.continue, 'pop'); }
             this.callback();
         });
 
         this.back.addEventListener('click', () => {
+            this.saveAnswer();
             if (this.options.question === 0) {
-                // Define the next page here
                 this.previous = new Consent({
                     app: this.app,
                     position: 'previous',
                 });
             } else {
-                // Define the next page here
                 this.previous = new Form({
                     app: this.app,
                     position: 'previous',
@@ -80,14 +83,13 @@ class Form extends Page {
         });
 
         this.continue.addEventListener('click', () => {
+            this.saveAnswer();
             if (this.options.question === this.options.app.options.form.length - 1) {
-                // Define the next page here
-                this.next = new Title({
+                this.next = new Levels({
                     app: this.app,
                     position: 'next',
                 });
             } else {
-                // Define the next page here
                 this.next = new Form({
                     app: this.app,
                     position: 'next',
@@ -117,6 +119,15 @@ class Form extends Page {
             if (hasClass(a, 'selected')) { result = true; break; }
         }
         return result;
+    }
+
+    saveAnswer() {
+        let result = [];
+        for (let i = 0; i < this.answers.length; i++) {
+            let a = this.answers[i];
+            if (hasClass(a, 'selected')) { result.push(i); }
+        }
+        this.question.answer = result;
     }
 }
 
