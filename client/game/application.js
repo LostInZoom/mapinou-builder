@@ -15,11 +15,17 @@ class Application {
     constructor(options) {
         this.options = options;
 
-        console.log(options)
+        console.log(options);
 
         // Create the DOM Element
         this.container = makeDiv('application', null);
         document.body.append(this.container);
+
+        this.mask = makeDiv(null, 'mask');
+        this.loader = makeDiv(null, 'loader');
+        this.mask.append(this.loader);
+        this.container.append(this.mask);
+        this.loading();
 
         this.rabbits = [];
         this.maxrabbit = 5;
@@ -43,6 +49,7 @@ class Application {
             center: [ 291041.84, 5629996.16 ],
             zoom: 15
         }, () => {
+            this.loaded();
             // Create the current page
             this.page = new Title({
                 app: this,
@@ -84,32 +91,54 @@ class Application {
      * @param {Page} page - The new page to display
      * @param {*} callback 
      */
-    slide(position, page, callback) {
+    slide(options, callback) {
         callback = callback || function() {};
 
+        // Make sure the page isn't sliding
         if (!this.sliding) {
             this.sliding = true;
 
             let center = this.basemap.getCenter();
             let increment = this.basemap.getResolution() * 100;
 
-            if (position === 'previous') { center[0] += increment; } else { center[0] -= increment; }
+            if (options.position === 'previous') { center[0] += increment; }
+            else { center[0] -= increment; }
+            
             this.basemap.animate({
                 center: center,
                 duration: 500,
                 easing: easeInOutCubic
             });
 
-            this.page.setPosition(position);
-            page.setPosition('current');
+            this.page.setPosition(options.position);
+            options.page.setPosition('current');
 
             wait(this.options.interface.transition.page, () => {
                 this.page.destroy();
-                this.page = page;
+                this.page = options.page;
                 this.sliding = false;
                 callback();
             })
         }
+    }
+
+    hasRabbits() {
+        if (this.rabbits.length > 0) { return true; }
+        else { return false; }
+    }
+
+    killRabbits() {
+        while (this.rabbits.length > 0) {
+            this.rabbits.pop().despawn();
+        }
+    }
+
+    loading() {
+        removeClass(this.mask, 'loaded');
+    }
+
+    loaded() {
+        addClass(this.mask, 'loaded');
     }
 }
 

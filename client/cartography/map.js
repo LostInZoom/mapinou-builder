@@ -34,11 +34,6 @@ class Basemap {
         if (options.class) { addClass(this.container, options.class); }
         this.parent.container.append(this.container);
 
-        this.mask = makeDiv(null, 'mask mask-map');
-        this.loader = makeDiv(null, 'loader');
-        this.mask.append(this.loader);
-        this.container.append(this.mask);
-
         this.view = new View({
             center: options.center,
             zoom: options.zoom,
@@ -85,10 +80,7 @@ class Basemap {
             }),
         });
 
-        this.map.once('loadend', () => {
-            this.loaded();
-            wait(200, () => { callback(); });
-        });
+        this.map.once('loadend', callback);
     }
 
     setCenter(center) {
@@ -111,17 +103,13 @@ class Basemap {
         return this.view.getResolution();
     }
 
-    loading() {
-        removeClass(this.mask, 'loaded');
-    }
-
-    loaded() {
-        addClass(this.mask, 'loaded');
-    }
-
     animate(options, callback) {
         callback = callback || function () {};
         this.view.animate(options, callback);
+    }
+
+    fit(extent) {
+        this.map.getView().fit(extent);
     }
 }
 

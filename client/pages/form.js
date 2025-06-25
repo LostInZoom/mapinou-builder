@@ -1,7 +1,9 @@
+import { ajaxPost } from "../utils/ajax";
 import { addClass, makeDiv, hasClass, addClass, removeClass, wait } from "../utils/dom";
 import Consent from "./consent";
 import Levels from "./levels";
 import Page from "./page";
+import Title from "./title";
 
 class Form extends Page {
     constructor(options, callback) {
@@ -68,10 +70,17 @@ class Form extends Page {
         this.back.addEventListener('click', () => {
             this.saveAnswer();
             if (this.options.question === 0) {
-                this.previous = new Consent({
-                    app: this.app,
-                    position: 'previous',
-                });
+                if (this.app.options.session.consent) {
+                    this.previous = new Title({
+                        app: this.app,
+                        position: 'previous',
+                    });
+                } else {
+                    this.previous = new Consent({
+                        app: this.app,
+                        position: 'previous',
+                    });
+                }
             } else {
                 this.previous = new Form({
                     app: this.app,
@@ -79,7 +88,10 @@ class Form extends Page {
                     question: this.options.question - 1,
                 });
             }
-            this.app.slide('next', this.previous);
+            this.app.slide({
+                position: 'next',
+                page: this.previous
+            });
         });
 
         this.continue.addEventListener('click', () => {
@@ -89,6 +101,10 @@ class Form extends Page {
                     app: this.app,
                     position: 'next',
                 });
+
+                ajaxPost('form/', { form: this.options.app.options.form }, (status) => {
+
+                });
             } else {
                 this.next = new Form({
                     app: this.app,
@@ -96,8 +112,19 @@ class Form extends Page {
                     question: this.options.question + 1,
                 });
             }
-            this.app.slide('previous', this.next);
+            this.app.slide({
+                position: 'previous',
+                page: this.next
+            });
         });
+    }
+
+    title() {
+        this.previous = new Title({ app: this.app, position: 'previous' });
+    }
+
+    levels() {
+
     }
 
     unselectAnswers(unique) {

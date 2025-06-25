@@ -37,6 +37,20 @@ class Page {
         addClass(this.container, position);
     }
 
+    slideNext() {
+        this.app.slide({
+            position: 'previous',
+            page: this.next
+        });
+    }
+
+    slidePrevious() {
+        this.app.slide({
+            position: 'next',
+            page: this.previous
+        });
+    }
+
     clear() {
         clearElement(this.container);
     }

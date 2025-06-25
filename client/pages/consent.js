@@ -1,3 +1,4 @@
+import { ajaxPost } from "../utils/ajax";
 import { addClass, isOverflown, makeDiv, removeClass, wait } from "../utils/dom";
 import Form from "./form";
 import Page from "./page";
@@ -84,30 +85,36 @@ class Consent extends Page {
                     behavior: 'smooth'
                 });
             });
-
+            
+            // PREVIOUS PAGE
             this.back.addEventListener('click', () => {
-                // Define the previous page here
-                this.previous = new Title({
-                    app: this.app,
-                    position: 'previous'
-                });
-
-                this.app.slide('next', this.previous);
+                this.title();
+                this.slidePrevious();
             });
 
+            // NEXT PAGE
             this.continue.addEventListener('click', () => {
-                // Define the next page here
-                this.next = new Form({
-                    app: this.app,
-                    position: 'next',
-                    question: 0
+                ajaxPost('consent/', { session: this.app.options.session.index }, (status) => {
+                    if (status.done) { this.app.options.session.consent = true; }
+                    this.form();
+                    this.slideNext();
                 });
-
-                this.app.slide('previous', this.next);
             });
 
             this.callback();
         });
+    }
+
+    title() {
+        this.previous = new Title({ app: this.app, position: 'previous' });
+    }
+
+    form() {
+        this.next = new Form({ app: this.app, position: 'next', question: 0 });
+    }
+
+    levels() {
+        
     }
 
     checking() {

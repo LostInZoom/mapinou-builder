@@ -2,6 +2,8 @@ import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
 import { remap, easeOutCubic, easeInCubic, easeOutSine } from "../utils/math";
 import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
+import Form from "./form";
+import Levels from "./levels";
 import Page from "./page";
 
 class Title extends Page {
@@ -117,15 +119,31 @@ class Title extends Page {
         });
 
         this.startlabel.addEventListener('click', () => {
-            // Define the next page here
-            this.next = new Consent({
-                app: this.app,
-                position: 'next'
-            });
+            if (this.options.app.options.session.consent) {
+                if (this.options.app.options.session.form) {
+                    this.level();
+                } else {
+                    this.form();
+                }
+            } else {
+                this.consent();
+            }
             
             addClass(this.startlabel, 'clicked');
-            this.app.slide('previous', this.next);
+            this.slideNext();
         });
+    }
+
+    consent() {
+        this.next = new Consent({ app: this.app, position: 'next' });
+    }
+    
+    form() {
+        this.next = new Form({ app: this.app, position: 'next', question: 0 });
+    }
+
+    level() {
+
     }
 }
 

@@ -37,8 +37,20 @@ app.post('/cartogame/registration', jsonParser, (req, res) => {
 });
 
 app.post('/cartogame/verification', jsonParser, (req, res) => {
-	verifySession(req.body.sessionId).then((isPresent) => {
-		res.send(JSON.stringify({ isPresent: isPresent }));
+	verifySession(req.body.sessionId).then((data) => {
+		res.send(JSON.stringify(data));
+	});
+});
+
+app.post('/cartogame/consent', jsonParser, (req, res) => {
+	giveConsent(req.body.session).then((done) => {
+		res.send(JSON.stringify({ done: done }));
+	});
+});
+
+app.post('/cartogame/form', jsonParser, (req, res) => {
+	insertForm(req.body.form).then((done) => {
+		res.send(JSON.stringify({ done: done }));
 	});
 });
 
@@ -67,18 +79,40 @@ async function createSession(options) {
 
 async function verifySession(index) {
 	let verification = `
-        SELECT id
+        SELECT id, consent, form
 		FROM data.sessions
 		WHERE id = ${index};
     `
 	try {
 		let result = await db.query(verification);
 		if (result.rows.length > 0) {
-			return true;
+			return {
+				isPresent: true,
+				consent: result.rows[0].consent,
+				form: result.rows[0].form,
+			};
 		} else {
-			return false
+			return { isPresent: false };
 		}
 	} catch {
-		return -1;
+		return {};
 	}
+}
+
+async function giveConsent(index) {
+	let verification = `
+        UPDATE data.sessions
+		SET consent = true
+		WHERE id = ${index};
+    `
+	try {
+		await db.query(verification);
+		return true
+	} catch {
+		return false;
+	}
+}
+
+async function insertForm(form) {
+	console.log(form)
 }

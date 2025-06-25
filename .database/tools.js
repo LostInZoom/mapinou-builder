@@ -24,6 +24,7 @@ async function createTables() {
             width integer,
             height integer,
             consent boolean DEFAULT False,
+            form boolean DEFAULT False,
             CONSTRAINT sessions_pkey PRIMARY KEY (id)
         );
 
@@ -86,8 +87,9 @@ async function insertLevels() {
     const params = load(file);
 
     for (let i = 0; i < params.levels.length; i++) {
-        let l = params.levels[i];
-        if (l !== null) {
+        let entry = params.levels[i];
+        if (entry.type === 'level' && entry.options) {
+            let l = entry.options;
             let insertion = `
                 INSERT INTO data.levels (player, target)
                 VALUES (

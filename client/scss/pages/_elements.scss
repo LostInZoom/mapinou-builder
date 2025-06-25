@@ -1,3 +1,5 @@
+@use '../colors';
+
 .banner {
     position: absolute;
     z-index: 50;
@@ -38,4 +40,37 @@
     &.center { align-items: center; }
     &.left { align-items: end; }
     &.right { align-items: start; }
+}
+
+.mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 100;
+
+    background-color: colors.$main-color-light;
+    opacity: 1;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: all;
+
+    transition: opacity .2s;
+    &.loaded {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+.loader {
+    width: .8rem;
+    height: .8rem;
+    border-radius: 50%;
+    border-width: .4rem;
+    border-style: solid;
+    border-color: colors.$secondary-color-dark transparent;
+    animation: rotationcw 1.2s linear infinite;
 }

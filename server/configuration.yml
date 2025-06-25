@@ -10,6 +10,8 @@ interface:
       - fr
       - en
     current: en
+  map:
+    extent: [-571380.89, 5066464.36, 1064167.68, 6636793.32]
 #########################
 #### GAME PARAMETERS ####
 #########################
@@ -117,12 +119,12 @@ tutorial:
   player: [ 396377.1,5701254.9 ]
   target: [ 416553.587,5708562.378 ]
   hints:
-    0: You are in the west of the city of Lyon
-    6: You are between St-Étienne and Clermont-Ferrand
-    8: You are south-west of Ambert
-    10: You are between St-Amant-Roche-Savine and St-Germain-l'Herm
-    11: You are south-west of Fournols
-    13: You are in La Colombière, double-tap on your position
+    0: À l'ouest de la ville de Lyon
+    6: Entre St-Étienne et Clermont-Ferrand
+    8: Au sud-ouest de la ville d'Ambert
+    10: Entre St-Amant-Roche-Savine et St-Germain-l'Herm
+    11: Au sud-ouest de Fournols
+    13: Au hameau de La Colombière, double-cliquez sur votre position
   pitfalls:
     - [ 399537.1,5699198.9 ]
     - [ 399416.53,5703120.31 ]
@@ -188,10 +190,8 @@ levels:
   - type: level
   - type: level
   - type: level
-  - type: level
   - type: test
     name: "Expérience 1"
-  - type: level
   - type: level
   - type: level
   - type: level
@@ -199,6 +199,11 @@ levels:
   - type: test
     name: "Expérience 2"
   - type: level
+  - type: level
+  - type: level
+  - type: level
+  - type: test
+    name: "Expérience 3"
   - type: level
   - type: level
   - type: level

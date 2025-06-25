@@ -18,21 +18,28 @@ async function register(callback) {
     }
 
     let sessionId = localStorage.getItem('session');
+    let results = { consent: false, form: false };
+
     if (sessionId) {
         ajaxPost('verification/', { sessionId: sessionId }, (data) => {
             if (data.isPresent) {
-                callback(sessionId);
+                results.index = parseInt(sessionId);
+                results.consent = data.consent;
+                results.form = data.form;
+                callback(results);
             } else {
                 ajaxPost('registration/', getInformation(), (data) => {
                     localStorage.setItem('session', data.sessionId);
-                    callback(data.sessionId);
+                    results.index = parseInt(data.sessionId);
+                    callback(results);
                 });
             }
         });
     } else {
         ajaxPost('registration/', getInformation(), (data) => {
             localStorage.setItem('session', data.sessionId);
-            callback(data.sessionId);
+            results.index = parseInt(data.sessionId);
+            callback(results);
         });
     }
 }
