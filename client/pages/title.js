@@ -119,30 +119,25 @@ class Title extends Page {
         });
 
         this.startlabel.addEventListener('click', () => {
-            if (this.options.app.options.session.consent) {
-                if (this.options.app.options.session.form) {
-                    this.level();
+            if (this.listen) {
+                this.listen = false;
+                if (this.options.app.options.session.consent) {
+                    if (this.options.app.options.session.form) {
+                        this.level();
+                    } else {
+                        this.next = new Form({ app: this.app, position: 'next', question: 0 });
+                        this.slideNext();
+                    }
                 } else {
-                    this.form();
+                    this.next = new Consent({ app: this.app, position: 'next' });
+                    this.slideNext();
                 }
-            } else {
-                this.consent();
+                addClass(this.startlabel, 'clicked');
             }
-            
-            addClass(this.startlabel, 'clicked');
-            this.slideNext();
         });
     }
 
-    consent() {
-        this.next = new Consent({ app: this.app, position: 'next' });
-    }
-    
-    form() {
-        this.next = new Form({ app: this.app, position: 'next', question: 0 });
-    }
-
-    level() {
+    levels() {
 
     }
 }

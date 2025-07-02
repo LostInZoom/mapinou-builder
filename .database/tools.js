@@ -28,13 +28,20 @@ async function createTables() {
             CONSTRAINT sessions_pkey PRIMARY KEY (id)
         );
 
+        CREATE TABLE IF NOT EXISTS data.questions (
+            id serial,
+            value character varying(1000),
+            CONSTRAINT questions_pkey PRIMARY KEY (id)
+        );
+
         CREATE TABLE IF NOT EXISTS data.survey (
             id serial,
             session integer,
-            question character varying(1000),
-            answer character varying(1000),
+            question integer,
+            answer text,
             CONSTRAINT survey_pkey PRIMARY KEY (id),
-            CONSTRAINT survey_sessions_key FOREIGN KEY (session) REFERENCES data.sessions(id)
+            CONSTRAINT survey_sessions_key FOREIGN KEY (session) REFERENCES data.sessions(id),
+            CONSTRAINT survey_questions_key FOREIGN KEY (question) REFERENCES data.questions(id)
         );
 
         CREATE TABLE IF NOT EXISTS data.levels (
@@ -85,6 +92,19 @@ async function createTables() {
 async function insertLevels() {
     const file = fs.readFileSync('./server/configuration.yml', { encoding: 'utf-8' });
     const params = load(file);
+
+    for (let i = 0; i < params.form.length; i++) {
+        let q = params.form[i].question;
+        // Remove breaks
+        q = q.replace('<br>', ' ');
+        // Replace single quotes with two single quotes to avoid errors during insertion
+        q = q.replace("'", "''");
+        let insertion = `
+            INSERT INTO data.questions (value)
+            VALUES ('${q}');
+        `
+        await db.query(insertion);
+    }
 
     for (let i = 0; i < params.levels.length; i++) {
         let entry = params.levels[i];

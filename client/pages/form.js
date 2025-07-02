@@ -68,59 +68,45 @@ class Form extends Page {
         });
 
         this.back.addEventListener('click', () => {
-            this.saveAnswer();
-            if (this.options.question === 0) {
-                if (this.app.options.session.consent) {
-                    this.previous = new Title({
-                        app: this.app,
-                        position: 'previous',
-                    });
+            if (this.listen) {
+                this.listen = false;
+                this.saveAnswer();
+                if (this.options.question === 0) {
+                    if (this.app.options.session.consent) {
+                        this.previous = new Title({ app: this.app, position: 'previous' });
+                    } else {
+                        this.previous = new Consent({ app: this.app, position: 'previous', });
+                    }
                 } else {
-                    this.previous = new Consent({
-                        app: this.app,
-                        position: 'previous',
-                    });
+                    this.previous = new Form({ app: this.app, position: 'previous', question: this.options.question - 1, });
                 }
-            } else {
-                this.previous = new Form({
-                    app: this.app,
-                    position: 'previous',
-                    question: this.options.question - 1,
-                });
+                this.slidePrevious();
             }
-            this.app.slide({
-                position: 'next',
-                page: this.previous
-            });
         });
 
         this.continue.addEventListener('click', () => {
-            this.saveAnswer();
-            if (this.options.question === this.options.app.options.form.length - 1) {
-                this.next = new Levels({
-                    app: this.app,
-                    position: 'next',
-                });
+            if (this.listen) {
+                this.listen = false;
+                this.saveAnswer();
+                if (this.options.question === this.options.app.options.form.length - 1) {
+                    let data = [];
+                    for (let i = 0; i < this.options.app.options.form.length; i++) {
+                        let q = this.options.app.options.form[i];
+                        let answers = []
+                        q.answer.forEach((a) => { answers.push(q.answers[a].text); });
+                        data.push(answers);
+                    }
 
-                ajaxPost('form/', { form: this.options.app.options.form }, (status) => {
-
-                });
-            } else {
-                this.next = new Form({
-                    app: this.app,
-                    position: 'next',
-                    question: this.options.question + 1,
-                });
+                    ajaxPost('form/', { session: this.app.options.session.index, form: data }, (status) => {
+                        if (status.done) { this.app.options.session.form = true; }
+                        this.levels();
+                    });
+                } else {
+                    this.next = new Form({ app: this.app, position: 'next', question: this.options.question + 1, });
+                    this.slideNext();
+                }
             }
-            this.app.slide({
-                position: 'previous',
-                page: this.next
-            });
         });
-    }
-
-    title() {
-        this.previous = new Title({ app: this.app, position: 'previous' });
     }
 
     levels() {

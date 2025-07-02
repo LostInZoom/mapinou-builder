@@ -88,33 +88,27 @@ class Consent extends Page {
             
             // PREVIOUS PAGE
             this.back.addEventListener('click', () => {
-                this.title();
-                this.slidePrevious();
+                if (this.listen) {
+                    this.listen = false;
+                    this.previous = new Title({ app: this.app, position: 'previous' });
+                    this.slidePrevious();
+                }
             });
 
             // NEXT PAGE
             this.continue.addEventListener('click', () => {
-                ajaxPost('consent/', { session: this.app.options.session.index }, (status) => {
-                    if (status.done) { this.app.options.session.consent = true; }
-                    this.form();
-                    this.slideNext();
-                });
+                if (this.listen) {
+                    this.listen = false;
+                    ajaxPost('consent/', { session: this.app.options.session.index }, (status) => {
+                        if (status.done) { this.app.options.session.consent = true; }
+                        this.next = new Form({ app: this.app, position: 'next', question: 0 });
+                        this.slideNext();
+                    });
+                }
             });
 
             this.callback();
         });
-    }
-
-    title() {
-        this.previous = new Title({ app: this.app, position: 'previous' });
-    }
-
-    form() {
-        this.next = new Form({ app: this.app, position: 'next', question: 0 });
-    }
-
-    levels() {
-        
     }
 
     checking() {

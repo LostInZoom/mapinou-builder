@@ -5,6 +5,7 @@ class Page {
     constructor(options, callback) {
         this.options = options || {};
         this.callback = callback || function() {};
+        this.listen = true;
 
         this.app = this.options.app;
         this.position = this.options.position;

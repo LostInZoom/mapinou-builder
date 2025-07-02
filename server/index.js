@@ -49,7 +49,7 @@ app.post('/cartogame/consent', jsonParser, (req, res) => {
 });
 
 app.post('/cartogame/form', jsonParser, (req, res) => {
-	insertForm(req.body.form).then((done) => {
+	insertForm(req.body).then((done) => {
 		res.send(JSON.stringify({ done: done }));
 	});
 });
@@ -113,6 +113,25 @@ async function giveConsent(index) {
 	}
 }
 
-async function insertForm(form) {
-	console.log(form)
+async function insertForm(data) {
+	let answers = [];
+	for (let q = 0; q < data.form.length; q++) {
+		let answer = data.form[q].join(', ').replace('<br>', ' ').replace("'", "''");
+		answers.push(`(${data.session}, ${q + 1}, '${answer}')`);
+	}
+	let values = answers.join(', ');
+	let insertion = `
+        INSERT INTO data.survey (session, question, answer)
+        VALUES ${values};
+
+		UPDATE data.sessions
+		SET form = true
+		WHERE id = ${data.session};
+    `
+	try {
+		await db.query(insertion);
+		return true
+	} catch {
+		return false;
+	}
 }
