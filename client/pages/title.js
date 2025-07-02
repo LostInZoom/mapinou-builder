@@ -123,7 +123,7 @@ class Title extends Page {
                 this.listen = false;
                 if (this.options.app.options.session.consent) {
                     if (this.options.app.options.session.form) {
-                        this.level();
+                        this.levels();
                     } else {
                         this.next = new Form({ app: this.app, position: 'next', question: 0 });
                         this.slideNext();
