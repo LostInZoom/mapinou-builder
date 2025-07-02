@@ -1,4 +1,4 @@
-import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
+import { addClass, addClassList, makeDiv, removeClass, wait } from "../utils/dom";
 import { remap, easeOutCubic, easeInCubic, easeOutSine } from "../utils/math";
 import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
@@ -9,23 +9,30 @@ import Page from "./page";
 class Title extends Page {
     constructor(options, callback) {
         super(options, callback);
+        this.listen = false;
+
+        if (this.options.initialize === undefined) { this.options.initialize = true; }
+
+        // Set the title name
+        this.name = 'Mapinou';
 
         addClass(this.container, 'page-title');
 
+        let className = this.options.initialize ? ' initialize' : '';
+
         // Create the title div and the container for the individual letters
-        this.title = makeDiv(null, 'title-name');
-        this.letters = makeDiv(null, 'title-letters');
+        this.title = makeDiv(null, 'title-name slanted');
+        this.letters = makeDiv(null, 'title-letters' + className);
         this.title.append(this.letters);
+        this.container.append(this.title);
 
         let delay = this.app.options.interface.transition.page;
-        wait(delay, () => { addClass(this.letters, 'pop'); })
-        
-        // Add a delay of 300 milliseconds to make sure the title background is revealed
-        delay += 300;
-        
-        // Set the title name
-        this.name = 'Mapinou';
-        this.container.append(this.title);
+
+        if (this.options.initialize) {
+            wait(delay, () => { removeClass(this.letters, 'initialize'); })
+            // Add a delay of 300 milliseconds to make sure the title background is revealed
+            delay += 300;
+        }
 
         this.letterArray = [];
         
@@ -41,68 +48,72 @@ class Title extends Page {
             this.letterArray.push(character);
         }
 
-        // Get the width of the page in rem
-        let width = pxToRem(this.title.offsetWidth);
+        if (this.options.initialize) {
+            // Get the width of the page in rem
+            let width = pxToRem(this.title.offsetWidth);
 
-        // Set the time taken by the letters animation
-        let animationtime = width * 10;
-        // Calculate individual letters animation time
-        let lettertime = animationtime / this.name.length;
+            // Set the time taken by the letters animation
+            let animationtime = width * 10;
+            // Calculate individual letters animation time
+            let lettertime = animationtime / this.name.length;
+            
+            let j = this.letterArray.length - 1;
+            this.letterArray.forEach((l) => {
+                l.style.transform = `translateX(-${width}rem)`;
+                // Remap the delay, from [0, animationtime] to [0, 1]
+                let remapped = remap(j * lettertime, 0, animationtime);
+                // Calculate the remapped easing
+                let easing = remap(easeOutCubic(remapped), 0, 1, 0, animationtime);
+                // Wait the easing value for each letter before the translation
+                wait(easing + delay, () => { l.style.transform = `translateX(0)`; });
+                j--;
+            })
 
-        let j = this.letterArray.length - 1;
-        this.letterArray.forEach((l) => {
-            l.style.transform = `translateX(-${width}rem)`;
-            // Remap the delay, from [0, animationtime] to [0, 1]
-            let remapped = remap(j * lettertime, 0, animationtime);
-            // Calculate the remapped easing
-            let easing = remap(easeOutCubic(remapped), 0, 1, 0, animationtime);
-            // Wait the easing value for each letter before the translation
-            wait(easing + delay, () => {
-                l.style.opacity = 1;
-                l.style.transform = `translateX(0)`;
-            });
-            j--;
-        })
-
-        // Increment the delay by the letters animation time
-        delay += 400 + animationtime;
-        // Bounce the whole title letters and add the time of the animation to the delay
-        wait(delay, () => { addClass(this.letters, 'bounce'); })
+            // Increment the delay by the letters animation time
+            delay += 400 + animationtime;
+            // Bounce the whole title letters and add the time of the animation to the delay
+            wait(delay, () => { addClass(this.letters, 'horizontal-bounce'); })
+        }
 
         // Create the start and credits buttons
         this.buttons = makeDiv(null, 'title-buttons');
 
-        this.start = makeDiv(null, 'title-button title-button-start');
+        this.start = makeDiv(null, 'title-button title-button-start' + className);
         this.startlabel = makeDiv(null, 'title-button-label', 'Jouer');
         this.start.append(this.startlabel);
 
-        this.credits = makeDiv(null, 'title-button title-button-credits');
+        this.credits = makeDiv(null, 'title-button title-button-credits' + className);
         this.creditslabel = makeDiv(null, 'title-button-label', 'Crédits');
         this.credits.append(this.creditslabel);
 
         this.buttons.append(this.start, this.credits);
 
-        // For each button slide and increment the delay
-        [ this.start, this.credits ].forEach((button) => {
-            wait(delay, () => {
-                addClass(button, 'slide');
-                wait(300, () => { addClass(button, 'bounce'); });
+        if (this.options.initialize) {
+            delay += 300;
+            // For each button slide and increment the delay
+            [ this.start, this.credits ].forEach((button) => {
+                wait(delay, () => { removeClass(button, 'initialize'); });
+                delay += 300;
             });
-            delay += 300
-        });
-
-        // Delay the build infos by 400 milliseconds for dramatic effects
-        delay += 400 + 300;
+        }
 
         // Create the bottom build info
-        this.buildinfos = makeDiv(null, 'title-build', `version alpha - ${new Date().getFullYear()}`);
+        this.buildinfos = makeDiv(null, 'title-build' + className, `version alpha - ${new Date().getFullYear()}`);
 
-        // Slide the build button
-        wait(delay, () => {
-            addClass(this.buildinfos, 'slide');
+        if (this.options.initialize) {
+            // Delay the build infos by 400 milliseconds for dramatic effects
+            delay += 200;
+            // Slide the build button
+            wait(delay, () => {
+                removeClass(this.buildinfos, 'initialize');
+                this.listen = true;
+                this.callback();
+            });
+        } else {
+            this.listen = true;
             this.callback();
-        });
-
+        }
+        
         // Add every element to the page
         this.container.append(this.buttons, this.buildinfos);
 
@@ -110,9 +121,9 @@ class Title extends Page {
         this.title.addEventListener('click', () => {
             if (this.titlelisten) {
                 this.titlelisten = false;
-                addClass(this.title, 'animate');
+                removeClass(this.title, 'slanted');
                 wait(800, () => {
-                    removeClass(this.title, 'animate');
+                    addClass(this.title, 'slanted');
                     wait(500, () => { this.titlelisten = true; });
                 });
             }
@@ -125,20 +136,31 @@ class Title extends Page {
                     if (this.options.app.options.session.form) {
                         this.levels();
                     } else {
+                        addClass(this.startlabel, 'clicked');
                         this.next = new Form({ app: this.app, position: 'next', question: 0 });
                         this.slideNext();
                     }
                 } else {
+                    addClass(this.startlabel, 'clicked');
                     this.next = new Consent({ app: this.app, position: 'next' });
                     this.slideNext();
                 }
-                addClass(this.startlabel, 'clicked');
             }
         });
     }
 
     levels() {
+        this.letters.style.transformOrigin = 'center center';
+        this.letters.style.transition = 'transform .3s cubic-bezier(0.36, 0, 0.66, -0.56)';
+        this.start.style.transition = 'transform .3s cubic-bezier(0.36, 0, 0.66, -0.56)';
+        this.credits.style.transition = 'transform .3s cubic-bezier(0.36, 0, 0.66, -0.56)';
+        this.buildinfos.style.transition = 'transform .3s cubic-bezier(0.36, 0, 0.66, -0.56)';
+        addClassList([ this.letters, this.start, this.credits, this.buildinfos ], 'initialize');
 
+        wait(300, () => {
+            this.destroy();
+            this.app.page = new Levels({ app: this.app, position: 'current' });
+        });
     }
 }
 

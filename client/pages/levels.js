@@ -1,3 +1,5 @@
+import {inAndOut} from 'ol/easing';
+
 import Tutorial from "../game/tutorial";
 import { addClass, makeDiv, hasClass, addClass, removeClass, wait } from "../utils/dom";
 import Consent from "./consent";
@@ -8,8 +10,12 @@ class Levels extends Page {
     constructor(options, callback) {
         super(options, callback);
 
-        // this.options.app.loading();
-        this.options.app.basemap.fit(this.options.app.options.interface.map.extent);
+        this.options.app.basemap.fit(this.options.app.options.interface.map.extent, {
+            duration: 500,
+            easing: inAndOut
+        }, () => {
+
+        });
 
 
 
@@ -129,6 +135,10 @@ class Levels extends Page {
             });
             this.app.slide('next', this.previous);
         });
+    }
+
+    title() {
+
     }
 }
 

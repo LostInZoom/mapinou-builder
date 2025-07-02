@@ -90,7 +90,7 @@ class Consent extends Page {
             this.back.addEventListener('click', () => {
                 if (this.listen) {
                     this.listen = false;
-                    this.previous = new Title({ app: this.app, position: 'previous' });
+                    this.previous = new Title({ app: this.app, position: 'previous', initialize: false });
                     this.slidePrevious();
                 }
             });

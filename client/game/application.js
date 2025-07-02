@@ -53,7 +53,7 @@ class Application {
             // Create the current page
             this.page = new Title({
                 app: this,
-                position: 'current',
+                position: 'current'
             }, () => {
                 this.music.displayButton();
             });

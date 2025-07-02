@@ -108,8 +108,9 @@ class Basemap {
         this.view.animate(options, callback);
     }
 
-    fit(extent) {
-        this.map.getView().fit(extent);
+    fit(extent, options, callback) {
+        options.callback = callback;
+        this.map.getView().fit(extent, options);
     }
 }
 
