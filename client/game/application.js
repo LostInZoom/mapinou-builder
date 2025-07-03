@@ -44,26 +44,27 @@ class Application {
         });
 
         this.basemap = new Basemap({
-            parent: this,
+            parent: this.container,
             class: 'basemap',
-            center: [ 291041.84, 5629996.16 ],
-            zoom: 15
+            center: this.options.interface.map.start.center,
+            zoom: this.options.interface.map.start.zoom
         }, () => {
             this.loaded();
             // Create the current page
-            this.page = new Title({
+            this.page = new Levels({
                 app: this,
-                position: 'current'
+                position: 'current',
+                init: true
             }, () => {
                 this.music.displayButton();
             });
         });
 
         // Rabbit spawner
-        let listen = true;
+        this.allowed = true;
         this.basemap.map.on('click', (e) => {
-            if (listen) {
-                listen = false;
+            if (this.allowed) {
+                this.allowed = false;
                 let coords = this.basemap.map.getEventCoordinate(event);
                 let rabbit = new Roamer({
                     basemap: this.basemap,
@@ -79,7 +80,7 @@ class Application {
                 rabbit.spawn(() => {
                     this.rabbits.push(rabbit);
                     rabbit.roam();
-                    listen = true;
+                    this.allowed = true;
                 });
             }
         });
@@ -120,6 +121,14 @@ class Application {
                 callback();
             })
         }
+    }
+
+    allowRabbits() {
+        this.allowed = true;
+    }
+
+    forbidRabbits() {
+        this.allowed = false;
     }
 
     hasRabbits() {

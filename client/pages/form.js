@@ -10,6 +10,7 @@ class Form extends Page {
         super(options, callback);
 
         addClass(this.container, 'page-form');
+        this.options.app.allowRabbits();
 
         this.content = makeDiv(null, 'page-content');
         this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
@@ -73,7 +74,7 @@ class Form extends Page {
                 this.saveAnswer();
                 if (this.options.question === 0) {
                     if (this.app.options.session.consent) {
-                        this.previous = new Title({ app: this.app, position: 'previous', });
+                        this.previous = new Title({ app: this.app, position: 'previous' });
                     } else {
                         this.previous = new Consent({ app: this.app, position: 'previous', });
                     }

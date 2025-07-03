@@ -32,7 +32,7 @@ class Basemap {
 
         this.container = makeDiv(null, 'map');
         if (options.class) { addClass(this.container, options.class); }
-        this.parent.container.append(this.container);
+        this.parent.append(this.container);
 
         this.view = new View({
             center: options.center,
@@ -66,6 +66,8 @@ class Basemap {
             target: this.container,
             layers: [ this.baselayer ],
             view: this.view,
+            loadTilesWhileAnimating: true,
+            loadTilesWhileInteracting: true,
             interactions: new defaultInteractions({
                 altShiftDragRotate: false,
                 altShiftDragRotate: false,
@@ -103,6 +105,10 @@ class Basemap {
         return this.view.getResolution();
     }
 
+    getPixel(coordinates) {
+        return this.map.getPixelFromCoordinate(coordinates);
+    }
+
     animate(options, callback) {
         callback = callback || function () {};
         this.view.animate(options, callback);
@@ -111,6 +117,12 @@ class Basemap {
     fit(extent, options, callback) {
         options.callback = callback;
         this.map.getView().fit(extent, options);
+    }
+}
+
+class MiniMap extends Basemap {
+    constructor(options, callback) {
+        super(options, callback);
     }
 }
 
@@ -599,4 +611,4 @@ class GameMap extends Basemap {
     }
 }
 
-export { Basemap, TitleMap, GameMap, MenuMap };
+export { Basemap, MiniMap, TitleMap, GameMap, MenuMap };

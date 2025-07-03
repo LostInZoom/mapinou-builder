@@ -1,4 +1,4 @@
-import { addClass, addClassList, makeDiv, removeClass, wait } from "../utils/dom";
+import { addClass, addClassList, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
 import { remap, easeOutCubic, easeInCubic, easeOutSine } from "../utils/math";
 import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
@@ -11,27 +11,30 @@ class Title extends Page {
         super(options, callback);
         this.listen = false;
 
-        if (this.options.initialize === undefined) { this.options.initialize = true; }
+        if (this.options.init === undefined) { this.options.init = false; }
+        let init = this.options.init;
 
         // Set the title name
         this.name = 'Mapinou';
 
+        this.options.app.allowRabbits();
         addClass(this.container, 'page-title');
-
-        let className = this.options.initialize ? ' initialize' : '';
 
         // Create the title div and the container for the individual letters
         this.title = makeDiv(null, 'title-name slanted');
-        this.letters = makeDiv(null, 'title-letters' + className);
+        this.letters = makeDiv(null, 'title-letters');
         this.title.append(this.letters);
         this.container.append(this.title);
 
         let delay = this.app.options.interface.transition.page;
 
-        if (this.options.initialize) {
-            wait(delay, () => { removeClass(this.letters, 'initialize'); })
+        if (init) {
+            wait(delay, () => { addClass(this.letters, 'pop'); })
             // Add a delay of 300 milliseconds to make sure the title background is revealed
             delay += 300;
+        } else {
+            this.letters.offsetWidth;
+            addClass(this.letters, 'pop');
         }
 
         this.letterArray = [];
@@ -48,7 +51,7 @@ class Title extends Page {
             this.letterArray.push(character);
         }
 
-        if (this.options.initialize) {
+        if (init) {
             // Get the width of the page in rem
             let width = pxToRem(this.title.offsetWidth);
 
@@ -78,45 +81,49 @@ class Title extends Page {
         // Create the start and credits buttons
         this.buttons = makeDiv(null, 'title-buttons');
 
-        this.start = makeDiv(null, 'title-button title-button-start' + className);
+        this.start = makeDiv(null, 'title-button title-button-start');
         this.startlabel = makeDiv(null, 'title-button-label', 'Jouer');
         this.start.append(this.startlabel);
 
-        this.credits = makeDiv(null, 'title-button title-button-credits' + className);
+        this.credits = makeDiv(null, 'title-button title-button-credits');
         this.creditslabel = makeDiv(null, 'title-button-label', 'Crédits');
         this.credits.append(this.creditslabel);
 
         this.buttons.append(this.start, this.credits);
+        this.buildinfos = makeDiv(null, 'title-build', `version alpha - ${new Date().getFullYear()}`);
 
-        if (this.options.initialize) {
+        this.container.append(this.buttons, this.buildinfos);
+
+        this.start.offsetWidth;
+        this.credits.offsetWidth;
+        this.buildinfos.offsetWidth;
+
+        delay += 300;
+        // For each button slide and increment the delay
+        [ this.start, this.credits ].forEach((button) => {
+            if (init) {
+                wait(delay, () => { addClass(button, 'pop'); });
+            } else {
+                addClass(button, 'pop');
+            }
             delay += 300;
-            // For each button slide and increment the delay
-            [ this.start, this.credits ].forEach((button) => {
-                wait(delay, () => { removeClass(button, 'initialize'); });
-                delay += 300;
-            });
-        }
+        });
 
-        // Create the bottom build info
-        this.buildinfos = makeDiv(null, 'title-build' + className, `version alpha - ${new Date().getFullYear()}`);
-
-        if (this.options.initialize) {
+        if (init) {
             // Delay the build infos by 400 milliseconds for dramatic effects
             delay += 200;
             // Slide the build button
             wait(delay, () => {
-                removeClass(this.buildinfos, 'initialize');
+                addClass(this.buildinfos, 'pop');
                 this.listen = true;
                 this.callback();
             });
         } else {
+            addClass(this.buildinfos, 'pop');
             this.listen = true;
             this.callback();
         }
         
-        // Add every element to the page
-        this.container.append(this.buttons, this.buildinfos);
-
         this.titlelisten = true;
         this.title.addEventListener('click', () => {
             if (this.titlelisten) {
@@ -150,13 +157,9 @@ class Title extends Page {
     }
 
     levels() {
-        this.letters.style.transformOrigin = 'center center';
-        this.letters.style.transition = 'transform .3s cubic-bezier(0.36, 0, 0.66, -0.56)';
-        this.start.style.transition = 'transform .3s cubic-bezier(0.36, 0, 0.66, -0.56)';
-        this.credits.style.transition = 'transform .3s cubic-bezier(0.36, 0, 0.66, -0.56)';
-        this.buildinfos.style.transition = 'transform .3s cubic-bezier(0.36, 0, 0.66, -0.56)';
-        addClassList([ this.letters, this.start, this.credits, this.buildinfos ], 'initialize');
-
+        addClassList([ this.letters, this.start, this.credits, this.buildinfos ], 'unpop');
+        this.options.app.killRabbits();
+        this.options.app.forbidRabbits();
         wait(300, () => {
             this.destroy();
             this.app.page = new Levels({ app: this.app, position: 'current' });

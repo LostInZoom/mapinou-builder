@@ -8,6 +8,7 @@ class Consent extends Page {
     constructor(options, callback) {
         super(options, callback);
         addClass(this.container, 'page-consent');
+        this.options.app.allowRabbits();
 
         this.content = makeDiv(null, 'page-content');
         this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
@@ -90,7 +91,7 @@ class Consent extends Page {
             this.back.addEventListener('click', () => {
                 if (this.listen) {
                     this.listen = false;
-                    this.previous = new Title({ app: this.app, position: 'previous', initialize: false });
+                    this.previous = new Title({ app: this.app, position: 'previous' });
                     this.slidePrevious();
                 }
             });
