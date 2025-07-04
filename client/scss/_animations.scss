@@ -48,6 +48,22 @@
 }
 
 
+@keyframes line-reveal {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes border-rotation {
+    0% { --angle: 0deg; }
+    60% { --angle: 180deg; }
+    100% { --angle: 360deg; }
+}
+
+@keyframes scale-breathing {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
 
 
 

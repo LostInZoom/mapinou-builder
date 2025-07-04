@@ -6,15 +6,17 @@ import Consent from "./consent";
 import Page from "./page";
 import Title from "./title";
 import { Basemap } from '../cartography/map.js';
+import { LevelEdges } from '../utils/svg.js';
 
 class Levels extends Page {
     constructor(options, callback) {
         super(options, callback);
+        this.listen = false;
 
         // Define the current advancement
         let progression = {
             position: 2,
-            subposition: 2
+            subposition: 3
         };
 
         this.back = makeDiv(null, 'header-button-back', this.options.app.options.svgs.arrowleft);
@@ -31,57 +33,79 @@ class Levels extends Page {
             let levels = this.options.app.options.levels;
             let pos = levels[progression.position];
 
+            let svg = new LevelEdges({ parent: this.container });
+            let minimaps = [];
+
             if (pos.type === 'tier') {
+                let delay = 200;
                 for (let i = 0; i < pos.content.length; i++) {
                     let level = pos.content[i];
                     let px = this.options.app.basemap.getPixel(level.minimap);
+
+                    let minimapcontainer = makeDiv(null, 'levels-minimap-container');
                     let minimap = makeDiv(null, 'levels-minimap');
-                    minimap.style.left = px[0] + 'px';
-                    minimap.style.top = px[1] + 'px';
+                    let unknown = makeDiv(null, 'levels-unknown', this.options.app.options.svgs.unknown);
 
-                    this.basemap = new Basemap({
-                        parent: minimap,
-                        class: 'minimap',
-                        center: level.minimap,
-                        zoom: zoom + 1
-                    })
+                    minimap.append(unknown);
+                    minimapcontainer.append(minimap);
+                    minimapcontainer.style.left = px[0] + 'px';
+                    minimapcontainer.style.top = px[1] + 'px';
+                    this.container.append(minimapcontainer);
 
-                    this.container.append(minimap);
-                    minimap.offsetHeight;
-                    addClass(minimap, 'pop');
+                    minimaps.push(minimapcontainer);
 
-                    if (i === progression.subposition) {
-                        addClass(minimap, 'active');
+                    // Create a minimap
+                    new Basemap({ parent: minimap, class: 'minimap', center: level.minimap, zoom: zoom + 1 });
+
+                    wait(delay, () => {
+                        addClass(minimapcontainer, 'pop');
+                        if (i === pos.content.length - 1) {
+                            this.listen = true;
+                        }
+                    });
+
+                    if (i <= progression.subposition) { delay +=300; } 
+                
+                    wait(delay, () => {
+                        if (i < progression.subposition) {
+                            let nextpx = this.options.app.basemap.getPixel(pos.content[i + 1].minimap);
+                            svg.addLine(px[0], px[1], nextpx[0], nextpx[1]);
+                        }
+                    });
+
+                    if (i > progression.subposition) {
+                        addClass(minimapcontainer, 'remaining');
+                    } else {
+                        if (i < progression.subposition) {
+                            addClass(minimapcontainer, 'finished');
+                        }
+                        if (i === progression.subposition) {
+                            addClass(minimapcontainer, 'active');
+                        }
+                        delay += 300;
                     }
-
-                    
                 }
             }
 
-
-
-
-
-
-
-
-
-
-
             this.back.addEventListener('click', () => {
-                this.listen = false;
-                removeClass(this.back, 'pop');
-                wait(300, () => {
-                    this.options.app.basemap.animate({
-                        center: this.options.app.options.interface.map.start.center,
-                        zoom: this.options.app.options.interface.map.start.zoom,
-                        duration: 500,
-                        easing: inAndOut
-                    }, () => {
-                        this.destroy();
-                        this.options.app.page = new Title({ app: this.app, position: 'current' });
-                    });
-                })
+                if (this.listen) {
+                    this.listen = false;
+                    removeClass(this.back, 'pop');
+                    minimaps.forEach((minimap) => { removeClass(minimap, 'pop'); });
+                    svg.thinOutLines();
+
+                    wait(500, () => {
+                        this.options.app.basemap.animate({
+                            center: this.app.center,
+                            zoom: this.options.app.options.interface.map.start.zoom,
+                            duration: 500,
+                            easing: inAndOut
+                        }, () => {
+                            this.destroy();
+                            this.options.app.page = new Title({ app: this.app, position: 'current' });
+                        });
+                    })
+                }
             });
         });
 

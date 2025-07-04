@@ -2,7 +2,7 @@ import Page from '../pages/page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
 import { Basemap } from '../cartography/map.js';
 import { Roamer } from '../characters/rabbit.js';
-import { easeInOutCubic } from '../utils/math.js';
+import { easeInOutCubic, generateRandomInteger } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
 import { Music } from '../utils/audio.js';
 
@@ -43,10 +43,14 @@ class Application {
             format: 'mp3',
         });
 
+        let centers = this.options.interface.map.start.centers;
+        let i = generateRandomInteger(0, centers.length - 1);
+        this.center = centers[i];
+
         this.basemap = new Basemap({
             parent: this.container,
             class: 'basemap',
-            center: this.options.interface.map.start.center,
+            center: this.center,
             zoom: this.options.interface.map.start.zoom
         }, () => {
             this.loaded();
