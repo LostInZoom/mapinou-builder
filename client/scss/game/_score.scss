@@ -1,0 +1,33 @@
+@use '../colors';
+
+.score-container {
+    pointer-events: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin-bottom: 2rem;
+
+    display: flex;
+    justify-content: center;
+}
+
+.score-text {
+    border-radius: .4rem;
+    outline: solid .3rem colors.$main-color-light;
+
+    font-family: 'Cabin';
+    font-weight: bold;
+    color: colors.$main-color-light;
+    font-size: 2rem;
+    padding: .2rem 0;
+    background-color: colors.$secondary-color-dark;
+
+    display: flex;
+    justify-content: center;
+
+    transition: .1s width;
+    animation-name: score-increment;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}

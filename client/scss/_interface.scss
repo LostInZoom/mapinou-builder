@@ -7,6 +7,8 @@
 @use 'pages/form';
 @use 'pages/levels';
 
+@use 'game/score';
+
 .map {
     width: 100%;
     height: 100%;

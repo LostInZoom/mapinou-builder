@@ -1,10 +1,20 @@
+import { makeDiv } from "../utils/dom";
+import { calculateTextWidth } from "../utils/parse";
+
 class Score {
-    constructor(value, increment, interval, html) {
-        this.value = value;
-        this.increment = increment;
-        this.interval = interval;
-        this.html = html;
-        this.object;
+    constructor(options) {
+        this.parent = options.parent;
+        this.value = options.value || 0;
+        this.increment = options.increment || this.parent.options.app.options.game.score.increment.default;
+        this.refresh = options.refresh || this.parent.options.app.options.game.score.refresh.default;
+
+        this.interval;
+        this.container = makeDiv(null, 'score-container');
+        this.text = makeDiv(null, 'score-text');
+        this.container.append(this.text);
+        this.parent.append(this.container);
+
+        this.update();
     }
 
     get() {
@@ -13,25 +23,32 @@ class Score {
 
     add(value) {
         this.value += value;
-        this.html.innerHTML = this.value;
+        this.text.innerHTML = this.value;
     }
 
     start() {
         this.stop();
-        this.object = setInterval(() => {
+        this.interval = setInterval(() => {
             this.value += this.increment;
-            this.html.innerHTML = this.value;
-        }, this.interval);
+            this.update();
+        }, this.refresh);
+    }
+
+    update() {
+        this.text.innerHTML = this.value;
+        let width = calculateTextWidth(this.value, getComputedStyle(this.text));
+        this.text.style.width = `${width + 2}rem`;
+        this.text.style.animationDuration = `${this.refresh * 2}ms`;
     }
 
     stop() {
-        if (this.object !== undefined) { clearInterval(this.object); }
+        if (this.interval !== undefined) { clearInterval(this.interval); }
     }
 
-    change(increment, interval) {
+    change(increment, refresh) {
         this.stop();
         this.increment = increment;
-        this.interval = interval;
+        this.refresh = refresh;
         this.start();
     }
 }

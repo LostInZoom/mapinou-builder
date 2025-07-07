@@ -7,6 +7,7 @@ import Page from "./page";
 import Title from "./title";
 import { Basemap } from '../cartography/map.js';
 import { LevelEdges } from '../utils/svg.js';
+import Level from '../game/level.js';
 
 class Levels extends Page {
     constructor(options, callback) {
@@ -33,8 +34,8 @@ class Levels extends Page {
             let levels = this.options.app.options.levels;
             let pos = levels[progression.position];
 
-            let svg = new LevelEdges({ parent: this.container });
-            let minimaps = [];
+            this.svg = new LevelEdges({ parent: this.container });
+            this.minimaps = [];
 
             if (pos.type === 'tier') {
                 let delay = 200;
@@ -52,7 +53,7 @@ class Levels extends Page {
                     minimapcontainer.style.top = px[1] + 'px';
                     this.container.append(minimapcontainer);
 
-                    minimaps.push(minimapcontainer);
+                    this.minimaps.push(minimapcontainer);
 
                     // Create a minimap
                     new Basemap({ parent: minimap, class: 'minimap', center: level.minimap, zoom: zoom + 1 });
@@ -69,7 +70,7 @@ class Levels extends Page {
                     wait(delay, () => {
                         if (i < progression.subposition) {
                             let nextpx = this.options.app.basemap.getPixel(pos.content[i + 1].minimap);
-                            svg.addLine(px[0], px[1], nextpx[0], nextpx[1]);
+                            this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1]);
                         }
                     });
 
@@ -84,15 +85,27 @@ class Levels extends Page {
                         }
                         delay += 300;
                     }
+
+                    minimapcontainer.addEventListener('click', () => {
+                        if (hasClass(minimapcontainer, 'active') && this.listen) {
+                            this.hideElements();
+                            wait(500, () => {
+                                this.destroy();
+                                this.options.app.page = new Level({
+                                    app: this.app,
+                                    position: 'current',
+                                    params: level
+                                });
+                            })
+                        }
+                    });
                 }
             }
 
             this.back.addEventListener('click', () => {
                 if (this.listen) {
                     this.listen = false;
-                    removeClass(this.back, 'pop');
-                    minimaps.forEach((minimap) => { removeClass(minimap, 'pop'); });
-                    svg.thinOutLines();
+                    this.hideElements();
 
                     wait(500, () => {
                         this.options.app.basemap.animate({
@@ -108,118 +121,12 @@ class Levels extends Page {
                 }
             });
         });
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-        
-
-        this.content = makeDiv(null, 'page-content');
-        this.text = makeDiv(null, 'levels-text');
-        this.hint = makeDiv(null, 'levels-text-hint',
-            `Les niveaux se débloquent dans l'ordre.<br>
-            Commencez par faire le tutoriel avant de progresser.`
-        );
-        this.text.append(this.hint);
-        this.content.append(this.text);
-        
-        this.levels = [];
-        this.tutorial = makeDiv(null, 'levels-test-button levels-button', 'Tutoriel');
-
-        this.tutorial.addEventListener('click', () => {
-            // this.options.app.basemap.loading();
-            // new Tutorial(this.options.app.options.tutorial);
-        });
-
-        this.tiers = makeDiv(null, 'levels-tiers');
-
-        
-
-        let delay = this.app.options.interface.transition.page;
-
-        wait(delay, () => {
-            
-            addClass(this.tutorial, 'pop');
-        });
-
-        delay += 250;
-
-        let tierlist = [];
-        let levelnumber = 1;
-        let className = 'done';
-
-        // for (let i = 0; i < this.app.options.levels.length; i++) {
-        //     let l = this.app.options.levels[i];
-        //     if (l.type === 'level') {
-        //         let level = makeDiv(null, 'levels-tier-button levels-button', levelnumber);
-        //         if (this.app.options.state.type === 'level' && this.app.options.state.position === levelnumber) {
-        //             addClass(level, 'active');
-        //             className = 'disabled';
-        //         } else {
-        //             addClass(level, className);
-        //         }
-        //         tierlist.push(level);
-        //         ++levelnumber;
-
-        //         wait(delay, () => { addClass(level, 'pop'); });
-        //         delay += 50;
-
-        //         level.addEventListener('click', () => {
-        //             if (hasClass(level, 'active')) {
-        //                 // Start new level
-        //             };
-        //         });
-        //     } else {
-        //         let tier = makeDiv(null, 'levels-tier');
-        //         tierlist.forEach((lvl) => { tier.append(lvl); });
-        //         this.tiers.append(tier);
-        //         tierlist = [];
-                
-        //         let test = makeDiv(null, 'levels-test-button levels-button', l.name);
-        //         this.tiers.append(test);
-
-        //         if (this.app.options.state.type === 'test' && this.app.options.state.position === l.name) {
-        //             addClass(test, 'active');
-        //             className = 'disabled';
-        //         } else {
-        //             addClass(test, className);
-        //         }
-
-        //         delay += 200;
-        //         wait(delay, () => { addClass(test, 'pop'); });
-        //         delay += 250;
-
-        //         test.addEventListener('click', () => {
-        //             if (hasClass(test, 'active')) {
-        //                 // Start new expérience
-        //             };
-        //         });
-        //     }
-        // }
-
-        // if (tierlist.length > 0) {
-        //     let tier = makeDiv(null, 'levels-tier');
-        //     tierlist.forEach((lvl) => { tier.append(lvl); });
-        //     this.tiers.append(tier);
-        // }
-
-        // wait(delay, this.callback);
-    
-        
     }
 
-    title() {
-
+    hideElements() {
+        removeClass(this.back, 'pop');
+        if (this.minimaps) { this.minimaps.forEach((minimap) => { removeClass(minimap, 'pop'); }); }
+        if (this.svg) { this.svg.thinOutLines(); }
     }
 }
 

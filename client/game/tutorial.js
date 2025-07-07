@@ -1,6 +1,8 @@
-class Tutorial {
+import Page from "../pages/page";
+
+class Tutorial extends Page {
     constructor(options, callback) {
-        callback = callback || function() {};
+        super(options, callback);
         console.log(options);
     }
 }
