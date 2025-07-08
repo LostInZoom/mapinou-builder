@@ -1,5 +1,6 @@
-import { makeDiv } from "../utils/dom";
-import { calculateTextWidth } from "../utils/parse";
+import { Header } from "../interface/elements";
+import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
+import { calculateTextSize } from "../utils/parse";
 
 class Score {
     constructor(options) {
@@ -12,8 +13,14 @@ class Score {
         this.container = makeDiv(null, 'score-container');
         this.text = makeDiv(null, 'score-text');
         this.container.append(this.text);
-        this.parent.append(this.container);
 
+        if (this.parent instanceof Header) {
+            this.parent.insertAtIndex(this.container, 2);
+        } else {
+            this.parent.append(this.container);
+        }
+
+        this.setState(options.state || 'default');
         this.update();
     }
 
@@ -36,9 +43,9 @@ class Score {
 
     update() {
         this.text.innerHTML = this.value;
-        let width = calculateTextWidth(this.value, getComputedStyle(this.text));
-        this.text.style.width = `${width + 2}rem`;
-        this.text.style.animationDuration = `${this.refresh * 2}ms`;
+        let width = calculateTextSize(this.value, getComputedStyle(this.text)).width + 1.7;
+        if (width < 2.5) { width = 2.5 }
+        this.text.style.width = `${width}rem`;
     }
 
     stop() {
@@ -50,6 +57,18 @@ class Score {
         this.increment = increment;
         this.refresh = refresh;
         this.start();
+    }
+
+    setState(state) {
+        removeClass(this.text, this.state);
+        addClass(this.text, state);
+        this.state = 'state';
+    }
+
+    pop(callback) {
+        callback = callback || function() {};
+        addClass(this.container, 'pop');
+        wait(200, callback);
     }
 }
 

@@ -63,7 +63,7 @@ class Enemy extends Character {
             }
         });
 
-        let sizeArea = this.basemap.params.game.tolerance.pitfalls;
+        let sizeArea = this.params.game.tolerance.enemies;
         this.area = new VectorLayer({
             source: new VectorSource({
                 features: [
@@ -72,7 +72,7 @@ class Enemy extends Character {
             }),
             style: new Style({
                 fill: new Fill({
-                    color: getColorsByClassNames('pitfalls-transparent')['pitfalls-transparent']
+                    color: getColorsByClassNames('enemies-transparent')['enemies-transparent']
                 })
             }),
             zIndex: this.zIndex - 1,

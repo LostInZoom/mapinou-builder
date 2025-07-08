@@ -45,7 +45,7 @@ class Target extends Character {
             }
         });
         
-        this.roam(this.coordinates, this.basemap.params.game.tolerance.target);
+        this.roam(this.coordinates, this.params.game.tolerance.target);
     }
 
     display() {

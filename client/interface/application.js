@@ -363,10 +363,10 @@ class Application {
         let information = makeDiv(null, 'tutorial-information');
 
         let text = makeDiv(null, 'tutorial-text', `
-            On your journey, you may come accross a bonus that reduces your score by ${Math.abs(this.params.game.score.modifiers.bonus)} points.
+            On your journey, you may come accross a bonus that reduces your score by ${Math.abs(this.params.game.score.modifiers.helpers)} points.
             <br><br>
             Like pitfalls, they are visible only at a certain zoom level. But in addition, they only become visible
-            if you are within ${Math.abs(this.params.game.visibility.bonus)} meters.
+            if you are within ${Math.abs(this.params.game.visibility.helpers)} meters.
         `)
 
         let continueButton = makeDiv(null, 'button-menu button ' + this.params.interface.theme, "Let's try it!");

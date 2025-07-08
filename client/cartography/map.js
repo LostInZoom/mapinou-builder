@@ -2,11 +2,16 @@ import Map from 'ol/Map.js';
 import View from 'ol/View.js';
 import { extend } from 'ol/extent.js';
 import { Feature } from 'ol';
-import { defaults as defaultInteractions } from 'ol/interaction/defaults.js';
 import { Point, LineString } from 'ol/geom.js';
 import TileLayer from 'ol/layer/Tile.js';
 import WMTS from 'ol/source/WMTS.js';
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
+
+import { defaults } from 'ol/interaction/defaults.js';
+import MouseWheelZoom from 'ol/interaction/MouseWheelZoom.js';
+import DragPan from 'ol/interaction/DragPan.js';
+import PinchZoom from 'ol/interaction/PinchZoom.js';
+import PointerInteraction from 'ol/interaction/Pointer.js';
 
 import { buffer, middle, project, within } from './analysis.js';
 import { addClass, addSVG, makeDiv, removeClass, wait } from '../utils/dom.js';
@@ -27,6 +32,7 @@ class Basemap {
     constructor(options, callback) {
         callback = callback || function () {};
         this.options = options || {};
+        
         this.layers = [];
         this.parent = this.options.parent;
 
@@ -62,26 +68,17 @@ class Basemap {
             })
         });
 
+        this.interactions = defaults();
         this.map = new Map({
             target: this.container,
             layers: [ this.baselayer ],
             view: this.view,
             loadTilesWhileAnimating: true,
             loadTilesWhileInteracting: true,
-            interactions: new defaultInteractions({
-                altShiftDragRotate: false,
-                altShiftDragRotate: false,
-                doubleClickZoom: false,
-                keyboard: false,
-                mouseWheelZoom: false,
-                shiftDragZoom: false,
-                dragPan: false,
-                pinchRotate: false,
-                pinchZoom: false,
-                pointerInteraction: false,
-            }),
+            interactions: this.interactions,
         });
 
+        this.setInteractions(false);
         this.map.once('loadend', callback);
     }
 
@@ -118,6 +115,28 @@ class Basemap {
         options.callback = callback;
         this.map.getView().fit(extent, options);
     }
+
+    isVisible(position, padding=50) {
+        let visible = false;
+        let size = this.map.getSize();
+        let [minx, maxy] = this.map.getCoordinateFromPixel([ padding, padding ]);
+        let [maxx, miny] = this.map.getCoordinateFromPixel([ size[0] - padding, size[1] - padding ]);
+        let [x, y] = position;
+        if (x > minx && x < maxx && y > miny && y < maxy) { visible = true; }
+        return visible;
+    }
+
+    setInteractions(interactable=false) {
+        this.interactions.forEach((interaction) => {
+            if (interactable) {
+                if (interaction instanceof MouseWheelZoom) { interaction.setActive(true); }
+                else if (interaction instanceof DragPan) { interaction.setActive(true); }
+                else if (interaction instanceof PinchZoom) { interaction.setActive(true); }
+                else if (interaction instanceof PointerInteraction) { interaction.setActive(true); }
+                else { interaction.setActive(false); }
+            } else { interaction.setActive(false); }
+        });
+    }
 }
 
 class MiniMap extends Basemap {
@@ -126,9 +145,46 @@ class MiniMap extends Basemap {
     }
 }
 
-class TitleMap extends Basemap {
+class MainMap extends Basemap {
     constructor(options, callback) {
         super(options, callback);
+    }
+
+    setupLevel(options) {
+        this.player = new Player({
+            basemap: this,
+            coordinates: options.player,
+            zIndex: 50
+        });
+
+        this.target = new Target({
+            basemap: this,
+            coordinates: options.target,
+            zIndex: 40
+        });
+
+        this.helpers = new Helpers({
+            basemap: this,
+            coordinates: options.helpers,
+            zIndex: 30,
+            minZoom: 13.5,
+        });
+
+        this.enemies = new Enemies({
+            basemap: this,
+            coordinates: options.enemies,
+            zIndex: 20,
+        });
+
+        this.player.setOrientation(this.target.getCoordinates());
+        this.enemies.setOrientation(this.player.getCoordinates());
+
+        this.player.display();
+        this.player.spawn();
+
+        this.target.display();
+        this.enemies.display();
+        this.helpers.display();
     }
 }
 
@@ -149,40 +205,6 @@ class Basemap1 {
         this.routable = false;
         this.moving = false;
         this.layers = [];
-    }
-
-    setCenter(center) {
-        this.view.setCenter(center);
-    }
-
-    setZoom(zoom) {
-        this.view.setZoom(zoom);
-    }
-
-    setGeometry(name, position) {
-        this.layers.setGeometry(name, new Point(position))
-    }
-
-    setPlayer(position) {
-        this.layers.setGeometry('player', new Point(position))
-    }
-
-    setTarget(position) {
-        this.layers.setGeometry('target', new Point(position))
-    }
-
-    setPath(vertexes) {
-        this.layers.setGeometry('path', new LineString(vertexes))
-    }
-
-    isVisible(position, padding) {
-        let visible = false;
-        let size = this.map.getSize();
-        let [minx, maxy] = this.map.getCoordinateFromPixel([ padding, padding ]);
-        let [maxx, miny] = this.map.getCoordinateFromPixel([ size[0] - padding, size[1] - padding ]);
-        let [x, y] = position;
-        if (x > minx && x < maxx && y > miny && y < maxy) { visible = true; }
-        return visible;
     }
 
     getZoomForData(padding) {
@@ -206,128 +228,6 @@ class Basemap1 {
             else { extent = extend(extent, layer.getSource().getExtent()) }
         })
         return extent;
-    }
-
-    activate() {
-        addClass(this.container, 'active');
-    }
-
-    deactivate() {
-        removeClass(this.container, 'active');
-    }
-
-    loading() {
-        removeClass(this.mask, 'loaded');
-    }
-
-    loaded() {
-        addClass(this.mask, 'loaded');
-    }
-
-    routing() {
-        this.routable = true;
-        removeClass(this.modebutton, 'collapse');
-    }
-
-    navigation() {
-        this.routable = false;
-        addClass(this.modebutton, 'collapse');
-    }
-
-    addPoint(layer, coordinates, index=null) {
-        let feature = new Feature({
-            type: layer,
-            geometry: new Point(coordinates)
-        });
-        if ( index !== null ) { feature.setId(index); }
-        this.layers.addFeature(layer, feature);
-    }
-
-    addZone(layer, coordinates, size, index=null) {
-        let feature = new Feature({
-            type: layer,
-            geometry: buffer(coordinates, size)
-        });
-        if ( index !== null ) { feature.setId(index); }
-        this.layers.addFeature(layer, feature);
-    }
-
-    fit(padding, transition, callback) {
-        let extent = this.getExtentForData();
-        this.map.getView().fit(extent, {
-            padding: [ padding, padding, padding, padding ],
-            duration: transition,
-            easing: inAndOut,
-            callback: callback
-        });
-    }
-
-    initialize() {
-        this.container = makeDiv(null, 'map map-' + this.type);
-        this.page.container.append(this.container);
-        this.mask = makeDiv(null, 'mask-map mask');
-        this.loader = makeDiv(null, 'loader');
-        this.mask.append(this.loader);
-        this.container.append(this.mask);
-
-        this.view = new View();
-        this.baselayer = new TileLayer({
-            preload: 'Infinity',
-            source: new WMTS({
-                url: 'https://data.geopf.fr/wmts',
-                layer: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
-                matrixSet: 'PM',
-                format: 'image/png',
-                style: 'normal',
-                dimensions: [256, 256],
-                tileGrid: new WMTSTileGrid({
-                    origin: [-20037508, 20037508],
-                    resolutions: [
-                        156543.03392804103, 78271.5169640205, 39135.75848201024, 19567.879241005125, 9783.939620502562,
-                        4891.969810251281, 2445.9849051256406, 1222.9924525628203, 611.4962262814101, 305.74811314070485,
-                        152.87405657035254, 76.43702828517625, 38.218514142588134, 19.109257071294063, 9.554628535647034,
-                        4.777314267823517, 2.3886571339117584, 1.1943285669558792, 0.5971642834779396, 0.29858214173896974,
-                        0.14929107086948493, 0.07464553543474241
-                    ],
-                    matrixIds: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"],
-                })
-            })
-        });
-
-        this.modebutton = makeDiv(null, 'game-mode collapse');
-        // addSVG(this.modebutton, new URL('../svg/routing.svg', import.meta.url));
-        this.container.append(this.modebutton);
-
-        let interactions = {
-            altShiftDragRotate: false,
-            altShiftDragRotate: false,
-            doubleClickZoom: false,
-            keyboard: false,
-            mouseWheelZoom: false,
-            shiftDragZoom: false,
-            dragPan: false,
-            pinchRotate: false,
-            pinchZoom: false,
-            pointerInteraction: false,
-        }
-
-        if (this.interactable) {
-            interactions.mouseWheelZoom = true;
-            interactions.dragPan = true;
-            interactions.pinchZoom = true;
-            interactions.pointerInteraction = true;
-        }
-
-        this.map = new Map({
-            target: this.container,
-            layers: [ this.baselayer ],
-            view: this.view,
-            interactions: new defaultInteractions(interactions),
-        });
-
-        this.map.once('loadend', () => {
-            this.loaded();
-        });
     }
 };
 
@@ -381,95 +281,24 @@ class GameMap extends Basemap {
 
         this.helpers = new Helpers({
             basemap: this,
-            coordinates: this.options.bonus,
+            coordinates: this.options.helpers,
             zIndex: 30,
             minZoom: 13.5,
         });
 
         this.enemies = new Enemies({
             basemap: this,
-            coordinates: this.options.pitfalls,
+            coordinates: this.options.enemies,
             zIndex: 20,
         });
 
         this.player.setOrientation(this.target.getCoordinates());
         this.enemies.setOrientation(this.player.getCoordinates());
 
-        // this.layers.add('player', 50);
-        // this.layers.add('target', 51);
-        // this.layers.add('path', 10);
-
-        // this.layers.add('pitfalls', 49);
-        // this.layers.setMaxZoom('pitfalls', 12);
-
-        // this.layers.add('pitfallsArea', 48);
-        // this.layers.setMinZoom('pitfallsArea', 12);
-
-        // this.layers.add('bonus', 47);
-        // this.layers.setMaxZoom('bonus', 12);
-
-        // this.layers.add('bonusArea', 46);
-        // this.layers.setMinZoom('bonusArea', 12);
-
-        // this.map.addLayer(this.layers.getLayer('player'));
-        // this.map.addLayer(this.layers.getLayer('path'));
-        // this.map.addLayer(this.layers.getLayer('target'));
-        // this.map.addLayer(this.layers.getLayer('pitfalls'));
-        // this.map.addLayer(this.layers.getLayer('pitfallsArea'));
-        // this.map.addLayer(this.layers.getLayer('bonus'));
-        // this.map.addLayer(this.layers.getLayer('bonusArea'));
-
         this.visiblebonus = []
 
         this.setCenter(this.options.start.center);
         this.setZoom(this.options.start.zoom);
-    }
-
-    phase1(callback) {
-        this.phase = 1;
-        let player = this.options.player;
-
-        this.hints = this.options.hints;
-        this.hint = makeDiv(null, 'game-hint');
-        this.hintext = makeDiv(null, 'game-hint-text collapse ' + this.params.interface.theme);
-        this.hint.append(this.hintext);
-        this.page.themed.push(this.hintext);
-        this.container.append(this.hint);
-
-        let hintlistener = this.map.on('postrender', () => {
-            let visible = this.isVisible(player, 50);
-            let zoom = this.view.getZoom();
-            for (let minzoom in this.hints) {
-                if (!visible) {
-                    this.hintext.innerHTML = 'Come back, you are getting lost!';
-                } else {
-                    if (zoom >= minzoom) {
-                        removeClass(this.hintext, 'collapse');
-                        this.hintext.innerHTML = this.hints[minzoom];
-                    }
-                }
-            }
-        });
-
-        let doublelistener = this.map.on('dblclick', (e) => {
-            let target = this.map.getEventCoordinate(event);
-            if (within(target, player, this.params.game.tolerance.target)) {
-                unByKey(hintlistener);
-                unByKey(doublelistener);
-                addClass(this.hintext, 'collapse');
-                wait(200, () => { this.hintext.remove(); })
-                callback();
-            } else {
-                if (!this.activeclue) {
-                    this.activeclue = true;
-                    addClass(this.clue, 'active');
-                    wait(500, () => {
-                        removeClass(this.clue, 'active');
-                        this.activeclue = false;
-                    })
-                }
-            }
-        });
     }
 
     phase2(callback) {
@@ -611,4 +440,4 @@ class GameMap extends Basemap {
     }
 }
 
-export { Basemap, MiniMap, TitleMap, GameMap, MenuMap };
+export { Basemap, MiniMap, MainMap, GameMap, MenuMap };

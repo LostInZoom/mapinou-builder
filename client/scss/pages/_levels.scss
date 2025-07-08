@@ -1,6 +1,5 @@
 @use '../colors';
 
-
 @property --angle {
     syntax: '<angle>';
     initial-value: 0deg;
@@ -27,6 +26,8 @@
                 colors.$main-color-medium,
                 colors.$main-color-dark,
                 colors.$main-color-dark,
+                colors.$main-color-medium,
+                colors.$main-color-dark,
                 colors.$main-color-dark,
                 colors.$main-color-medium
             ) border-box;
@@ -38,21 +39,11 @@
 
     &.remaining {
         opacity: .7;
-        & > .levels-minimap > .levels-unknown { opacity: 1; }
+        & > .levels-minimap > .levels-state { opacity: 1; }
     }
 
     &.finished {
-        & > .levels-minimap:before {
-            content: "";
-            position: absolute;
-            z-index: 2;
-            top: 0;
-            left: 0;
-            height: inherit;
-            width: inherit;
-            background-color: colors.$main-color-medium;
-            opacity: .8;
-        }
+        & > .levels-minimap > .levels-state { opacity: 0.8; }
     }
 
     &.pop {
@@ -72,7 +63,7 @@
     box-shadow: 0 0 1rem grey;
 }
 
-.levels-unknown {
+.levels-state {
     position: absolute;
     z-index: 1;
     top: 0;

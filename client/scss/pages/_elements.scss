@@ -5,13 +5,16 @@
     z-index: 50;
     left: 0;
 
-    width: 100%;
+    width: calc(100% - 2rem);
     overflow: hidden;
     pointer-events: none;
 
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    padding: 1rem;
+    gap: 1rem;
 
     &.line { flex-direction: row; }
     &.column { flex-direction: column; }

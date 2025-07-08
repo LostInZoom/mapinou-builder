@@ -94,7 +94,7 @@ class Player extends Character {
                     self.sprite.setDirectionFromAngle(a);
                     self.sprite.setCoordinates(coords);
 
-                    let close = self.getWithin(self.basemap.helpers.getActiveHelpers(), self.params.game.tolerance.bonus);
+                    let close = self.getWithin(self.basemap.helpers.getActiveHelpers(), self.params.game.tolerance.helpers);
 
                     close.forEach((helper) => {
                         helper.consume();

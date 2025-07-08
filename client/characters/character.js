@@ -17,6 +17,7 @@ class Character {
 
         this.basemap = this.options.basemap;
         this.coordinates = this.options.coordinates;
+        this.params = this.basemap.options.app.options;
         
         this.layer = new VectorLayer({
             source: new VectorSource(),

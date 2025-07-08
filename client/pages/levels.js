@@ -14,14 +14,16 @@ class Levels extends Page {
         super(options, callback);
         this.listen = false;
 
+        this.options.app.forbidRabbits();
+
         // Define the current advancement
         let progression = {
             position: 2,
             subposition: 3
         };
 
-        this.back = makeDiv(null, 'header-button-back', this.options.app.options.svgs.arrowleft);
-        this.container.append(this.back);
+        this.back = makeDiv(null, 'header-button left', this.options.app.options.svgs.arrowleft);
+        this.options.app.header.insert(this.back);
 
         this.options.app.basemap.fit(this.options.app.options.interface.map.levels, {
             duration: 500,
@@ -45,9 +47,9 @@ class Levels extends Page {
 
                     let minimapcontainer = makeDiv(null, 'levels-minimap-container');
                     let minimap = makeDiv(null, 'levels-minimap');
-                    let unknown = makeDiv(null, 'levels-unknown', this.options.app.options.svgs.unknown);
+                    let state = makeDiv(null, 'levels-state');
 
-                    minimap.append(unknown);
+                    minimap.append(state);
                     minimapcontainer.append(minimap);
                     minimapcontainer.style.left = px[0] + 'px';
                     minimapcontainer.style.top = px[1] + 'px';
@@ -76,9 +78,11 @@ class Levels extends Page {
 
                     if (i > progression.subposition) {
                         addClass(minimapcontainer, 'remaining');
+                        state.innerHTML = this.options.app.options.svgs.unknown;
                     } else {
                         if (i < progression.subposition) {
                             addClass(minimapcontainer, 'finished');
+                            state.innerHTML = this.options.app.options.svgs.check;
                         }
                         if (i === progression.subposition) {
                             addClass(minimapcontainer, 'active');
@@ -91,6 +95,7 @@ class Levels extends Page {
                             this.hideElements();
                             wait(500, () => {
                                 this.destroy();
+                                this.back.remove();
                                 this.options.app.page = new Level({
                                     app: this.app,
                                     position: 'current',
@@ -101,6 +106,8 @@ class Levels extends Page {
                     });
                 }
             }
+
+            this.callback();
 
             this.back.addEventListener('click', () => {
                 if (this.listen) {
@@ -115,6 +122,7 @@ class Levels extends Page {
                             easing: inAndOut
                         }, () => {
                             this.destroy();
+                            this.back.remove();
                             this.options.app.page = new Title({ app: this.app, position: 'current' });
                         });
                     })

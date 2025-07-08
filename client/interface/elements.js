@@ -20,6 +20,17 @@ class Element {
             this.container.append(elements[i]);
         }
     }
+
+    insert(...elements) {
+        for (let i = 0; i < elements.length; i++) {
+            this.container.insertBefore(elements[i], this.container.firstChild);
+        }
+    }
+
+    insertAtIndex(element, index) {
+        let children = this.container.childNodes;
+        this.container.insertBefore(element, children[children.length - index]);
+    }
 }
 
 class Banner extends Element {

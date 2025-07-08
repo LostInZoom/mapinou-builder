@@ -26,7 +26,7 @@ function pxToRem(px) {
     return px / parseInt(window.getComputedStyle(document.body.parentNode).getPropertyValue('font-size'))
 }
 
-function calculateTextWidth(text, style) {
+function calculateTextSize(text, style) {
     let dummy = document.createElement('div');
     dummy.style.fontFamily = style.fontFamily;
     dummy.style.fontSize = style.fontSize;
@@ -39,9 +39,13 @@ function calculateTextWidth(text, style) {
     dummy.innerHTML = text;
     document.body.appendChild(dummy);
     let width = dummy.clientWidth;
+    let height = dummy.clientHeight;
     dummy.remove();
-    return pxToRem(width);
+    return {
+        width: pxToRem(width),
+        height: pxToRem(height)
+    }
 }
 
 
-export { getColorsByClassNames, remToPx, pxToRem, calculateTextWidth };
+export { getColorsByClassNames, remToPx, pxToRem, calculateTextSize };

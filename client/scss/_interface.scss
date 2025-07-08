@@ -8,12 +8,24 @@
 @use 'pages/levels';
 
 @use 'game/score';
+@use 'game/level';
+
+#application {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: colors.$main-color-dark;
+}
 
 .map {
     width: 100%;
     height: 100%;
     background-color: colors.$main-color-light;
+
     &.active { pointer-events: all; }
+    &.wrong { animation: wrong-double-click .3s linear; }
 }
 
 .basemap {

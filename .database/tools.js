@@ -68,12 +68,12 @@ async function createTables() {
             CONSTRAINT pitfalls_levels_key FOREIGN KEY (level) REFERENCES data.levels(id)
         );
 
-        CREATE TABLE IF NOT EXISTS data.bonus (
+        CREATE TABLE IF NOT EXISTS data.helpers (
             id serial,
             level integer,
             geom geometry(Point, 3857),
-            CONSTRAINT bonus_pkey PRIMARY KEY (id),
-            CONSTRAINT bonus_levels_key FOREIGN KEY (level) REFERENCES data.levels(id)
+            CONSTRAINT helpers_pkey PRIMARY KEY (id),
+            CONSTRAINT helpers_levels_key FOREIGN KEY (level) REFERENCES data.levels(id)
         );
 
         CREATE TABLE IF NOT EXISTS data.games (
@@ -138,13 +138,13 @@ async function insertLevels() {
                 await db.query(pitfall);
             }
 
-            for (let j = 0; j < l.bonus.length; j++) {
-                let b = l.bonus[j];
-                let bonus = `
-                    INSERT INTO data.bonus (level, geom)
+            for (let j = 0; j < l.helpers.length; j++) {
+                let b = l.helpers[j];
+                let helpers = `
+                    INSERT INTO data.helpers (level, geom)
                     VALUES (${index}, ST_SetSRID(ST_POINT(${b[0]}, ${b[1]}), 3857))
                 `
-                await db.query(bonus);
+                await db.query(helpers);
             }
         }
     }

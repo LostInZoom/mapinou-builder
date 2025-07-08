@@ -1,10 +1,10 @@
 import Page from '../pages/page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
-import { Basemap } from '../cartography/map.js';
+import { MainMap } from '../cartography/map.js';
 import { Roamer } from '../characters/rabbit.js';
 import { easeInOutCubic, generateRandomInteger } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
-import { Music } from '../utils/audio.js';
+import { SoundEffectsButton, MusicButton } from '../utils/audio.js';
 
 import Title from '../pages/title.js';
 import Consent from '../pages/consent.js';
@@ -14,9 +14,7 @@ import Levels from '../pages/levels.js';
 class Application {
     constructor(options) {
         this.options = options;
-
-        console.log(options);
-
+        
         // Create the DOM Element
         this.container = makeDiv('application', null);
         document.body.append(this.container);
@@ -36,18 +34,24 @@ class Application {
         this.header = new Header(this);
         this.header.setJustification('right');
 
-        this.music = new Music({
+        this.music = new MusicButton({
             parent: this.header,
             svg: this.options.svgs.music,
             src: './sounds/theme',
             format: 'mp3',
         });
 
+        this.sound = new SoundEffectsButton({
+            parent: this.header,
+            svg: this.options.svgs.sound,
+        });
+
         let centers = this.options.interface.map.start.centers;
         let i = generateRandomInteger(0, centers.length - 1);
         this.center = centers[i];
 
-        this.basemap = new Basemap({
+        this.basemap = new MainMap({
+            app: this,
             parent: this.container,
             class: 'basemap',
             center: this.center,
@@ -60,7 +64,8 @@ class Application {
                 position: 'current',
                 init: true
             }, () => {
-                this.music.displayButton();
+                this.music.display(true);
+                this.sound.display(false);
             });
         });
 

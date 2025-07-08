@@ -17,17 +17,17 @@ $player: #6183af;
 $player-transparent: #6183af7a;
 $target: #68b362;
 $target-transparent: #67b36280;
-$bonus: #61afa8;
-$bonus-transparent: #61afa880;
-$pitfalls: #af6161;
-$pitfalls-transparent: #af616177;
+$helpers: #61afa8;
+$helpers-transparent: #61afa880;
+$enemies: #af6161;
+$enemies-transparent: #af616177;
 
 .player { background-color: $player; }
 .player-transparent { background-color: $player-transparent; }
 .target { background-color: $target; }
 .target-transparent { background-color: $target-transparent; }
-.bonus { background-color: $bonus; }
-.bonus-transparent { background-color: $bonus-transparent; }
-.pitfalls { background-color: $pitfalls; }
-.pitfalls-transparent { background-color: $pitfalls-transparent; }
+.helpers { background-color: $helpers; }
+.helpers-transparent { background-color: $helpers-transparent; }
+.enemies { background-color: $enemies; }
+.enemies-transparent { background-color: $enemies-transparent; }
 .path { background-color: $player-transparent }
