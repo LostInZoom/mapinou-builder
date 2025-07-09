@@ -6,7 +6,7 @@ import { getVectorContext } from "ol/render";
 import { LineString } from "ol/geom";
 
 import { getColorsByClassNames } from "../utils/parse.js";
-import { generateRandomInteger } from "../utils/math.js";
+import { easeInSine, easeOutSine, generateRandomInteger } from "../utils/math.js";
 import Character from "./character.js";
 import { buffer } from "../cartography/analysis.js";
 import { SoundEffect } from "../utils/audio.js";
@@ -30,7 +30,7 @@ class Helpers {
     }
 
     hide() {
-        this.helpers.forEach((helper) => { helper.hide(); })
+        this.helpers.forEach((helper) => { helper.hide(); });
     }
 
     getActiveHelpers() {
@@ -45,13 +45,15 @@ class Helpers {
 class Helper extends Character {
     constructor(options) {
         super(options);
+        this.scale = 1;
+        this.visible = false;
         this.sprite = new Sprite({
             type: 'static',
             layer: this.layer,
             src: './sprites/vegetables.png',
             width: 64,
             height: 64,
-            scale: 1,
+            scale: this.scale,
             framerate: 50,
             // The image is a random sprite inside the provided vegetables
             offset: [ generateRandomInteger(0, 9) * 64, 0 ],
@@ -60,6 +62,41 @@ class Helper extends Character {
             minScale: 0.6,
             increment: 0.05,
         });
+        this.sprite.setScale(0);
+        this.sprite.setOpacity(1);
+    }
+
+    reveal(callback) {
+        callback = callback || function() {};
+        this.cancelScaleAnimation();
+        this.visible = true;
+        let goal = this.scale;
+        this.sprite.animateScale(goal * 1.2, easeOutSine, this.sprite.spawnIncrement, this.sprite.spawnFramerate, () => {
+            this.sprite.animateScale(goal, easeInSine, this.sprite.spawnIncrement, this.sprite.spawnFramerate, () => {
+                callback();
+            });
+        });
+    }
+
+    hide(callback) {
+        callback = callback || function() {};
+        this.cancelScaleAnimation();
+        this.visible = false;
+        this.sprite.animateScale(0, easeOutSine, this.sprite.spawnIncrement, this.sprite.spawnFramerate, () => {
+            callback();
+        });
+    }
+
+    isVisible() {
+        return this.visible;
+    }
+
+    cancelScaleAnimation() {
+        this.sprite.cancelScaleAnimation();
+    }
+
+    breathe() {
+        this.sprite.breathe(0.8, 1.2);
     }
 
     consume() {
@@ -88,4 +125,4 @@ class Helper extends Character {
     }
 }
 
-export { Helpers }
+export { Helpers, Helper }

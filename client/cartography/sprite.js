@@ -2,6 +2,7 @@ import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { Icon, Style } from 'ol/style';
 import { easeInSine, easeOutSine, remap } from '../utils/math';
+import { linear } from 'ol/easing';
 
 class Sprite {
     constructor(options, callback) {
@@ -10,6 +11,7 @@ class Sprite {
 
         this.type = options.type || 'dynamic;';
         this.coordinates = options.coordinates;
+        this.originalScale = options.scale || 1;
         this.scale = options.scale || 1;
         this.feature = new Feature({ geometry: new Point(options.coordinates || null) });
 
@@ -70,7 +72,7 @@ class Sprite {
     }
 
     makeDynamic(options) {
-        this.freezeScale();
+        this.cancelScaleAnimation();
         
         this.framerate = options.framerate || 100;
         this.states = options.states;
@@ -99,16 +101,19 @@ class Sprite {
         let goal = this.scale;
         this.setScale(0);
         this.icon.setOpacity(1);
-        this.animateScale(goal * 1.2, easeInSine, () => {
-            this.animateScale(goal, easeOutSine, callback);
+        this.animateScale(goal * 1.2, easeInSine, this.spawnIncrement, this.spawnFramerate, () => {
+            this.animateScale(goal, easeOutSine, this.spawnIncrement, this.spawnFramerate, () => {
+                callback();
+            });
         });
     }
 
     despawn(callback) {
         callback = callback || function() {};
+        this.cancelScaleAnimation();
         let goal = this.scale;
-        this.animateScale(goal * 1.2, easeOutSine, () => {
-            this.animateScale(0, easeInSine, () => {
+        this.animateScale(goal * 1.2, easeOutSine, this.spawnIncrement, this.spawnFramerate, () => {
+            this.animateScale(0, easeInSine, this.spawnIncrement, this.spawnFramerate, () => {
                 this.freeze();
                 callback();
             });
@@ -132,6 +137,14 @@ class Sprite {
     setCoordinates(coords) {
         this.coordinates = coords;
         if (this.feature.getGeometry()) { this.feature.getGeometry().setCoordinates(coords); }
+    }
+
+    getOpacity() {
+        return this.icon.getOpacity();
+    }
+
+    setOpacity(opacity) {
+        this.icon.setOpacity(opacity);
     }
 
     getCoordinates() {
@@ -216,49 +229,33 @@ class Sprite {
         return this.freezed;
     }
 
-    breathe(goal, callback) {
-        let scale = this.scale;
-
-        let inflation = setInterval(() => {
-            scale += this.spawnIncrement;
-            if (scale >= goal * 1.2) {
-                this.setScale(goal * 1.2);
-                clearInterval(inflation);
-                let deflation = setInterval(() => {
-                    scale -= this.spawnIncrement;
-                    if (scale <= goal) {
-                        this.setScale(goal);
-                        clearInterval(deflation);
-                        callback();
-                    } else {
-                        this.setScale(scale);
-                    }
-                }, this.spawnFramerate);
-            } else {
-                // Remap the scale value, from [0, max] to [0, 1]
-                let remapped = remap(scale, 0, goal * 1.2);
-                // Calculate the remapped easing out cubic value 
-                let eased = easeOutSine(remapped) * goal * 1.2;
-                this.setScale(eased);
-            }
-        }, this.spawnFramerate);
+    breathe(value1, value2) {
+        this.animateScale(value1, linear, 0.05, 50, () => {
+            this.animateScale(value2, linear, 0.05, 50, () => {
+                this.breathe(value1, value2);
+            });
+        });
     }
 
-    animateScale(value, easing, callback) {
+    cancelScaleAnimation() {
+        if (this.scaleAnimation) {
+            clearInterval(this.scaleAnimation);
+        }
+    }
+
+    animateScale(value, easing, increment, framerate, callback) {
         callback = callback || function () {};
         let scale = this.scale;
         if (scale !== value) {
             let inflate = scale < value ? true : false;
-            let animation = setInterval(() => {
-                if (inflate) { scale += this.spawnIncrement } else { scale -= this.spawnIncrement }
+            this.scaleAnimation = setInterval(() => {
+                if (inflate) { scale += increment } else { scale -= increment }
                 let done = false;
-                
                 if (inflate && scale >= value) { done = true; }
                 if (!inflate && scale <= value) { done = true; }
-
                 if (done) {
                     this.setScale(value);
-                    clearInterval(animation);
+                    clearInterval(this.scaleAnimation);
                     callback();
                 } else {
                     // Remap the scale value, from [min, max] to [0, 1]
@@ -269,7 +266,7 @@ class Sprite {
                     let eased = easing(remap(remapped, 0, 1, min, max));
                     this.setScale(eased);
                 }
-            }, this.spawnFramerate);
+            }, framerate);
         }
     }
 
@@ -282,6 +279,14 @@ class Sprite {
         this.shift = [ (this.width - this.currentSize[0]) / 2, (this.height - this.currentSize[1]) / 2 ];
         this.scale = scale;
         this.draw();
+    }
+
+    getScale() {
+        return this.scale;
+    }
+
+    restoreScale() {
+        this.setScale(this.originalScale);
     }
 }
 

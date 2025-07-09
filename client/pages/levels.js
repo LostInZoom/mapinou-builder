@@ -43,7 +43,7 @@ class Levels extends Page {
                 let delay = 200;
                 for (let i = 0; i < pos.content.length; i++) {
                     let level = pos.content[i];
-                    let px = this.options.app.basemap.getPixel(level.minimap);
+                    let px = this.options.app.basemap.getPixel(level.target);
 
                     let minimapcontainer = makeDiv(null, 'levels-minimap-container');
                     let minimap = makeDiv(null, 'levels-minimap');
@@ -58,7 +58,7 @@ class Levels extends Page {
                     this.minimaps.push(minimapcontainer);
 
                     // Create a minimap
-                    new Basemap({ parent: minimap, class: 'minimap', center: level.minimap, zoom: zoom + 1 });
+                    new Basemap({ app: this.options.app, parent: minimap, class: 'minimap', center: level.target, zoom: zoom + 1 });
 
                     wait(delay, () => {
                         addClass(minimapcontainer, 'pop');
@@ -71,7 +71,7 @@ class Levels extends Page {
                 
                     wait(delay, () => {
                         if (i < progression.subposition) {
-                            let nextpx = this.options.app.basemap.getPixel(pos.content[i + 1].minimap);
+                            let nextpx = this.options.app.basemap.getPixel(pos.content[i + 1].target);
                             this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1]);
                         }
                     });

@@ -5,6 +5,9 @@ import Score from "../cartography/score";
 import Page from "../pages/page";
 import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
 import { inAndOut } from 'ol/easing';
+import { Enemy } from '../characters/enemies';
+import Target from '../characters/target';
+import Player from '../characters/player';
 
 class Level extends Page {
     constructor(options, callback) {
@@ -72,7 +75,7 @@ class Level extends Page {
 
         let player = this.level.player;
 
-        this.hintListener = this.basemap.map.on('postrender', () => {
+        this.hintListener = this.basemap.map.on('postrender', () => {           
             let visible = this.basemap.isVisible(player);
             let zoom = this.basemap.view.getZoom();
             for (let [m, h] of Object.entries(this.hints)) {
@@ -117,24 +120,25 @@ class Level extends Page {
         this.phase = 2;
         this.basemap.createCharacters(this, this.level);
 
+        this.canceller = makeDiv(null, 'level-cancel-button');
+        this.container.append(this.canceller);
+
         this.basemap.player.spawn(() => {
             let extent = this.basemap.getExtentForData();
             this.basemap.fit(extent, {
                 duration: 500,
                 easing: inAndOut,
-                padding: [ 100, 20, 20, 20 ]
+                padding: [ 100, 50, 50, 50 ]
             }, () => {
                 this.basemap.target.spawn(() => {
-                    let enemies = this.basemap.enemies.getEnemies();
-                    
-                    
-                    this.basemap.setInteractions(true);
-                    this.basemap.activateMovement();
+                    this.basemap.enemies.spawn(1000, () => {
+                        // this.basemap.enemies.roam();
+                        this.basemap.setInteractions(true);
+                        this.basemap.activateMovement();
+                    });
                 });
             })
         });
-
-        
     }
 }
 

@@ -1,6 +1,6 @@
 import { LineString } from "ol/geom.js";
 
-import { angle, project } from "../cartography/analysis.js";
+import { angle, project, within } from "../cartography/analysis.js";
 import { getVectorContext } from "ol/render.js";
 import Rabbit from "./rabbit.js";
 
@@ -15,8 +15,8 @@ class Player extends Rabbit {
 
         let increment = this.params.game.score.increment.movement;
         let interval = this.params.game.score.refresh.movement;
-
         this.level.score.change(increment, interval);
+
         this.sprite.setState('move');
         
         // Retrieve the vertexes composing the calculated route
@@ -63,10 +63,19 @@ class Player extends Rabbit {
                 self.sprite.setDirectionFromAngle(a);
                 self.sprite.setCoordinates(coords);
 
-                let close = self.getWithin(self.basemap.helpers.getActiveHelpers(), self.params.game.tolerance.helpers);
+                let [inside, outside] = self.getWithin(self.basemap.helpers.getActiveHelpers(), self.params.game.visibility.helpers);
+                
+                outside.forEach((helper) => {
+                    if (helper.isVisible()) { helper.hide(); }
+                });
 
-                close.forEach((helper) => {
-                    helper.consume();
+                inside.forEach((helper) => {
+                    if (!helper.isVisible()) {
+                        helper.reveal(() => { helper.breathe(); });
+                    }
+                    if (within(self.getCoordinates(), helper.getCoordinates(), self.params.game.tolerance.helpers)) {
+                        helper.consume();
+                    }
                 });
 
                 // self.pitfallsHandling(coords);
@@ -110,9 +119,8 @@ class Player extends Rabbit {
             self.layer.un('postrender', animatePlayer);
 
             let score = self.params.game.score;
-            self.basemap.score.change(score.increment.default, score.refresh.default);
+            self.level.score.change(score.increment.default, score.refresh.default);
             self.travelled += distance;
-            console.log('end');
 
             callback(destination, end);
         }

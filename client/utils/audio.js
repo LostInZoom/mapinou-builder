@@ -46,6 +46,10 @@ class SoundEffect extends Sound {
         else { this.file = `${this.src}.${this.format}`; }
         this.audio = new Audio(this.file);
     }
+
+    play() {
+        this.audio.play();
+    }
 }
 
 class Music extends Sound {

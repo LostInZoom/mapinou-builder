@@ -1,34 +1,25 @@
-import { Feature } from "ol";
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import { Fill, Style } from "ol/style";
 import { getVectorContext } from "ol/render";
 import { LineString } from "ol/geom";
 
 import Character from "./character.js";
-import { getColorsByClassNames } from "../utils/parse.js";
-import { angle, buffer, randomPointInCircle } from "../cartography/analysis.js";
+import { angle, randomPointInCircle } from "../cartography/analysis.js";
 import Sprite from "../cartography/sprite.js";
+import { wait } from "../utils/dom.js";
+import { distance } from "ol/coordinate.js";
 
 class Enemies {
     constructor(options) {
         this.options = options || {};
+        this.params = this.options.basemap.params;
+
         this.enemies = [];
         if (this.options.coordinates) {
             this.options.coordinates.forEach((coords) => {
                 let o = this.options;
-                o['coordinates'] = coords;
+                o.coordinates = coords;
                 this.enemies.push(new Enemy(o));
             });
         }
-    }
-
-    display() {
-        this.enemies.forEach((enemy) => { enemy.display(); })
-    }
-
-    hide() {
-        this.enemies.forEach((enemy) => { enemy.hide(); })
     }
 
     setOrientation(coordinates) {
@@ -38,65 +29,61 @@ class Enemies {
     getEnemies() {
         return this.enemies;
     }
+
+    spawn(duration, callback) {
+        callback = callback || function () {};
+        let increment = duration / this.enemies.length;
+        let delay = 0;
+        for (let i = 0; i < this.enemies.length; i++) {
+            let e = this.enemies[i];
+            wait(delay, () => {
+                e.spawn();
+                if (i === (this.enemies.length - 1)) {
+                    wait(increment, callback);
+                }
+            });
+            delay += increment
+        }
+    }
+
+    roam() {
+        this.enemies.forEach((enemy) => { enemy.roam(enemy.getCoordinates(), this.params.game.tolerance.enemies); })
+    }
+
+    distanceOrder(coordinates) {
+        this.enemies = this.enemies.sort((a, b) => {
+            return distance(a.getCoordinates(), coordinates) - distance(b.getCoordinates(), coordinates);
+        });
+    }
 }
 
 class Enemy extends Character {
     constructor(options) {
         super(options);
+        this.states = {
+            idle: {
+                north: { line: 0, length: 3 },
+                east: { line: 1, length: 3 },
+                south: { line: 2, length: 3 },
+                west: { line: 3, length: 3 },
+            }
+        }
+
         this.sprite = new Sprite({
             type: 'dynamic',
             layer: this.layer,
             src: './sprites/snake.png',
             width: 64,
             height: 64,
-            scale: .8,
+            scale: 0.8,
             anchor: [0.5, 0.7],
             framerate: 300,
             coordinates: this.coordinates,
-            states: {
-                idle: {
-                    north: { line: 0, length: 3 },
-                    east: { line: 1, length: 3 },
-                    south: { line: 2, length: 3 },
-                    west: { line: 3, length: 3 },
-                }
-            }
+            states: this.states
         }, () => {
             this.sprite.animate();
         });
-
-        let sizeArea = this.params.game.tolerance.enemies;
-        this.area = new VectorLayer({
-            source: new VectorSource({
-                features: [
-                    new Feature({ geometry: buffer(this.coordinates, sizeArea) })
-                ],
-            }),
-            style: new Style({
-                fill: new Fill({
-                    color: getColorsByClassNames('enemies-transparent')['enemies-transparent']
-                })
-            }),
-            zIndex: this.zIndex - 1,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-            minZoom: 13,
-            opacity: 0,
-        });
-
-        this.basemap.map.addLayer(this.area);
-        this.basemap.layers.push(this.area);
     }
-
-    // display() {
-    //     this.sprite.icon.setOpacity(1);
-    //     this.area.setOpacity(1);
-    // }
-
-    // hide() {
-    //     this.sprite.icon.setOpacity(0);
-    //     this.area.setOpacity(0);
-    // }
 
     roam(coordinates, radius) {
         this.sprite.setState('idle');
@@ -107,9 +94,9 @@ class Enemy extends Character {
 
         const line = new LineString([ coordinates, destination ]);
         const length = line.getLength();
-        const speed = this.params.game.speed.roaming;
+        const speed = this.params.game.speed.enemies;
         const position = this.sprite.getGeometryClone();
-        this.sprite.setGeometry(null);
+        this.sprite.hide();
 
         let lastTime = Date.now();
         let distance = 0;
@@ -139,7 +126,7 @@ class Enemy extends Character {
                 self.layer.un('postrender', animate);
                 position.setCoordinates(destination);
                 context.drawGeometry(position);
-                self.sprite.setGeometry(position);
+                self.sprite.display();
                 self.roam(destination, radius);
             }
         }

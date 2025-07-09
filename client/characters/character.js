@@ -41,6 +41,7 @@ class Character {
     spawn(callback) {
         if (this.sprite) {
             this.sprite.spawn(callback);
+            this.layer.changed();
         }
     }
 
@@ -100,14 +101,17 @@ class Character {
     }
 
     getWithin(objects, distance) {
-        let intersecting = [];
+        let inside = [];
+        let outside = [];
         for (let i = 0; i < objects.length; i++) {
             let obj = objects[i];
             if (within(this.getCoordinates(), obj.getCoordinates(), distance)) {
-                intersecting.push(obj);
+                inside.push(obj);
+            } else {
+                outside.push(obj);
             }
         }
-        return intersecting;
+        return [inside, outside];
     }
 }
 

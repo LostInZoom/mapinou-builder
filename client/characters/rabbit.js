@@ -14,8 +14,10 @@ class Rabbit extends Character {
             this.color = this.colors[i];
         }
 
-        this.width = 64;
-        this.height = 64;
+        this.width = 52;
+        this.height = 52;
+        this.weights = [ 1, 10, 30 ];
+        this.statespool = [ 'move', 'graze', 'idle' ];
 
         this.states = {
             idle: {
@@ -38,19 +40,16 @@ class Rabbit extends Character {
             }
         }
 
-        this.statespool = [ 'move', 'graze', 'idle' ];
-        this.weights = [ 1, 10, 30 ];
-
         this.sprite = new Sprite({
             type: 'dynamic',
             layer: this.layer,
             src: `./sprites/rabbit-${this.color}.png`,
-            width: 52,
-            height: 52,
+            width: this.width,
+            height: this.height,
             scale: 1,
+            anchor: [0.5, 0.8],
             framerate: 200,
             coordinates: this.coordinates,
-            anchor: [0.5, 0.8],
             states: this.states,
         }, () => {
             this.sprite.animate();

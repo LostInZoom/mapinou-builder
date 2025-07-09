@@ -22,16 +22,17 @@ import Score from './score.js';
 import Router from './routing.js';
 import { getVectorContext } from 'ol/render.js';
 
-import { Enemies } from '../characters/enemies.js';
+import { Enemies, Enemy } from '../characters/enemies.js';
 import Player from '../characters/player.js';
 import Target from '../characters/target.js';
-import { Helpers } from '../characters/helpers.js';
+import { Helper, Helpers } from '../characters/helpers.js';
 import { Music } from '../utils/audio.js';
 
 class Basemap {
     constructor(options, callback) {
         callback = callback || function () {};
         this.options = options || {};
+        this.params = options.app.options;
         
         this.layers = [];
         this.parent = this.options.parent;
@@ -158,6 +159,7 @@ class MainMap extends Basemap {
             coordinates: options.player,
             zIndex: 50
         });
+        this.player.setOrientation(options.target)
 
         this.target = new Target({
             basemap: this,
@@ -172,8 +174,8 @@ class MainMap extends Basemap {
             basemap: this,
             level: level,
             coordinates: options.helpers,
+            minZoom: this.params.game.routing,
             zIndex: 30,
-            minZoom: 13.5,
         });
 
         this.enemies = new Enemies({
@@ -182,25 +184,25 @@ class MainMap extends Basemap {
             coordinates: options.enemies,
             zIndex: 20,
         });
-
-        this.player.setOrientation(this.target.getCoordinates());
-        this.enemies.setOrientation(this.player.getCoordinates());
+        this.enemies.setOrientation(options.player);
+        this.enemies.distanceOrder(options.player);
     }
 
     activateMovement() {
         this.router = new Router({ position: this.player.getCoordinates() });
-
         let movement = this.map.on('click', () => {
-            let target = this.map.getEventCoordinate(event);
-            this.router.calculateRoute(target, (route) => {
-                this.player.travel(route, (position, end) => {
-                    this.router.setPosition(position);
-                    if (end) {
-                        unByKey(movement);
-                        callback();
-                    }
+            if (this.view.getZoom() >= this.params.game.routing) {
+                let target = this.map.getEventCoordinate(event);
+                this.router.calculateRoute(target, (route) => {
+                    this.player.travel(route, (position, end) => {
+                        this.router.setPosition(position);
+                        if (end) {
+                            unByKey(movement);
+                            callback();
+                        }
+                    });
                 });
-            });
+            }
         });
 
         this.mapListeners.push(movement);

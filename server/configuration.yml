@@ -65,7 +65,7 @@ game:
       movement: 1
     refresh:
       default: 1000
-      movement: 20
+      movement: 200
     modifier:
       enemies: 500
       helpers: -250
@@ -79,6 +79,7 @@ game:
   speed:
     travel: 5000 # in km/h
     roaming: 20 # in px/s
+    enemies: 10 # in px/s
   routing: 13.5
   lost: 'Revenez en arrière !'
 ###########################
@@ -198,8 +199,7 @@ tutorial:
 levels:
   - type: tier
     content:
-      - minimap: [ -216509, 6127212 ]
-        start:
+      - start:
           zoom: 5
           center: [ 270845.15,5904541.30 ]
         player: [ -345683.0352282714,6152332.792990951 ]
@@ -231,18 +231,17 @@ levels:
           - [ -326402.71403488476,6130024.302039234 ]
           - [ -357192.19324065116,6140933.410330648 ]
           - [ -335082.7828091639,6141802.881527393 ]
-      - minimap: [ 213178, 6110557 ]
-      - minimap: [ 527949, 5779132 ]
-      - minimap: [ -43302, 5637568 ]
+      - target: [ 213178, 6110557 ]
+      - target: [ 527949, 5779132 ]
+      - target: [ -43302, 5637568 ]
   - type: test
     name: "Expérience 1"
   - type: tier
     content:
-      - minimap: [ 143229, 5447706 ]
-      - minimap: [ 677841, 5767473 ]
-      - minimap: [ 151556, 5772470 ]
-      - minimap: [ -169876, 6368703 ]
-        start:
+      - target: [ 143229, 5447706 ]
+      - target: [ 677841, 5767473 ]
+      - target: [ 151556, 5772470 ]
+      - start:
           zoom: 5
           center: [ 270845.15,5904541.30 ]
         player: [ -169401.7706461927, 6346640.57489011 ]
@@ -299,15 +298,15 @@ levels:
     name: "Expérience 2"
   - type: tier
     content:
-      - minimap: [ 143229, 5447706 ]
-      - minimap: [ 677841, 5767473 ]
-      - minimap: [ 151556, 5772470 ]
-      - minimap: [ -169876, 6368703 ]
+      - target: [ 143229, 5447706 ]
+      - target: [ 677841, 5767473 ]
+      - target: [ 151556, 5772470 ]
+      - target: [ -169876, 6368703 ]
   - type: test
     name: "Expérience 3"
   - type: tier
     content:
-      - minimap: [ 143229, 5447706 ]
-      - minimap: [ 677841, 5767473 ]
-      - minimap: [ 151556, 5772470 ]
-      - minimap: [ -169876, 6368703 ]
+      - target: [ 143229, 5447706 ]
+      - target: [ 677841, 5767473 ]
+      - target: [ 151556, 5772470 ]
+      - target: [ -169876, 6368703 ]
