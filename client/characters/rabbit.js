@@ -1,18 +1,12 @@
-import { LineString } from "ol/geom.js";
-
+import { generateRandomInteger } from "../utils/math.js";
+import Sprite from "../cartography/sprite.js";
 import Character from "./character.js";
-import { Sprite } from "../cartography/sprite.js";
-import { angle } from "../cartography/analysis.js";
-import { getVectorContext } from "ol/render.js";
-import { generateRandomInteger, weightedRandom } from "../utils/math.js";
 
 class Rabbit extends Character {
     constructor(options) {
         super(options);
-
-        this.colors = [ 'white', 'grey', 'brown', 'sand' ]
+        this.colors = options.colors || [ 'white', 'grey', 'brown', 'sand' ];
         this.color = options.color || 'white';
-
         this.speed = options.speed || 20;
 
         if (this.color === 'random') {
@@ -62,100 +56,8 @@ class Rabbit extends Character {
             this.sprite.animate();
         });
     }
-
-    move(destination, callback) {
-        callback = callback || function () {};
-
-        this.sprite.setState('move');
-        this.sprite.setDirectionFromAngle(angle(this.coordinates, destination));
-
-        const line = new LineString([ this.coordinates, destination ]);
-        const length = line.getLength();
-        const speed = this.speed;
-        const position = this.sprite.getGeometryClone();
-        this.sprite.hide();
-
-        let lastTime = Date.now();
-        let distance = 0;
-
-        this.layer.on('postrender', animate);
-
-        let self = this;
-        function animate(event) {
-            const time = event.frameState.time;
-            const context = getVectorContext(event);
-            context.setStyle(self.sprite.style);
-
-            const elapsed = (time - lastTime) / 1000;
-
-            distance += speed * elapsed * self.basemap.view.getResolution();
-            lastTime = time;
-
-            // If the travelled distance is below the length of the route, continue the animation
-            if (distance < length) {
-                let coords = line.getCoordinateAt(distance / length);
-                self.sprite.setCoordinates(coords);
-
-                position.setCoordinates(coords);
-                context.drawGeometry(position);
-                self.basemap.map.render();
-            }
-            else {
-                self.layer.un('postrender', animate);
-                position.setCoordinates(destination);
-                context.drawGeometry(position);
-
-                self.sprite.setCoordinates(destination);
-                self.sprite.display();
-
-                callback();
-            }
-        }
-    }
-    
-    getNextPoint() {
-        let destination;
-        if (this.options.roamingRadius) {
-            destination = randomPointInCircle(this.coordinates, this.options.roamingRadius);
-        } else {
-
-        }
-        return destination;
-    }
 }
 
-class Roamer extends Rabbit {
-    constructor(options) {
-        super(options);
-        this.setRandomDirection();
-    }
 
-    setRandomDirection() {
-        let pool = Object.keys(this.states.idle);
-        let d = pool[pool.length * Math.random() | 0];
-        this.sprite.setDirection(d);
-    }
 
-    roam() {
-        if (generateRandomInteger(0, 4) === 4) { this.setRandomDirection(); }
-
-        let choice = weightedRandom(this.statespool, this.weights.slice());
-        if (choice === 'move') {
-            let e = this.basemap.container;
-            let x = generateRandomInteger(0, e.offsetWidth - this.sprite.width);
-            let y = generateRandomInteger(0, e.offsetHeight - this.sprite.height);
-            let destination = this.basemap.map.getCoordinateFromPixel([x, y]);
-
-            this.move(destination, () => {
-                this.coordinates = destination;
-                this.roam();
-            });
-        } else {
-            this.animate(choice, () => {
-                this.roam();
-            })
-        }
-    }
-}
-
-export { Rabbit, Roamer };
+export default Rabbit;

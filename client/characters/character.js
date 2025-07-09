@@ -17,6 +17,7 @@ class Character {
 
         this.basemap = this.options.basemap;
         this.coordinates = this.options.coordinates;
+        this.origin = this.options.coordinates;
         this.params = this.basemap.options.app.options;
         
         this.layer = new VectorLayer({
@@ -44,8 +45,19 @@ class Character {
     }
 
     despawn(callback) {
+        callback = callback || function() {};
         if (this.sprite) {
-            this.sprite.despawn(callback);
+            this.sprite.despawn(() => {
+                this.active = false;
+                this.basemap.map.removeLayer(this.layer);
+                for (let i = 0; i < this.basemap.layers.length; i++) {
+                    if (this.layer === this.basemap.layers[i]) {
+                        this.basemap.layers.splice(i, 1);
+                        break;
+                    }
+                }
+                callback();
+            });
         }
     }
 

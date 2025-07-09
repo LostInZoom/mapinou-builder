@@ -148,23 +148,29 @@ class MiniMap extends Basemap {
 class MainMap extends Basemap {
     constructor(options, callback) {
         super(options, callback);
+        this.mapListeners = [];
     }
 
-    setupLevel(options) {
+    createCharacters(level, options) {
         this.player = new Player({
             basemap: this,
+            level: level,
             coordinates: options.player,
             zIndex: 50
         });
 
         this.target = new Target({
             basemap: this,
+            level: level,
+            colors: [ 'brown', 'sand', 'grey' ],
+            color: 'random',
             coordinates: options.target,
             zIndex: 40
         });
 
         this.helpers = new Helpers({
             basemap: this,
+            level: level,
             coordinates: options.helpers,
             zIndex: 30,
             minZoom: 13.5,
@@ -172,19 +178,45 @@ class MainMap extends Basemap {
 
         this.enemies = new Enemies({
             basemap: this,
+            level: level,
             coordinates: options.enemies,
             zIndex: 20,
         });
 
         this.player.setOrientation(this.target.getCoordinates());
         this.enemies.setOrientation(this.player.getCoordinates());
+    }
 
-        this.player.display();
-        this.player.spawn();
+    activateMovement() {
+        this.router = new Router({ position: this.player.getCoordinates() });
 
-        this.target.display();
-        this.enemies.display();
-        this.helpers.display();
+        let movement = this.map.on('click', () => {
+            let target = this.map.getEventCoordinate(event);
+            this.router.calculateRoute(target, (route) => {
+                this.player.travel(route, (position, end) => {
+                    this.router.setPosition(position);
+                    if (end) {
+                        unByKey(movement);
+                        callback();
+                    }
+                });
+            });
+        });
+
+        this.mapListeners.push(movement);
+    }
+
+    removeListeners() {
+        this.mapListeners.forEach((listener) => { unByKey(listener); });
+    }
+
+    getExtentForData() {
+        let extent;
+        this.layers.forEach((layer) => {
+            if (extent === undefined) { extent = layer.getSource().getExtent() }
+            else { extent = extend(extent, layer.getSource().getExtent()) }
+        });
+        return extent;
     }
 }
 

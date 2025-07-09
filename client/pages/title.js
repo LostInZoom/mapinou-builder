@@ -1,5 +1,5 @@
-import { addClass, addClassList, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
-import { remap, easeOutCubic, easeInCubic, easeOutSine } from "../utils/math";
+import { addClass, addClassList, makeDiv, removeClass, wait } from "../utils/dom";
+import { remap, easeOutCubic } from "../utils/math";
 import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
 import Form from "./form";

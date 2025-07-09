@@ -1,7 +1,7 @@
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { Icon, Style } from 'ol/style';
-import { easeInCubic, easeInSine, easeOutCubic, easeOutSine, remap } from '../utils/math';
+import { easeInSine, easeOutSine, remap } from '../utils/math';
 
 class Sprite {
     constructor(options, callback) {
@@ -45,6 +45,7 @@ class Sprite {
         this.size = [ width, height ];
         this.currentSize = [ width, height ];
         this.shift = [ 0, 0 ];
+        this.freezed = true;
 
         let img = this.icon.img_ = new Image();
         img.crossOrigin = options.crossOrigin || "anonymous";
@@ -107,7 +108,10 @@ class Sprite {
         callback = callback || function() {};
         let goal = this.scale;
         this.animateScale(goal * 1.2, easeOutSine, () => {
-            this.animateScale(0, easeInSine, callback);
+            this.animateScale(0, easeInSine, () => {
+                this.freeze();
+                callback();
+            });
         });
     }
 
@@ -183,6 +187,7 @@ class Sprite {
      */
     animate(callback) {
         callback = callback || function () {};
+        this.freezed = false;
         this.pos = 1;
         this.animation = setInterval(() => {
             let state = this.states[this.state][this.direction];
@@ -203,7 +208,12 @@ class Sprite {
     freeze() {
         if (this.animation) {
             clearInterval(this.animation);
+            this.freezed = true;
         }
+    }
+
+    isFreezed() {
+        return this.freezed;
     }
 
     breathe(goal, callback) {
@@ -275,4 +285,4 @@ class Sprite {
     }
 }
 
-export { Sprite }
+export  default Sprite;

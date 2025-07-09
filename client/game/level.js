@@ -4,6 +4,7 @@ import { within } from "../cartography/analysis";
 import Score from "../cartography/score";
 import Page from "../pages/page";
 import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
+import { inAndOut } from 'ol/easing';
 
 class Level extends Page {
     constructor(options, callback) {
@@ -29,10 +30,22 @@ class Level extends Page {
 
         // Cancel current game and go back to level selection
         this.back.addEventListener('click', () => {
-
+            this.basemap.removeListeners();
+            switch (this.phase) {
+                case 1: {
+                    break;
+                }
+                case 2: {
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
         });
 
         // this.phase1(() => {
+        //     this.basemap.setInteractions(false);
         //     this.phase2(() => {
         //         console.log('nice');
         //     });
@@ -59,7 +72,7 @@ class Level extends Page {
 
         let player = this.level.player;
 
-        let hintListener = this.basemap.map.on('postrender', () => {
+        this.hintListener = this.basemap.map.on('postrender', () => {
             let visible = this.basemap.isVisible(player);
             let zoom = this.basemap.view.getZoom();
             for (let [m, h] of Object.entries(this.hints)) {
@@ -78,11 +91,11 @@ class Level extends Page {
         this.basemap.map.render();
 
         let activeWrong = false;
-        let selectionListener = this.basemap.map.on('dblclick', (e) => {
+        this.selectionListener = this.basemap.map.on('dblclick', (e) => {
             let target = this.basemap.map.getEventCoordinate(event);
             if (within(target, player, this.params.game.tolerance.target)) {
-                unByKey(hintListener);
-                unByKey(selectionListener);
+                unByKey(this.hintListener);
+                unByKey(this.selectionListener);
                 removeClass(this.hint, 'pop');
                 wait(300, () => { this.hint.remove(); })
                 callback();
@@ -102,11 +115,26 @@ class Level extends Page {
     phase2(callback) {
         callback = callback || function() {};
         this.phase = 2;
+        this.basemap.createCharacters(this, this.level);
 
-        this.basemap.setInteractions(true);
-        this.basemap.setupLevel(this.level);
+        this.basemap.player.spawn(() => {
+            let extent = this.basemap.getExtentForData();
+            this.basemap.fit(extent, {
+                duration: 500,
+                easing: inAndOut,
+                padding: [ 100, 20, 20, 20 ]
+            }, () => {
+                this.basemap.target.spawn(() => {
+                    let enemies = this.basemap.enemies.getEnemies();
+                    
+                    
+                    this.basemap.setInteractions(true);
+                    this.basemap.activateMovement();
+                });
+            })
+        });
 
-        callback();
+        
     }
 }
 

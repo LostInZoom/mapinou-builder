@@ -6,9 +6,9 @@ import { getVectorContext } from "ol/render";
 import { LineString } from "ol/geom";
 
 import Character from "./character.js";
-import { Sprite } from "../cartography/sprite.js";
 import { getColorsByClassNames } from "../utils/parse.js";
 import { angle, buffer, randomPointInCircle } from "../cartography/analysis.js";
+import Sprite from "../cartography/sprite.js";
 
 class Enemies {
     constructor(options) {
@@ -61,6 +61,8 @@ class Enemy extends Character {
                     west: { line: 3, length: 3 },
                 }
             }
+        }, () => {
+            this.sprite.animate();
         });
 
         let sizeArea = this.params.game.tolerance.enemies;
@@ -84,19 +86,17 @@ class Enemy extends Character {
 
         this.basemap.map.addLayer(this.area);
         this.basemap.layers.push(this.area);
-
-        // this.roam(this.coordinates, sizeArea);
     }
 
-    display() {
-        this.sprite.icon.setOpacity(1);
-        this.area.setOpacity(1);
-    }
+    // display() {
+    //     this.sprite.icon.setOpacity(1);
+    //     this.area.setOpacity(1);
+    // }
 
-    hide() {
-        this.sprite.icon.setOpacity(0);
-        this.area.setOpacity(0);
-    }
+    // hide() {
+    //     this.sprite.icon.setOpacity(0);
+    //     this.area.setOpacity(0);
+    // }
 
     roam(coordinates, radius) {
         this.sprite.setState('idle');

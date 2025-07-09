@@ -7,9 +7,8 @@ import { ajaxGet } from "../utils/ajax.js";
 import { project } from "./analysis.js";
 
 class Router {
-    constructor(map, position) {
-        this.map = map;
-        this.position = position;
+    constructor(options) {
+        this.position = options.position;
     }
 
     setPosition(position) {

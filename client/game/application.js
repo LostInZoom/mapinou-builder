@@ -1,7 +1,6 @@
 import Page from '../pages/page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
 import { MainMap } from '../cartography/map.js';
-import { Roamer } from '../characters/rabbit.js';
 import { easeInOutCubic, generateRandomInteger } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
 import { SoundEffectsButton, MusicButton } from '../utils/audio.js';
@@ -10,6 +9,7 @@ import Title from '../pages/title.js';
 import Consent from '../pages/consent.js';
 import Form from '../pages/form.js';
 import Levels from '../pages/levels.js';
+import Roamer from '../characters/roamer.js';
 
 class Application {
     constructor(options) {
