@@ -17,13 +17,10 @@ class Level extends Page {
         this.basemap = this.options.app.basemap;
 
         this.score = new Score({
+            level: this,
             parent: this.options.app.header,
-            increment: this.params.game.score.increment.default,
-            refresh: this.params.game.score.refresh.default,
-            state: 'default'
+            state: 'stopped'
         });
-        this.score.pop();
-        this.score.start();
 
         this.back = makeDiv(null, 'header-button left', this.params.svgs.cross);
         this.options.app.header.insert(this.back);
@@ -120,8 +117,12 @@ class Level extends Page {
         this.phase = 2;
         this.basemap.createCharacters(this, this.level);
 
-        this.canceller = makeDiv(null, 'level-cancel-button');
-        this.container.append(this.canceller);
+        this.canceler = makeDiv(null, 'level-cancel-button', this.params.svgs.helm);
+        this.container.append(this.canceler);
+
+        this.canceler.addEventListener('click', () => {
+            this.basemap.player.stop();
+        });
 
         this.basemap.player.spawn(() => {
             let extent = this.basemap.getExtentForData();
@@ -133,12 +134,43 @@ class Level extends Page {
                 this.basemap.target.spawn(() => {
                     this.basemap.enemies.spawn(1000, () => {
                         // this.basemap.enemies.roam();
+                        this.score.pop();
+                        this.score.setState('default');
+                        this.score.start();
                         this.basemap.setInteractions(true);
                         this.basemap.activateMovement();
                     });
                 });
             })
         });
+    }
+
+    routing() {
+        if (this.canceler) {
+            removeClass(this.canceler, 'moving');
+            addClass(this.canceler, 'routing');
+        }
+    }
+
+    moving() {
+        if (this.canceler) {
+            removeClass(this.canceler, 'routing');
+            addClass(this.canceler, 'moving');
+        }
+    }
+
+    activateMovementButton() {
+        if (this.canceler) {
+            addClass(this.canceler, 'active');
+        }
+    }
+
+    deactivateMovementButton() {
+        if (this.canceler) {
+            removeClass(this.canceler, 'moving');
+            removeClass(this.canceler, 'routing');
+            removeClass(this.canceler, 'active');
+        }
     }
 }
 

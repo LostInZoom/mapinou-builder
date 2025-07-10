@@ -189,23 +189,17 @@ class MainMap extends Basemap {
     }
 
     activateMovement() {
-        this.router = new Router({ position: this.player.getCoordinates() });
         let movement = this.map.on('click', () => {
             if (this.view.getZoom() >= this.params.game.routing) {
-                let target = this.map.getEventCoordinate(event);
-                this.router.calculateRoute(target, (route) => {
-                    this.player.travel(route, (position, end) => {
-                        this.router.setPosition(position);
-                        if (end) {
-                            unByKey(movement);
-                            callback();
-                        }
-                    });
-                });
+                let destination = this.map.getEventCoordinate(event)
+                this.player.travel(destination);
             }
         });
-
         this.mapListeners.push(movement);
+    }
+
+    deactivateMovement() {
+        if (this.listener) { unByKey(this.listener); }
     }
 
     removeListeners() {

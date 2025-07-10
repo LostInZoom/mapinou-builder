@@ -16,6 +16,7 @@ class Router {
     }
 
     calculateRoute(target, callback) {
+        callback = callback || function() {};
         const origin = project('3857', '4326', this.position);
         const destination = project('3857', '4326', target);
         let url = 'https://data.geopf.fr/navigation/itineraire?'

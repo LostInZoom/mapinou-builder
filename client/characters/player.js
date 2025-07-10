@@ -3,128 +3,170 @@ import { LineString } from "ol/geom.js";
 import { angle, project, within } from "../cartography/analysis.js";
 import { getVectorContext } from "ol/render.js";
 import Rabbit from "./rabbit.js";
+import { unByKey } from "ol/Observable.js";
+import Router from "../cartography/routing.js";
 
 class Player extends Rabbit {
     constructor(options) {
         super(options);
         this.level = options.level;
+
+        // Routing infos
+        this.router = new Router({ position: this.coordinates });
+        this.moving = false;
+
+        this.context = undefined;
+        this.destination = undefined;
+
+        this.clone = this.sprite.getGeometryClone();
+        this.distance = 0;
+        this.position = this.coordinates;
     }
 
-    travel(route, callback) {
-        callback = callback || function () {};
+    stop() {
+        // Remove the listener
+        if (this.listener) { unByKey(this.listener); }
 
-        let increment = this.params.game.score.increment.movement;
-        let interval = this.params.game.score.refresh.movement;
-        this.level.score.change(increment, interval);
+        // Redraw the clone to avoid a missing frame
+        this.context.setStyle(this.sprite.style);
+        this.context.drawGeometry(this.clone);
+        // Set the sprite coordinates to the destination
+        this.sprite.setCoordinates(this.position);
 
+        // Increment the traveled distance
+        this.travelled += this.distance;
+
+        // Set router position
+        this.router.setPosition(this.clone.getCoordinates());
+
+        this.sprite.display();
+        this.sprite.setState('idle');
+
+        this.traveling = false;
+    }
+
+    move(route, callback) {
+        callback = callback || function() {};
+
+        // Set routing button to moving mode
+        this.level.moving();
+        // Set the sprite to moving state
         this.sprite.setState('move');
         
         // Retrieve the vertexes composing the calculated route
-        const vertexes = [];
-        const nodes = route.geometry.coordinates;
-        for (let i = 0; i < nodes.length; i++) {
-            vertexes.push(project('4326', '3857', nodes[i]));
-        }
-        
+        let vertexes = [];
+        let nodes = route.geometry.coordinates;
+        nodes.forEach((node) => { vertexes.push(project('4326', '3857', node)); });
+
         const destination = vertexes[vertexes.length - 1];
         
         // Create the path line and calculate its length
         const line = new LineString(vertexes);
         const length = line.getLength();
 
+        // Retrieve the time
         let lastTime = Date.now();
-        let distance = 0;
 
         // Get the speed in meters/second
         const speed = this.params.game.speed.travel / 3.6;
-        const position = this.sprite.getGeometryClone();
+        
+        // Start the distance counter
+        this.distance = 0;
 
+        // Hide the sprite (replaced with a clone during movement)
         this.sprite.hide();
-        this.layer.on('postrender', animatePlayer);
-
-        let self = this;
-        function animatePlayer(event) {
-            // Get the current time
+        // This listener is executed at each map frame rendered
+        this.listener = this.layer.on('postrender', (event) => {
+            // Get the time of the current frame
             const time = event.frameState.time;
-            const context = getVectorContext(event);
+            this.context = getVectorContext(event);
+
             // Calculate the elapsed time in seconds
             const elapsed = (time - lastTime) / 1000;
             // Calculate the distance traveled depending on the elapsed time and the speed
-            distance = distance + (elapsed * speed);
+            this.distance = this.distance + (elapsed * speed);
             // Set the previous time as the current one
             lastTime = time;
 
             // If the travelled distance is below the length of the route, continue the animation
-            if (distance < length) {
+            if (this.distance < length) {
                 // Calculate the position of the point along the route line
-                let coords = line.getCoordinateAt(distance / length);
+                this.position = line.getCoordinateAt(this.distance / length);
 
-                let a = angle(position.getCoordinates(), coords);
-                self.sprite.setDirectionFromAngle(a);
-                self.sprite.setCoordinates(coords);
+                // Change the direction of the sprite according to its current movement
+                let a = angle(this.clone.getCoordinates(), this.position);
+                this.sprite.setDirectionFromAngle(a);
 
-                let [inside, outside] = self.getWithin(self.basemap.helpers.getActiveHelpers(), self.params.game.visibility.helpers);
-                
+                // Update the sprite coordinates
+                this.sprite.setCoordinates(this.position);
+
+                // Retrieve the helpers oustide and inside the visibible range
+                let [inside, outside] = this.getWithin(this.basemap.helpers.getActiveHelpers(), this.params.game.visibility.helpers);
+                // Treating helpers outside the visible rande
                 outside.forEach((helper) => {
+                    // If they are visible, hide them
                     if (helper.isVisible()) { helper.hide(); }
                 });
-
+                // Treating helpers inside the visible range
                 inside.forEach((helper) => {
+                    // Reveal them if they are hidden
                     if (!helper.isVisible()) {
                         helper.reveal(() => { helper.breathe(); });
                     }
-                    if (within(self.getCoordinates(), helper.getCoordinates(), self.params.game.tolerance.helpers)) {
+                    // Consume them if within consuming range
+                    if (within(this.getCoordinates(), helper.getCoordinates(), this.params.game.tolerance.helpers)) {
                         helper.consume();
                     }
                 });
 
-                // self.pitfallsHandling(coords);
-                // self.bonusHandling(coords);
+                // Set the new coordinates to the clone
+                this.clone.setCoordinates(this.position);
+                // Apply the style to the clone for orientation
+                this.context.setStyle(this.sprite.style);
+                // Redraw the clone
+                this.context.drawGeometry(this.clone);
 
-                let win = false;
-                
-                // if (within(coords, self.options.target, self.params.game.tolerance.target)) { win = true; }
-
-                // if (path === undefined) { path = new LineString([ vertexes[0], coords ]); }
-                // else { path.appendCoordinate(coords); }
-
-                // // context.setStyle(self.layers.getStyle(['path']));
-                // context.drawGeometry(path);
-
-                position.setCoordinates(coords);
-                context.setStyle(self.sprite.style);
-                context.drawGeometry(position);
-
-                // Render the map to trigger the listener
-                self.basemap.map.render();
-
-                if (self.basemap.enemies) {
-                    self.basemap.enemies.setOrientation(coords);
+                // If enemies are present, orient them towards the player
+                if (this.basemap.enemies) {
+                    this.basemap.enemies.setOrientation(this.position);
                 }
 
-                if (win) { stopAnimation(context, true); }
+                // Render the map to trigger the listener
+                this.basemap.map.render();
             }
-            // Here, the journey is over
-            else { stopAnimation(context, false); }
-        }
+            // Here, destination reached
+            else {
+                // Stop the animation
+                this.stop();
+                callback();
+            }
+        });
+    }
 
-        function stopAnimation(context, end) {
-            context.setStyle(self.sprite.style);
-            context.drawGeometry(position);
-            self.sprite.setCoordinates(destination);
-            self.sprite.display();
-            self.sprite.setState('idle');
+    travel(destination, callback) {
+        callback = callback || function () {};
 
-            // Removing the render listener
-            self.layer.un('postrender', animatePlayer);
+        if (this.traveling) { this.stop(); }
+        this.traveling = true;
+        this.destination = destination;
 
-            let score = self.params.game.score;
-            self.level.score.change(score.increment.default, score.refresh.default);
-            self.travelled += distance;
+        // Show the routing button and set it to routing mode
+        this.level.activateMovementButton();
+        this.level.routing();
 
-            callback(destination, end);
-        }
-    
+        // Calculate the route using the router (AJAX)
+        this.router.calculateRoute(destination, (route) => {
+            // Make sure the map hasn't been clicked while fetching the route
+            if (destination === this.destination) {
+                // Change the score increment
+                this.level.score.setState('movement');
+                this.move(route, () => {
+                    this.level.deactivateMovementButton();
+                    this.level.score.setState('default');
+                    callback();
+                });
+            }
+        });
     }
 }
 

@@ -5,22 +5,24 @@ import { calculateTextSize } from "../utils/parse";
 class Score {
     constructor(options) {
         this.parent = options.parent;
+        this.level = options.level;
+        this.params = this.level.options.app.options;
+
         this.value = options.value || 0;
-        this.increment = options.increment || this.parent.options.app.options.game.score.increment.default;
-        this.refresh = options.refresh || this.parent.options.app.options.game.score.refresh.default;
+        this.states = options.states || [ 'stopped', 'default', 'movement' ];
+        this.state = options.state || 'stopped'
+
+        this.running = false;
 
         this.interval;
         this.container = makeDiv(null, 'score-container');
         this.text = makeDiv(null, 'score-text');
         this.container.append(this.text);
 
-        if (this.parent instanceof Header) {
-            this.parent.insertAtIndex(this.container, 2);
-        } else {
-            this.parent.append(this.container);
-        }
+        if (this.parent instanceof Header) { this.parent.insertAtIndex(this.container, 2); }
+        else { this.parent.append(this.container); }
 
-        this.setState(options.state || 'default');
+        this.setState(this.state);
         this.update();
     }
 
@@ -34,11 +36,21 @@ class Score {
     }
 
     start() {
+        if (this.state === 'stopped') { this.setState('default'); }
         this.stop();
+        this.running = true;
+        this.increment = this.params.game.score.increment[this.state];
+        this.refresh = this.params.game.score.refresh[this.state];
+        this.text.style.animationDuration = `${this.refresh * 2}ms`;
         this.interval = setInterval(() => {
             this.value += this.increment;
             this.update();
         }, this.refresh);
+    }
+
+    stop() {
+        if (this.interval !== undefined) { clearInterval(this.interval); }
+        this.running = false;
     }
 
     update() {
@@ -48,21 +60,15 @@ class Score {
         this.text.style.width = `${width}rem`;
     }
 
-    stop() {
-        if (this.interval !== undefined) { clearInterval(this.interval); }
-    }
-
-    change(increment, refresh) {
-        this.stop();
-        this.increment = increment;
-        this.refresh = refresh;
-        this.start();
-    }
-
     setState(state) {
-        removeClass(this.text, this.state);
-        addClass(this.text, state);
-        this.state = 'state';
+        if (this.states.includes(state)) {
+            let running = this.running;
+            removeClass(this.text, this.state);
+            this.stop();
+            this.state = state;
+            addClass(this.text, this.state);
+            if (running) { this.start(); }
+        }
     }
 
     pop(callback) {

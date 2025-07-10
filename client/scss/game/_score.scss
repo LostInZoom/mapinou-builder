@@ -32,6 +32,16 @@
     justify-content: center;
     align-items: center;
 
-    transition: .1s width;
-    &.default { animation: score-default-increment 2s linear infinite; }
+    transition: width .1s linear;
+    animation-name: score-default-increment;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+
+    // &.default {
+    //     animation: score-default-increment 2s linear infinite;
+    // }
+
+    // &.movement {
+    //     animation: score-default-increment .4s linear infinite;
+    // }
 }

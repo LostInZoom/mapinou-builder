@@ -34,16 +34,11 @@ class Enemies {
         callback = callback || function () {};
         let increment = duration / this.enemies.length;
         let delay = 0;
-        for (let i = 0; i < this.enemies.length; i++) {
-            let e = this.enemies[i];
-            wait(delay, () => {
-                e.spawn();
-                if (i === (this.enemies.length - 1)) {
-                    wait(increment, callback);
-                }
-            });
-            delay += increment
-        }
+        this.enemies.forEach((enemy) => {
+            wait(delay, () => { enemy.spawn(); })
+            delay += increment;
+        });
+        wait(delay + 300, callback);
     }
 
     roam() {
