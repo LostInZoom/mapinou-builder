@@ -14,7 +14,7 @@ function buffer(coordinates, size) {
     let c = project('3857', '4326', coordinates)
 
     // Calculate the buffer around the coordinates
-    let b = turf.buffer(turf.point(c), size, { units: "meters", steps: 16 })
+    let b = turf.buffer(turf.point(c), size, { units: "meters", steps: 12 })
 
     // Project the resulting coordinates
     let v = []
@@ -22,6 +22,33 @@ function buffer(coordinates, size) {
 
     // Return an openlayer polygon from the list of vertexes
     return new Polygon([v]);
+}
+
+/**
+ * Calculate a buffer around the given polygon.
+ * @param {array} coordinates The coordinates of the point.
+ * @param {integer} size      The size of the buffer in meters.
+ * @return {Polygon}          OpenLayers Polygon geometry.
+ */
+function bufferAroundPolygon(coordinates, size) {
+    let projected = [];
+    coordinates.forEach(c => { projected.push(project('3857', '4326', c)) });
+
+    // Calculate the buffer around the coordinates
+    let polygon = turf.polygon([projected]);
+    let b = turf.buffer(polygon, size, { units: "meters", steps: 4 });
+    let d = turf.difference(turf.featureCollection([b, polygon]));
+
+    // Project the resulting coordinates
+    let v = []
+    d.geometry.coordinates.forEach(linear => {
+        l = []
+        linear.forEach(c => { l.push(project('4326', '3857', c)); });
+        v.push(l);
+    });
+
+    // Return an openlayer polygon from the list of vertexes
+    return new Polygon(v);
 }
 
 /**
@@ -92,4 +119,4 @@ function randomPointInCircle(center, radius) {
     return [center[0] + adjacent, center[1] + opposite]
 }
 
-export { buffer, middle, within, project, angle, randomPointInCircle }
+export { buffer, bufferAroundPolygon, middle, within, project, angle, randomPointInCircle }

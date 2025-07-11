@@ -67,8 +67,8 @@ game:
       default: 1000
       movement: 200
     modifier:
-      enemies: 500
-      helpers: -250
+      enemies: 50
+      helpers: -20
   tolerance:
     flag: 500
     target: 200
@@ -80,7 +80,7 @@ game:
     travel: 5000 # in km/h
     roaming: 20 # in px/s
     enemies: 10 # in px/s
-  routing: 13.5
+  routing: 13.4
   lost: 'Revenez en arrière !'
 ###########################
 #### FORM DEFINITION ######

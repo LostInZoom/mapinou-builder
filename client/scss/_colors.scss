@@ -13,6 +13,11 @@ $grey-medium: #929292;
 $grey-dark: #646464;
 $grey-extradark: #353535;
 
+$score-helpers-light: #93c5da;
+$score-helpers-dark: #5a8496;
+$score-enemies-light: #da8b8b;
+$score-enemies-dark: #9c6161;
+
 $player: #6183af;
 $player-transparent: #6183af7a;
 $target: #68b362;
@@ -22,12 +27,15 @@ $helpers-transparent: #61afa880;
 $enemies: #af6161;
 $enemies-transparent: #af616177;
 
-.player { background-color: $player; }
-.player-transparent { background-color: $player-transparent; }
-.target { background-color: $target; }
-.target-transparent { background-color: $target-transparent; }
-.helpers { background-color: $helpers; }
-.helpers-transparent { background-color: $helpers-transparent; }
-.enemies { background-color: $enemies; }
+.enemies-map { background-color: $enemies; }
+.enemies-map-transparent { background-color: $enemies-transparent; }
+
+// .player { background-color: $player; }
+// .player-transparent { background-color: $player-transparent; }
+// .target { background-color: $target; }
+// .target-transparent { background-color: $target-transparent; }
+// .helpers { background-color: $helpers; }
+// .helpers-transparent { background-color: $helpers-transparent; }
+// .enemies { background-color: $enemies; }
 .enemies-transparent { background-color: $enemies-transparent; }
-.path { background-color: $player-transparent }
+// .path { background-color: $player-transparent }

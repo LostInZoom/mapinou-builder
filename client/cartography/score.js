@@ -1,5 +1,5 @@
 import { Header } from "../interface/elements";
-import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
+import { addClass, hasClass, makeDiv, removeClass, wait } from "../utils/dom";
 import { calculateTextSize } from "../utils/parse";
 
 class Score {
@@ -10,6 +10,7 @@ class Score {
 
         this.value = options.value || 0;
         this.states = options.states || [ 'stopped', 'default', 'movement' ];
+        this.modifiers = options.modifiers || [ 'enemies', 'helpers' ]
         this.state = options.state || 'stopped'
 
         this.running = false;
@@ -17,22 +18,44 @@ class Score {
         this.interval;
         this.container = makeDiv(null, 'score-container');
         this.text = makeDiv(null, 'score-text');
-        this.container.append(this.text);
+        this.textcontainer = makeDiv(null, 'score-text-container');
+        this.textcontainer.append(this.text);
+        this.container.append(this.textcontainer);
 
         if (this.parent instanceof Header) { this.parent.insertAtIndex(this.container, 2); }
         else { this.parent.append(this.container); }
 
         this.setState(this.state);
-        this.update();
+        this.update(0);
     }
 
     get() {
         return this.value;
     }
 
-    add(value) {
-        this.value += value;
-        this.text.innerHTML = this.value;
+    addModifier(name) {
+        if (this.modifiers.includes(name)) {
+            let value = this.params.game.score.modifier[name]
+            let text = (value >= 0) ? `+${value}` : `${value}`;
+            let modifier = makeDiv(null, 'score-modifier ' + name, text);
+            this.container.append(modifier);
+            modifier.offsetHeight;
+            // Display the modifier
+            addClass(modifier, 'reveal');
+            wait(1000, () => {
+                // Hide the modifier after one second
+                removeClass(modifier, 'reveal');
+                // Wait for the modifier to be hidden
+                wait(300, () => {
+                    modifier.remove();
+                    this.update(this.params.game.score.modifier[name]);
+                    addClass(this.textcontainer, name);
+                    wait(300, () => {
+                        this.modifiers.forEach(m => { removeClass(this.textcontainer, m); });
+                    });
+                })
+            })
+        }
     }
 
     start() {
@@ -41,10 +64,9 @@ class Score {
         this.running = true;
         this.increment = this.params.game.score.increment[this.state];
         this.refresh = this.params.game.score.refresh[this.state];
-        this.text.style.animationDuration = `${this.refresh * 2}ms`;
         this.interval = setInterval(() => {
-            this.value += this.increment;
-            this.update();
+            this.update(this.increment);
+            this.animate();
         }, this.refresh);
     }
 
@@ -53,11 +75,23 @@ class Score {
         this.running = false;
     }
 
-    update() {
+    update(value) {
+        if (this.value + value > 0) { this.value += value; }
+        else { this.value = 0 }
         this.text.innerHTML = this.value;
         let width = calculateTextSize(this.value, getComputedStyle(this.text)).width + 1.7;
-        if (width < 2.5) { width = 2.5 }
+        if (width < 2.5) { width = 2.5; }
         this.text.style.width = `${width}rem`;
+    }
+
+    animate() {
+        if (hasClass(this.text, 'left')) {
+            removeClass(this.text, 'left');
+            addClass(this.text, 'right');
+        } else {
+            removeClass(this.text, 'right');
+            addClass(this.text, 'left');
+        }
     }
 
     setState(state) {

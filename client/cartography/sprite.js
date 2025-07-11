@@ -16,7 +16,7 @@ class Sprite {
         this.feature = new Feature({ geometry: new Point(options.coordinates || null) });
 
         this.framerate = options.framerate || 100;
-        this.loop = options.loop || true;
+        this.loop = options.loop === undefined ? true : false;
         this.states = options.states;
         this.state = options.state || 'idle';
         this.direction = options.direction || 'south';
@@ -176,7 +176,7 @@ class Sprite {
 
     setState(state) {
         this.state = state;
-        this.pos = 1;
+        this.pos = 0;
         this.draw();
     }
 
@@ -201,18 +201,18 @@ class Sprite {
     animate(callback) {
         callback = callback || function () {};
         this.freezed = false;
-        this.pos = 1;
+        this.pos = 0;
         this.animation = setInterval(() => {
             let state = this.states[this.state][this.direction];
             let last = false;
-            if (this.pos == state.length) { this.pos = 1; last = true; }
+            if (this.pos === state.length - 1) { this.pos = 0; last = true; }
             else { ++this.pos; }
-            this.offset = [ (this.pos - 1)*this.width, state.line*this.height ]
 
             if (last && !this.loop) {
                 this.freeze();
                 callback();
             } else {
+                this.offset = [ (this.pos)*this.width, state.line*this.height ]
                 this.draw();
             }
         }, this.framerate);

@@ -36,7 +36,7 @@ class Level extends Page {
                     break;
                 }
                 case 2: {
-                    break;
+                    this.basemap.player.stop();
                 }
                 default: {
                     break;

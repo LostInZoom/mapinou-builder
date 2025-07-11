@@ -5,6 +5,7 @@ import { getVectorContext } from "ol/render.js";
 import Rabbit from "./rabbit.js";
 import { unByKey } from "ol/Observable.js";
 import Router from "../cartography/routing.js";
+import Flower from "./flower.js";
 
 class Player extends Rabbit {
     constructor(options) {
@@ -21,11 +22,18 @@ class Player extends Rabbit {
         this.clone = this.sprite.getGeometryClone();
         this.distance = 0;
         this.position = this.coordinates;
+
+        this.closeEnemies = [];
+        this.flowers = [];
     }
 
     stop() {
         // Remove the listener
         if (this.listener) { unByKey(this.listener); }
+
+        if (this.flowers.length > 0) {
+            this.flowers.shift().decay();
+        }
 
         // Redraw the clone to avoid a missing frame
         this.context.setStyle(this.sprite.style);
@@ -42,6 +50,9 @@ class Player extends Rabbit {
         this.sprite.display();
         this.sprite.setState('idle');
 
+        this.level.deactivateMovementButton();
+        this.level.score.setState('default');
+
         this.traveling = false;
     }
 
@@ -57,8 +68,6 @@ class Player extends Rabbit {
         let vertexes = [];
         let nodes = route.geometry.coordinates;
         nodes.forEach((node) => { vertexes.push(project('4326', '3857', node)); });
-
-        const destination = vertexes[vertexes.length - 1];
         
         // Create the path line and calculate its length
         const line = new LineString(vertexes);
@@ -116,6 +125,27 @@ class Player extends Rabbit {
                     // Consume them if within consuming range
                     if (within(this.getCoordinates(), helper.getCoordinates(), this.params.game.tolerance.helpers)) {
                         helper.consume();
+                        this.level.score.addModifier('helpers');
+                    }
+                });
+
+                // Retrieve the enemies oustide and inside the visibible range
+                [inside, outside] = this.getWithin(this.basemap.enemies.getEnemies(), this.params.game.tolerance.enemies);
+                // Treating enemies within range
+                inside.forEach(enemy => {
+                    // Check if the enemy has not already striked
+                    if (!this.closeEnemies.includes(enemy)) {
+                        this.closeEnemies.push(enemy);
+                        this.level.score.addModifier('enemies');
+                    }
+                });
+                // Treating enemies outside range
+                outside.forEach(enemy => {
+                    // If it was in close enemies
+                    if (this.closeEnemies.includes(enemy)) {
+                        // Remove it from the list
+                        let i = this.closeEnemies.indexOf(enemy);
+                        if (i > -1) { this.closeEnemies.splice(i, 1); }
                     }
                 });
 
@@ -150,6 +180,14 @@ class Player extends Rabbit {
         this.traveling = true;
         this.destination = destination;
 
+        let flower = new Flower({
+            basemap: this.basemap,
+            level: this.level,
+            coordinates: this.destination,
+            zIndex: 35
+        });
+        this.flowers.push(flower);
+
         // Show the routing button and set it to routing mode
         this.level.activateMovementButton();
         this.level.routing();
@@ -161,8 +199,6 @@ class Player extends Rabbit {
                 // Change the score increment
                 this.level.score.setState('movement');
                 this.move(route, () => {
-                    this.level.deactivateMovementButton();
-                    this.level.score.setState('default');
                     callback();
                 });
             }

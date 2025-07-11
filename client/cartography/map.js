@@ -150,6 +150,15 @@ class MainMap extends Basemap {
     constructor(options, callback) {
         super(options, callback);
         this.mapListeners = [];
+        this.routable = true;
+
+        this.maskcontainer = makeDiv(null, 'map-mask-container');
+        this.east = makeDiv(null, 'map-mask meridian east');
+        this.west = makeDiv(null, 'map-mask meridian west');
+        this.north = makeDiv(null, 'map-mask parallel north');
+        this.south = makeDiv(null, 'map-mask parallel south');
+        this.maskcontainer.append(this.east, this.west, this.north, this.south);
+        this.container.append(this.maskcontainer);
     }
 
     createCharacters(level, options) {
@@ -190,12 +199,22 @@ class MainMap extends Basemap {
 
     activateMovement() {
         let movement = this.map.on('click', () => {
-            if (this.view.getZoom() >= this.params.game.routing) {
-                let destination = this.map.getEventCoordinate(event)
+            if (this.routable) {
+                let destination = this.map.getEventCoordinate(event);
                 this.player.travel(destination);
             }
         });
         this.mapListeners.push(movement);
+
+        let routing = this.map.on('postrender', () => {
+            if (this.view.getZoom() >= this.params.game.routing && !this.routable) {
+                this.makeRoutable();
+            }
+            else if (this.view.getZoom() < this.params.game.routing && this.routable) {
+                this.makeUnroutable();
+            }
+        });
+        this.mapListeners.push(routing);
     }
 
     deactivateMovement() {
@@ -213,6 +232,16 @@ class MainMap extends Basemap {
             else { extent = extend(extent, layer.getSource().getExtent()) }
         });
         return extent;
+    }
+
+    makeRoutable() {
+        this.routable = true;
+        addClass(this.maskcontainer, 'routable');
+    }
+
+    makeUnroutable() {
+        this.routable = false;
+        removeClass(this.maskcontainer, 'routable');
     }
 }
 

@@ -38,6 +38,17 @@ class Character {
         this.travelled = 0;
     }
 
+    destroy() {
+        this.active = false;
+        this.basemap.map.removeLayer(this.layer);
+        for (let i = 0; i < this.basemap.layers.length; i++) {
+            if (this.layer === this.basemap.layers[i]) {
+                this.basemap.layers.splice(i, 1);
+                break;
+            }
+        }
+    }
+
     spawn(callback) {
         if (this.sprite) {
             this.sprite.spawn(callback);
@@ -49,14 +60,7 @@ class Character {
         callback = callback || function() {};
         if (this.sprite) {
             this.sprite.despawn(() => {
-                this.active = false;
-                this.basemap.map.removeLayer(this.layer);
-                for (let i = 0; i < this.basemap.layers.length; i++) {
-                    if (this.layer === this.basemap.layers[i]) {
-                        this.basemap.layers.splice(i, 1);
-                        break;
-                    }
-                }
+                this.destroy();
                 callback();
             });
         }
