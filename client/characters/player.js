@@ -18,6 +18,7 @@ class Player extends Rabbit {
 
         this.context = undefined;
         this.destination = undefined;
+        this.traveling = false;
 
         this.clone = this.sprite.getGeometryClone();
         this.distance = 0;

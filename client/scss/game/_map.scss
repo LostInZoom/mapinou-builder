@@ -50,3 +50,28 @@
         &.south { bottom: 0; }
     }
 }
+
+.level-position-container {
+    pointer-events: none;
+    position: absolute;
+    top: .5rem;
+    left: .5rem;
+    // transition: top .1s linear;
+}
+
+.level-position {
+    height: 2rem;
+    width: 2rem;
+
+    border: solid .4rem colors.$main-color-dark;
+    border-radius: 0 2rem 2rem 2rem;
+    background-color: colors.$main-color-light;
+
+    transform: scale(0);
+    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
+
+    &.pop {
+        transform: scale(1);
+        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+}

@@ -8,6 +8,7 @@ import { inAndOut } from 'ol/easing';
 import { Enemy } from '../characters/enemies';
 import Target from '../characters/target';
 import Player from '../characters/player';
+import Levels from '../pages/levels';
 
 class Level extends Page {
     constructor(options, callback) {
@@ -24,30 +25,18 @@ class Level extends Page {
 
         this.back = makeDiv(null, 'header-button left', this.params.svgs.cross);
         this.options.app.header.insert(this.back);
-
         this.back.offsetWidth;
         addClass(this.back, 'pop');
 
         // Cancel current game and go back to level selection
+        this.listening = false;
         this.back.addEventListener('click', () => {
-            this.basemap.removeListeners();
-            switch (this.phase) {
-                case 1: {
-                    break;
-                }
-                case 2: {
-                    this.basemap.player.stop();
-                }
-                default: {
-                    break;
-                }
-            }
+            if (this.listening) { this.clear('abort'); }
         });
 
         // this.phase1(() => {
-        //     this.basemap.setInteractions(false);
         //     this.phase2(() => {
-        //         console.log('nice');
+        //         this.clear('win');
         //     });
         // });
 
@@ -110,18 +99,21 @@ class Level extends Page {
                 }
             }
         });
+
+        this.listening = true;
     }
 
     phase2(callback) {
         callback = callback || function() {};
         this.phase = 2;
+        this.basemap.setInteractions(false);
         this.basemap.createCharacters(this, this.level);
 
         this.canceler = makeDiv(null, 'level-cancel-button', this.params.svgs.helm);
         this.container.append(this.canceler);
 
         this.canceler.addEventListener('click', () => {
-            this.basemap.player.stop();
+            if (this.player.traveling) { this.player.stop(); }
         });
 
         this.basemap.player.spawn(() => {
@@ -133,6 +125,8 @@ class Level extends Page {
             }, () => {
                 this.basemap.target.spawn(() => {
                     this.basemap.enemies.spawn(1000, () => {
+                        this.listening = true;
+                        
                         // this.basemap.enemies.roam();
                         this.score.pop();
                         this.score.setState('default');
@@ -171,6 +165,39 @@ class Level extends Page {
             removeClass(this.canceler, 'routing');
             removeClass(this.canceler, 'active');
         }
+    }
+
+    clear(state) {
+        removeClass(this.back, 'pop');
+        this.basemap.setInteractions(false);
+        this.basemap.removeListeners();
+
+        const clearing = 4;
+        let cleared = 0;
+
+        wait(300, () => {
+            this.back.remove();
+            if (++cleared === clearing) { this.toLevels(); }
+        });
+        this.basemap.clear(() => {
+            this.basemap.removeLayers();
+            if (++cleared === clearing) { this.toLevels(); }
+        });
+        this.score.destroy(() => {
+            if (++cleared === clearing) { this.toLevels();}
+        });
+        this.basemap.makeUnroutable(() => {
+            if (++cleared === clearing) { this.toLevels(); }
+        });
+    }
+
+    toLevels() {
+        this.destroy();
+        this.app.page = new Levels({
+            app: this.app,
+            position: 'current',
+            init: true
+        });
     }
 }
 

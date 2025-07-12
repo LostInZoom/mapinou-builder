@@ -48,6 +48,18 @@ class Enemies {
         wait(delay + 300, callback);
     }
 
+    despawn(callback) {
+        callback = callback || function () {};
+        let amount = this.getEnemies().length;
+        let done = 0;
+        this.enemies.forEach((enemy) => {
+            enemy.despawn();
+            enemy.hideArea(() => {
+                if (++done === amount) { callback(); }
+            });
+        });
+    }
+
     roam() {
         this.enemies.forEach((enemy) => { enemy.roam(enemy.getCoordinates(), this.params.game.tolerance.enemies); })
     }
@@ -128,21 +140,21 @@ class Enemy extends Character {
             let zoom = this.basemap.view.getZoom();
             if (zoom >= threshold && !this.areaVisible) {
                 this.areaVisible = true;
-                this.reveal();
+                this.revealArea();
             }
             else if (zoom < threshold && this.areaVisible) {
                 this.areaVisible = false;
-                this.hide();
+                this.hideArea();
             }
         });
     }
 
-    reveal(callback) {
+    revealArea(callback) {
         this.stopAnimation();
         this.animateOpacity(1, callback);
     }
 
-    hide(callback) {
+    hideArea(callback) {
         this.stopAnimation();
         this.animateOpacity(0, callback);
     }
@@ -175,57 +187,6 @@ class Enemy extends Character {
                     this.basemap.map.render();
                 }
             });
-        }
-    }
-    
-
-
-    
-
-    roam(coordinates, radius) {
-        this.sprite.setState('idle');
-
-        let destination = randomPointInCircle(this.coordinates, radius);
-        let a = angle(coordinates, destination);
-        this.sprite.setDirectionFromAngle(a);
-
-        const line = new LineString([ coordinates, destination ]);
-        const length = line.getLength();
-        const speed = this.params.game.speed.enemies;
-        const position = this.sprite.getGeometryClone();
-        this.sprite.hide();
-
-        let lastTime = Date.now();
-        let distance = 0;
-        let newPosition = position.getCoordinates();
-
-        this.layer.on('postrender', animate);
-
-        let self = this;
-        function animate(event) {
-            const time = event.frameState.time;
-            const context = getVectorContext(event);
-            context.setStyle(self.sprite.style);
-
-            const elapsed = (time - lastTime) / 1000;
-
-            distance += speed * elapsed * self.basemap.view.getResolution();
-            lastTime = time;
-
-            // If the travelled distance is below the length of the route, continue the animation
-            if (distance < length) {
-                newPosition = line.getCoordinateAt(distance / length);
-                position.setCoordinates(newPosition);
-                context.drawGeometry(position);
-                self.basemap.map.render();
-            }
-            else {
-                self.layer.un('postrender', animate);
-                position.setCoordinates(destination);
-                context.drawGeometry(position);
-                self.sprite.display();
-                self.roam(destination, radius);
-            }
         }
     }
 }

@@ -32,6 +32,21 @@ class Helpers {
         this.helpers.forEach((helper) => { helper.hide(); });
     }
 
+    despawn(callback) {
+        callback = callback || function () {};
+        let amount = this.getHelpers().length;
+        let done = 0;
+        this.helpers.forEach((helper) => {
+            helper.despawn(() => {
+                if (++done === amount) { callback(); }
+            });
+        });
+    }
+
+    getHelpers() {
+        return this.helpers;
+    }
+
     getActiveHelpers() {
         let a = [];
         this.helpers.forEach((helper) => {
@@ -114,11 +129,7 @@ class Helper extends Character {
             framerate: 80,
             scale: 0.8,
             state: 'burst',
-            states: {
-                burst: {
-                    south: { line: 0, length: 6 },
-                }
-            }
+            states: { burst: { south: { line: 0, length: 6 }, } }
         });
     }
 }

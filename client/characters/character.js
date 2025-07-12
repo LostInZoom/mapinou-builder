@@ -63,6 +63,8 @@ class Character {
                 this.destroy();
                 callback();
             });
+        } else {
+            callback();
         }
     }
 

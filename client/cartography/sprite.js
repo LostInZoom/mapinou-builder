@@ -267,6 +267,8 @@ class Sprite {
                     this.setScale(eased);
                 }
             }, framerate);
+        } else {
+            callback();
         }
     }
 

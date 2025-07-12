@@ -13,7 +13,7 @@ import DragPan from 'ol/interaction/DragPan.js';
 import PinchZoom from 'ol/interaction/PinchZoom.js';
 import PointerInteraction from 'ol/interaction/Pointer.js';
 
-import { buffer, middle, project, within } from './analysis.js';
+import { angle, buffer, middle, project, within } from './analysis.js';
 import { addClass, addSVG, makeDiv, removeClass, wait } from '../utils/dom.js';
 // import { MapLayers, Player, Enemy, Target } from './layers.js';
 import { unByKey } from 'ol/Observable.js';
@@ -138,6 +138,10 @@ class Basemap {
             } else { interaction.setActive(false); }
         });
     }
+
+    removeLayers() {
+        this.layers.forEach(layer => { this.map.removeLayer(layer); })
+    }
 }
 
 class MiniMap extends Basemap {
@@ -159,6 +163,24 @@ class MainMap extends Basemap {
         this.south = makeDiv(null, 'map-mask parallel south');
         this.maskcontainer.append(this.east, this.west, this.north, this.south);
         this.container.append(this.maskcontainer);
+
+        this.positioncontainer = makeDiv(null, 'level-position-container');
+        this.position = makeDiv(null, 'level-position');
+        this.positioncontainer.append(this.position);
+        this.container.append(this.positioncontainer);
+
+        this.width = this.container.offsetWidth;
+        this.height = this.container.offsetHeight;
+
+        const center = [this.width / 2, this.height / 2];
+        this.aNW = angle(center, [0, 0]);
+        this.aNE = angle(center, [this.width, 0]);
+        this.aSW = angle(center, [0, this.height]);
+        this.aSE = angle(center, [this.width, this.height]);
+        console.log('NW: ' + this.aNW);
+        console.log('NE: ' + this.aNE);
+        console.log('SW: ' + this.aSW);
+        console.log('SE: ' + this.aSE);
     }
 
     createCharacters(level, options) {
@@ -207,11 +229,58 @@ class MainMap extends Basemap {
         this.mapListeners.push(movement);
 
         let routing = this.map.on('postrender', () => {
+            // Handle the routability of the map
             if (this.view.getZoom() >= this.params.game.routing && !this.routable) {
                 this.makeRoutable();
             }
             else if (this.view.getZoom() < this.params.game.routing && this.routable) {
                 this.makeUnroutable();
+            }
+
+            // Handle the visibility of the position marker
+            let coords = this.player.getCoordinates();
+            if (this.isVisible(this.player.getCoordinates(), 0)) {
+                removeClass(this.position, 'pop');
+            } else {
+                addClass(this.position, 'pop');
+                let player = this.map.getPixelFromCoordinate(this.player.getCoordinates());
+                let center = this.map.getPixelFromCoordinate(this.getCenter());
+
+                let a = angle(center, player);
+                this.positioncontainer.style.top = 'unset';
+                this.positioncontainer.style.bottom = 'unset';
+                this.positioncontainer.style.left = 'unset';
+                this.positioncontainer.style.right = 'unset';
+                if (a >= this.aNW && a <= this.aNE) {
+                    this.positioncontainer.style.top = '.5rem';
+
+                    this.positioncontainer.style.left = '.5rem';
+                    console.log('NORTH');
+                }
+                else if (a >= this.aSE && a <= this.aSW) {
+                    this.positioncontainer.style.bottom = '.5rem';
+
+                    this.positioncontainer.style.right = '.5rem';
+                    console.log('SOUTH');
+                }
+                else if (a > this.aSW && a < this.aNW) {
+                    this.positioncontainer.style.left = '.5rem';
+
+                    this.positioncontainer.style.bottom = '.5rem';
+                    console.log('WEST');
+                }
+                else {
+                    this.positioncontainer.style.right = '.5rem';
+
+                    this.positioncontainer.style.top = '.5rem';
+                    console.log('EAST');
+                }
+                
+                let ao = angle(center, [0, 0]);
+
+                let rotation = (ao - a);
+                if (rotation < 0) { rotation += 2 * Math.PI }
+                // this.positioncontainer.style.transform = `rotate(-${rotation}rad)`;
             }
         });
         this.mapListeners.push(routing);
@@ -234,14 +303,53 @@ class MainMap extends Basemap {
         return extent;
     }
 
-    makeRoutable() {
-        this.routable = true;
-        addClass(this.maskcontainer, 'routable');
+    makeRoutable(callback) {
+        callback = callback || function() {};
+        if (this.routable) { callback(); }
+        else {
+            this.routable = true;
+            addClass(this.maskcontainer, 'routable');
+            wait(500, callback);
+        }
     }
 
-    makeUnroutable() {
-        this.routable = false;
-        removeClass(this.maskcontainer, 'routable');
+    makeUnroutable(callback) {
+        callback = callback || function() {};
+        if (!this.routable) { callback(); }
+        else {
+            this.routable = false;
+            removeClass(this.maskcontainer, 'routable');
+            wait(500, callback);
+        }
+    }
+
+    clear(callback) {
+        callback = callback || function() {};
+        let cleared = 0;
+        const clearing = 4;
+
+        if (this.player) {
+            if (this.player.traveling) { this.player.stop(); }
+            this.player.despawn(() => {
+                if (++cleared === clearing) { callback(); }
+            });
+        }
+        if (this.target) {
+            this.target.despawn(() => {
+                if (++cleared === clearing) { callback(); }
+            });
+        }
+
+        if (this.enemies) {
+            this.enemies.despawn(() => {
+                if (++cleared === clearing) { callback(); }
+            });
+        }
+        if (this.helpers) {
+            this.helpers.despawn(() => {
+                if (++cleared === clearing) { callback(); }
+            });
+        }
     }
 }
 

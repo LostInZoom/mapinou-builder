@@ -110,6 +110,21 @@ class Score {
         addClass(this.container, 'pop');
         wait(200, callback);
     }
+
+    unpop(callback) {
+        callback = callback || function() {};
+        removeClass(this.container, 'pop');
+        wait(200, callback);
+    }
+
+    destroy(callback) {
+        callback = callback || function() {};
+        this.unpop(() => {
+            this.stop();
+            this.container.remove();
+            callback();
+        });
+    }
 }
 
 export default Score;
