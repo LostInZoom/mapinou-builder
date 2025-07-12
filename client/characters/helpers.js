@@ -9,7 +9,6 @@ import { getColorsByClassNames } from "../utils/parse.js";
 import { easeInSine, easeOutSine, generateRandomInteger } from "../utils/math.js";
 import Character from "./character.js";
 import { buffer } from "../cartography/analysis.js";
-import { SoundEffect } from "../utils/audio.js";
 import Sprite from "../cartography/sprite.js";
 
 class Helpers {
@@ -101,12 +100,11 @@ class Helper extends Character {
 
     consume() {
         this.deactivate();
-        let sound = new SoundEffect({
+        this.basemap.options.app.sounds.playFile({
             src: './sounds/crounch',
             format: 'mp3',
             amount: 3,
         });
-        sound.play(false);
 
         this.sprite.makeDynamic({
             src: './sprites/burst.png',

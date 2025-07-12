@@ -26,7 +26,7 @@ import { Enemies, Enemy } from '../characters/enemies.js';
 import Player from '../characters/player.js';
 import Target from '../characters/target.js';
 import { Helper, Helpers } from '../characters/helpers.js';
-import { Music } from '../utils/audio.js';
+import { Music } from '../utils/sounds.js';
 
 class Basemap {
     constructor(options, callback) {

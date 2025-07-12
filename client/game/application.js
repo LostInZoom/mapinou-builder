@@ -3,13 +3,13 @@ import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils
 import { MainMap } from '../cartography/map.js';
 import { easeInOutCubic, generateRandomInteger } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
-import { SoundEffectsButton, MusicButton } from '../utils/audio.js';
 
 import Title from '../pages/title.js';
 import Consent from '../pages/consent.js';
 import Form from '../pages/form.js';
 import Levels from '../pages/levels.js';
 import Roamer from '../characters/roamer.js';
+import { Music, SoundEffects } from '../utils/soundbuttons.js';
 
 class Application {
     constructor(options) {
@@ -34,14 +34,14 @@ class Application {
         this.header = new Header(this);
         this.header.setJustification('right');
 
-        this.music = new MusicButton({
+        this.music = new Music({
             parent: this.header,
             svg: this.options.svgs.music,
             src: './sounds/theme',
             format: 'mp3',
         });
 
-        this.sound = new SoundEffectsButton({
+        this.sounds = new SoundEffects({
             parent: this.header,
             svg: this.options.svgs.sound,
         });
@@ -65,7 +65,7 @@ class Application {
                 init: true
             }, () => {
                 this.music.display(true);
-                this.sound.display(false);
+                this.sounds.display(false);
             });
         });
 

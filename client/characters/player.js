@@ -68,6 +68,14 @@ class Player extends Rabbit {
         let vertexes = [];
         let nodes = route.geometry.coordinates;
         nodes.forEach((node) => { vertexes.push(project('4326', '3857', node)); });
+
+        let flower = new Flower({
+            basemap: this.basemap,
+            level: this.level,
+            coordinates: vertexes[vertexes.length - 1],
+            zIndex: 35
+        });
+        this.flowers.push(flower);
         
         // Create the path line and calculate its length
         const line = new LineString(vertexes);
@@ -179,14 +187,6 @@ class Player extends Rabbit {
         if (this.traveling) { this.stop(); }
         this.traveling = true;
         this.destination = destination;
-
-        let flower = new Flower({
-            basemap: this.basemap,
-            level: this.level,
-            coordinates: this.destination,
-            zIndex: 35
-        });
-        this.flowers.push(flower);
 
         // Show the routing button and set it to routing mode
         this.level.activateMovementButton();
