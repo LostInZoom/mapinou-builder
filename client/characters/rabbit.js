@@ -48,7 +48,7 @@ class Rabbit extends Character {
             height: this.height,
             scale: 1,
             anchor: [0.5, 0.8],
-            framerate: 200,
+            framerate: 150,
             coordinates: this.coordinates,
             states: this.states,
         }, () => {

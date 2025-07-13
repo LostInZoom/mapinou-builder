@@ -49,6 +49,10 @@ class Sprite {
         this.shift = [ 0, 0 ];
         this.freezed = true;
 
+        this.skip = false;
+        this.skipGap = 3;
+        this.skipCount = 0;
+
         let img = this.icon.img_ = new Image();
         img.crossOrigin = options.crossOrigin || "anonymous";
         img.src = options.src;
@@ -123,10 +127,24 @@ class Sprite {
     draw() {
         var ctx = this.icon.getImage().getContext("2d");
         ctx.clearRect(0, 0, this.width, this.height);
-        ctx.drawImage(
-            this.icon.img_, this.offset[0], this.offset[1], this.size[0], this.size[1],
-            this.shift[0], this.shift[1], this.currentSize[0], this.currentSize[1]
-        );
+
+        let draw = true;
+        if (this.skip) {
+            if (this.skipCount >= this.skipGap) {
+                draw = false;
+                this.skipCount = 0;
+            } else {
+                ++this.skipCount;
+            }
+        }
+        
+        if (draw) {
+            ctx.drawImage(
+                this.icon.img_, this.offset[0], this.offset[1], this.size[0], this.size[1],
+                this.shift[0], this.shift[1], this.currentSize[0], this.currentSize[1]
+            );
+        }
+        
         this.options.layer.values_.map.render();
     }
 
@@ -270,6 +288,16 @@ class Sprite {
         } else {
             callback();
         }
+    }
+
+    enableFrameSkipping(gap=1) {
+        this.skip = true;
+        this.skipCount = 0;
+        this.skipGap = gap;
+    }
+
+    disableFrameSkipping() {
+        this.skip = false;
     }
 
     /**

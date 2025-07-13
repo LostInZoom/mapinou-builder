@@ -6,6 +6,7 @@ import Rabbit from "./rabbit.js";
 import { unByKey } from "ol/Observable.js";
 import Router from "../cartography/routing.js";
 import Flower from "./flower.js";
+import { wait } from "../utils/dom.js";
 
 class Player extends Rabbit {
     constructor(options) {
@@ -26,6 +27,21 @@ class Player extends Rabbit {
 
         this.closeEnemies = [];
         this.flowers = [];
+
+        this.invulnerable = false;
+    }
+
+    isInvulnerable() {
+        return this.invulnerable;
+    }
+
+    makeInvulnerable(duration) {
+        this.invulnerable = true;
+        this.sprite.enableFrameSkipping();
+        wait(duration, () => {
+            this.sprite.disableFrameSkipping();
+            this.invulnerable = false;
+        })
     }
 
     stop() {
@@ -145,7 +161,10 @@ class Player extends Rabbit {
                     // Check if the enemy has not already striked
                     if (!this.closeEnemies.includes(enemy)) {
                         this.closeEnemies.push(enemy);
-                        this.level.score.addModifier('enemies');
+                        if (!this.isInvulnerable()) {
+                            this.level.score.addModifier('enemies');
+                            this.makeInvulnerable(this.params.game.invulnerability);
+                        }
                     }
                 });
                 // Treating enemies outside range
