@@ -56,15 +56,16 @@
     position: absolute;
     top: .5rem;
     left: .5rem;
-    // transition: top .1s linear;
+    transform: translate(-50%, -50%);
 }
 
 .level-position {
-    height: 2rem;
-    width: 2rem;
+    position: relative;
+    height: 1.5rem;
+    width: 1.5rem;
 
     border: solid .4rem colors.$main-color-dark;
-    border-radius: 0 2rem 2rem 2rem;
+    border-radius: 0 1.5rem 1.5rem 1.5rem;
     background-color: colors.$main-color-light;
 
     transform: scale(0);
@@ -73,5 +74,17 @@
     &.pop {
         transform: scale(1);
         transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &:before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: .8rem;
+        width: .8rem;
+        border-radius: 0 .8rem .8rem .8rem;
+        background-color: colors.$secondary-color-dark;
     }
 }
