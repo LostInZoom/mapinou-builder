@@ -1,6 +1,7 @@
 import { radiansToDegrees } from "@turf/turf";
 import { angle } from "../cartography/analysis";
 import { addClass, removeClass, hasClass, wait, makeDiv } from "../utils/dom";
+import { inAndOut } from "ol/easing";
 
 class Position {
     constructor(options) {
@@ -12,7 +13,21 @@ class Position {
         this.container.append(this.marker);
         this.basemap.container.append(this.container);
 
-        this.padding = 20;
+        this.listen = true;
+        this.container.addEventListener('click', () => {
+            if (this.listen) {
+                this.listen = false;
+                this.basemap.animate({
+                    center: this.player.getCoordinates(),
+                    duration: 500,
+                    easing: inAndOut,
+                }, () => {
+                    this.listen = true;
+                });
+            }
+        })
+
+        this.padding = [ 72, 20, 20, 20 ];
         let width = this.basemap.container.offsetWidth;
         let height = this.basemap.container.offsetHeight;
 
@@ -38,11 +53,13 @@ class Position {
             let [x3, y3] = [undefined, undefined];
             let a = undefined;
 
-            let paddingW = this.padding + this.width / 2;
-            let paddingH = this.padding + this.height / 2;
+            let paddingN = this.padding[0] + this.height / 2;
+            let paddingE = this.padding[1] + this.width / 2;
+            let paddingS = this.padding[2] + this.height / 2;
+            let paddingW = this.padding[3] + this.width / 2;
 
-            let [ xmin, ymin ] = [ paddingW, paddingH ];
-            let [ xmax, ymax ] = [ this.mapWidth - paddingW, this.mapHeight - paddingH ]
+            let [ xmin, ymin ] = [ paddingW, paddingN ];
+            let [ xmax, ymax ] = [ this.mapWidth - paddingE, this.mapHeight - paddingS ]
             let rotation = 135;
 
             if (x2 < xmin) { x3 = xmin; a = 180; }

@@ -81,7 +81,7 @@ game:
     roaming: 20 # in px/s
     enemies: 10 # in px/s
   invulnerability: 3000
-  routing: 13.33
+  routing: 13.4
   lost: 'Revenez en arrière !'
 ###########################
 #### FORM DEFINITION ######
