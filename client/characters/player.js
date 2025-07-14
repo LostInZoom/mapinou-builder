@@ -189,6 +189,12 @@ class Player extends Rabbit {
                     this.basemap.enemies.setOrientation(this.position);
                 }
 
+                // If target is in range, win the level
+                if (within(this.position, this.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
+                    this.stop();
+                    callback(true);
+                }
+
                 // Render the map to trigger the listener
                 this.basemap.map.render();
             }
@@ -196,7 +202,7 @@ class Player extends Rabbit {
             else {
                 // Stop the animation
                 this.stop();
-                callback();
+                callback(false);
             }
         });
     }
@@ -218,9 +224,7 @@ class Player extends Rabbit {
             if (destination === this.destination) {
                 // Change the score increment
                 this.level.score.setState('movement');
-                this.move(route, () => {
-                    callback();
-                });
+                this.move(route, callback);
             }
         });
     }

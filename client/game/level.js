@@ -1,6 +1,6 @@
 import { unByKey } from 'ol/Observable.js';
 
-import { within } from "../cartography/analysis";
+import { middle, within } from "../cartography/analysis";
 import Score from "../cartography/score";
 import Page from "../pages/page";
 import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
@@ -15,6 +15,7 @@ class Level extends Page {
         super(options, callback);
         this.params = this.options.app.options;
         this.level = this.options.params;
+        this.levels = this.options.levels;
         this.basemap = this.options.app.basemap;
 
         this.score = new Score({
@@ -41,7 +42,9 @@ class Level extends Page {
         // });
 
         this.phase2(() => {
-            console.log('nice');
+            this.ending(() => {
+                this.clear('won');
+            });
         });
     }
 
@@ -117,8 +120,9 @@ class Level extends Page {
         });
 
         this.basemap.player.spawn(() => {
-            let extent = this.basemap.getExtentForData();
-            this.basemap.fit(extent, {
+            this.dataExtent = this.basemap.getExtentForData();
+
+            this.basemap.fit(this.dataExtent, {
                 duration: 500,
                 easing: inAndOut,
                 padding: [ 100, 50, 50, 50 ]
@@ -126,16 +130,36 @@ class Level extends Page {
                 this.basemap.target.spawn(() => {
                     this.basemap.enemies.spawn(1000, () => {
                         this.listening = true;
-                        
-                        // this.basemap.enemies.roam();
                         this.score.pop();
                         this.score.setState('default');
                         this.score.start();
                         this.basemap.setInteractions(true);
-                        this.basemap.activateMovement();
+
+                        this.basemap.activateMovement(win => {
+                            // Here, the level has been won
+                            if (win) {
+                                this.basemap.setInteractions(false);
+                                callback();
+                            }
+                        });
                     });
                 });
             })
+        });
+    }
+
+    ending(callback) {
+        callback = callback || function() {};
+        this.score.stop()
+        let score = this.score.get();
+        this.score.unpop(() => { this.score.destroy(); });
+
+        this.basemap.fit(this.dataExtent, {
+            duration: 500,
+            easing: inAndOut,
+            padding: [ 100, 50, 50, 50 ]
+        }, () => {
+            
         });
     }
 

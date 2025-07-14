@@ -46,6 +46,8 @@ async function createTables() {
 
         CREATE TABLE IF NOT EXISTS data.levels (
             id serial,
+            tier int,
+            level int,
             player geometry(Point, 3857),
             target geometry(Point, 3857),
             CONSTRAINT levels_pkey PRIMARY KEY (id)
@@ -60,12 +62,12 @@ async function createTables() {
             CONSTRAINT hints_levels_key FOREIGN KEY (level) REFERENCES data.levels(id)
         );
 
-        CREATE TABLE IF NOT EXISTS data.pitfalls (
+        CREATE TABLE IF NOT EXISTS data.enemies (
             id serial,
             level integer,
             geom geometry(Point, 3857),
-            CONSTRAINT pitfalls_pkey PRIMARY KEY (id),
-            CONSTRAINT pitfalls_levels_key FOREIGN KEY (level) REFERENCES data.levels(id)
+            CONSTRAINT enemies_pkey PRIMARY KEY (id),
+            CONSTRAINT enemies_levels_key FOREIGN KEY (level) REFERENCES data.levels(id)
         );
 
         CREATE TABLE IF NOT EXISTS data.helpers (
@@ -84,6 +86,16 @@ async function createTables() {
             CONSTRAINT games_pkey PRIMARY KEY (id),
             CONSTRAINT games_sessions_key FOREIGN KEY (session) REFERENCES data.sessions(id),
             CONSTRAINT games_levels_key FOREIGN KEY (level) REFERENCES data.levels(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS data.interactions (
+            id serial,
+            session integer,
+            level integer,
+            type character varying (100),
+            CONSTRAINT interactions_pkey PRIMARY KEY (id),
+            CONSTRAINT interactions_sessions_key FOREIGN KEY (session) REFERENCES data.sessions(id),
+            CONSTRAINT interactions_levels_key FOREIGN KEY (level) REFERENCES data.levels(id)
         );
     `
     await db.query(TABLES);
@@ -106,48 +118,84 @@ async function insertLevels() {
         await db.query(insertion);
     }
 
-    for (let i = 0; i < params.levels.length; i++) {
-        let entry = params.levels[i];
-        if (entry.type === 'level' && entry.options) {
-            let l = entry.options;
-            let insertion = `
-                INSERT INTO data.levels (player, target)
-                VALUES (
-                    ST_SetSRID(ST_POINT(${l.player[0]}, ${l.player[1]}), 3857),
-                    ST_SetSRID(ST_POINT(${l.target[0]}, ${l.target[1]}), 3857)
-                )
-                RETURNING id;
-            `
-            let result = await db.query(insertion);
-            let index = result.rows[0].id;
+    let tier = 1;
+    for (let t = 0; t < params.levels.length; t++) {
+        let entry = params.levels[t];
 
-            for (let zoom in l.hints) {
-                let hint = `
-                    INSERT INTO data.hints (level, zoom, hint)
-                    VALUES (${index}, ${zoom}, '${l.hints[zoom]}')
-                `
-                await db.query(hint);
+        if (entry.type === 'tier') {
+            let levels = entry.content;
+            for (let l = 0; l < levels.length; l++) {
+                let level = levels[l];
+
+                if (level.player) {
+                    let insertion = `
+                        INSERT INTO data.levels (tier, level, player, target)
+                        VALUES (
+                            ${tier},
+                            ${l + 1},
+                            ST_SetSRID(ST_POINT(${level.player[0]}, ${level.player[1]}), 3857),
+                            ST_SetSRID(ST_POINT(${level.target[0]}, ${level.target[1]}), 3857)
+                        )
+                        RETURNING id;
+                    `
+                    let result = await db.query(insertion);
+                    let index = result.rows[0].id;
+
+                    for (let zoom in level.hints) {
+                        let hint = `
+                            INSERT INTO data.hints (level, zoom, hint)
+                            VALUES (${index}, ${zoom}, '${level.hints[zoom]}')
+                        `
+                        await db.query(hint);
+                    }
+
+                    for (let j = 0; j < level.enemies.length; j++) {
+                        let p = level.enemies[j];
+                        let enemies = `
+                            INSERT INTO data.enemies (level, geom)
+                            VALUES (${index}, ST_SetSRID(ST_POINT(${p[0]}, ${p[1]}), 3857))
+                        `
+                        await db.query(enemies);
+                    }
+
+                    for (let j = 0; j < level.helpers.length; j++) {
+                        let b = level.helpers[j];
+                        let helpers = `
+                            INSERT INTO data.helpers (level, geom)
+                            VALUES (${index}, ST_SetSRID(ST_POINT(${b[0]}, ${b[1]}), 3857))
+                        `
+                        await db.query(helpers);
+                    }
+                }
             }
 
-            for (let j = 0; j < l.pitfalls.length; j++) {
-                let p = l.pitfalls[j];
-                let pitfall = `
-                    INSERT INTO data.pitfalls (level, geom)
-                    VALUES (${index}, ST_SetSRID(ST_POINT(${p[0]}, ${p[1]}), 3857))
-                `
-                await db.query(pitfall);
-            }
-
-            for (let j = 0; j < l.helpers.length; j++) {
-                let b = l.helpers[j];
-                let helpers = `
-                    INSERT INTO data.helpers (level, geom)
-                    VALUES (${index}, ST_SetSRID(ST_POINT(${b[0]}, ${b[1]}), 3857))
-                `
-                await db.query(helpers);
-            }
+            ++tier;
         }
     }
+
+    let s = `
+        INSERT INTO data.sessions (consent, form)
+        VALUES
+            (True, True),
+            (True, True),
+            (True, True),
+            (True, True),
+            (True, True);
+    `
+
+    await db.query(s);
+
+    // INSERT FAKE SESSIONS RESULTS
+    let helpers = `
+        INSERT INTO data.games (session, level, score)
+        VALUES
+            (1, 2, 584),
+            (2, 2, 1204),
+            (3, 2, 103),
+            (4, 2, 84),
+            (5, 2, 4);
+    `
+    await db.query(helpers);
 }
 
 export { clearDB, createTables, insertLevels }

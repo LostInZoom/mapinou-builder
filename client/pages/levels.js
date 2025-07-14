@@ -14,7 +14,7 @@ class Levels extends Page {
         super(options, callback);
         this.listen = false;
 
-        this.options.app.forbidRabbits();
+        this.app.forbidRabbits();
 
         // Define the current advancement
         let progression = {
@@ -22,18 +22,21 @@ class Levels extends Page {
             subposition: 3
         };
 
-        this.back = makeDiv(null, 'header-button left', this.options.app.options.svgs.arrowleft);
-        this.options.app.header.insert(this.back);
+        this.back = makeDiv(null, 'header-button left', this.params.svgs.arrowleft);
+        this.app.header.insert(this.back);
 
-        this.options.app.basemap.fit(this.options.app.options.interface.map.levels, {
+        this.basemap.fit(this.params.interface.map.levels, {
             duration: 500,
             easing: inAndOut
         }, () => {
+            this.mapCenter = this.basemap.getCenter();
+            this.mapZoom = this.basemap.getZoom();
+
             addClass(this.container, 'page-levels');
             addClass(this.back, 'pop');
 
-            let zoom = this.options.app.basemap.getZoom();
-            let levels = this.options.app.options.levels;
+            let zoom = this.app.basemap.getZoom();
+            let levels = this.app.options.levels;
             let pos = levels[progression.position];
 
             this.svg = new LevelEdges({ parent: this.container });
@@ -43,7 +46,7 @@ class Levels extends Page {
                 let delay = 200;
                 for (let i = 0; i < pos.content.length; i++) {
                     let level = pos.content[i];
-                    let px = this.options.app.basemap.getPixel(level.target);
+                    let px = this.app.basemap.getPixel(level.target);
 
                     let minimapcontainer = makeDiv(null, 'levels-minimap-container');
                     let minimap = makeDiv(null, 'levels-minimap');
@@ -96,8 +99,9 @@ class Levels extends Page {
                             wait(500, () => {
                                 this.destroy();
                                 this.back.remove();
-                                this.options.app.page = new Level({
+                                this.app.page = new Level({
                                     app: this.app,
+                                    levels: this,
                                     position: 'current',
                                     params: level
                                 });
@@ -117,13 +121,13 @@ class Levels extends Page {
                     wait(500, () => {
                         this.options.app.basemap.animate({
                             center: this.app.center,
-                            zoom: this.options.app.options.interface.map.start.zoom,
+                            zoom: this.params.interface.map.start.zoom,
                             duration: 500,
                             easing: inAndOut
                         }, () => {
                             this.destroy();
                             this.back.remove();
-                            this.options.app.page = new Title({ app: this.app, position: 'current' });
+                            this.app.page = new Title({ app: this.app, position: 'current' });
                         });
                     })
                 }

@@ -8,6 +8,8 @@ class Page {
         this.listen = true;
 
         this.app = this.options.app;
+        this.params = this.app.options;
+        this.basemap = this.options.basemap;
         this.position = this.options.position;
 
         // Create DOM Element

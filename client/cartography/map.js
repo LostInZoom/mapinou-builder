@@ -213,11 +213,13 @@ class MainMap extends Basemap {
         this.enemies.distanceOrder(options.player);
     }
 
-    activateMovement() {
+    activateMovement(callback) {
+        callback = callback || function () {};
+
         let movement = this.map.on('click', () => {
             if (this.routable) {
                 let destination = this.map.getEventCoordinate(event);
-                this.player.travel(destination);
+                this.player.travel(destination, callback);
             }
         });
         this.mapListeners.push(movement);
@@ -226,7 +228,6 @@ class MainMap extends Basemap {
             basemap: this,
             player: this.player
         });
-
         let routing = this.map.on('postrender', () => {
             // Handle the routability of the map
             if (this.view.getZoom() >= this.params.game.routing && !this.routable) {
@@ -235,7 +236,6 @@ class MainMap extends Basemap {
             else if (this.view.getZoom() < this.params.game.routing && this.routable) {
                 this.makeUnroutable();
             }
-
             this.position.update();
         });
         this.mapListeners.push(routing);

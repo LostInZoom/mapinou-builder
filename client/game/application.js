@@ -61,6 +61,7 @@ class Application {
             // Create the current page
             this.page = new Levels({
                 app: this,
+                basemap: this.basemap,
                 position: 'current',
                 init: true
             }, () => {

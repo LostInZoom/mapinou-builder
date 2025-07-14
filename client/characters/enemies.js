@@ -26,7 +26,6 @@ class Enemies {
                 let o = this.options;
                 o.coordinates = coords;
                 let choice = weightedRandom(this.statespool, this.weights.slice());
-                console.log(choice)
                 if (choice === 'hunter') { this.enemies.push(new Hunter(o)); }
                 else if (choice === 'snake') { this.enemies.push(new Snake(o)); }
                 else if (choice === 'bird') { this.enemies.push(new Bird(o)); }

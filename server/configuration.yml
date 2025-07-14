@@ -77,7 +77,7 @@ game:
   visibility:
     helpers: 1500
   speed:
-    travel: 5000 # in km/h
+    travel: 50000 # in km/h
     roaming: 20 # in px/s
     enemies: 10 # in px/s
   invulnerability: 3000
