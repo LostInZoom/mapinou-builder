@@ -1,18 +1,16 @@
-import { getVectorContext } from "ol/render";
-import { LineString } from "ol/geom";
-
-import Character from "./character.js";
-import { angle, buffer, bufferAroundPolygon, randomPointInCircle } from "../cartography/analysis.js";
-import Sprite from "../cartography/sprite.js";
-import { wait } from "../utils/dom.js";
-import { distance } from "ol/coordinate.js";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
 import { Feature } from "ol";
-import { getColorsByClassNames } from "../utils/parse.js";
-import { Fill, Stroke, Style } from "ol/style.js";
 import { unByKey } from "ol/Observable.js";
-import { remap, weightedRandom } from "../utils/math.js";
+import { Fill, Style } from "ol/style.js";
+import { distance } from "ol/coordinate.js";
+
+import Character from "./character.js";
+import Sprite from "../cartography/sprite.js";
+import { buffer, bufferAroundPolygon } from "../cartography/analysis.js";
+import { wait } from "../utils/dom.js";
+import { getColorsByClassNames } from "../utils/parse.js";
+import { weightedRandom } from "../utils/math.js";
 
 class Enemies {
     constructor(options) {
@@ -206,7 +204,7 @@ class Snake extends Enemy {
         this.orientable = true;
         this.states = {
             idle: {
-                north: { line: 0, length: 5 },
+                north: { line: 0, length: 3 },
                 east: { line: 1, length: 3 },
                 south: { line: 2, length: 3 },
                 west: { line: 3, length: 3 },

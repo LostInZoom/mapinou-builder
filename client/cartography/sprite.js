@@ -14,6 +14,7 @@ class Sprite {
         this.originalScale = options.scale || 1;
         this.scale = options.scale || 1;
         this.feature = new Feature({ geometry: new Point(options.coordinates || null) });
+        this.src = options.src;
 
         this.framerate = options.framerate || 100;
         this.loop = options.loop === undefined ? true : false;
@@ -55,7 +56,7 @@ class Sprite {
 
         let img = this.icon.img_ = new Image();
         img.crossOrigin = options.crossOrigin || "anonymous";
-        img.src = options.src;
+        img.src = this.src;
         this.style = new Style({
             image: this.icon
         });
@@ -128,17 +129,17 @@ class Sprite {
         var ctx = this.icon.getImage().getContext("2d");
         ctx.clearRect(0, 0, this.width, this.height);
 
-        let draw = true;
+        let drawImage = true;
         if (this.skip) {
             if (this.skipCount >= this.skipGap) {
-                draw = false;
+                drawImage = false;
                 this.skipCount = 0;
             } else {
                 ++this.skipCount;
             }
         }
         
-        if (draw) {
+        if (drawImage) {
             ctx.drawImage(
                 this.icon.img_, this.offset[0], this.offset[1], this.size[0], this.size[1],
                 this.shift[0], this.shift[1], this.currentSize[0], this.currentSize[1]
