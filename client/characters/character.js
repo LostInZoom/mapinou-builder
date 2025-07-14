@@ -19,6 +19,7 @@ class Character {
         this.coordinates = this.options.coordinates;
         this.origin = this.options.coordinates;
         this.params = this.basemap.options.app.options;
+        this.orientable = this.options.orientable === undefined ? false : this.options.orientable;
         
         this.layer = new VectorLayer({
             source: new VectorSource(),
@@ -102,8 +103,14 @@ class Character {
         return this.sprite.getCoordinates();
     }
 
+    isOrientable() {
+        return this.orientable;
+    }
+
     setOrientation(coordinates) {
-        this.sprite.setDirectionFromAngle(angle(this.coordinates, coordinates));
+        if (this.isOrientable()) {
+            this.sprite.setDirectionFromAngle(angle(this.coordinates, coordinates));
+        }
     }
 
     getWithin(objects, distance) {

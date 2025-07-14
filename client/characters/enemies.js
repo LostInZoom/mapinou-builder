@@ -12,19 +12,26 @@ import { Feature } from "ol";
 import { getColorsByClassNames } from "../utils/parse.js";
 import { Fill, Stroke, Style } from "ol/style.js";
 import { unByKey } from "ol/Observable.js";
-import { remap } from "../utils/math.js";
+import { remap, weightedRandom } from "../utils/math.js";
 
 class Enemies {
     constructor(options) {
         this.options = options || {};
         this.params = this.options.basemap.params;
 
+        this.weights = [ 1, 2, 2 ];
+        this.statespool = [ 'hunter', 'snake', 'bird' ];
+
         this.enemies = [];
         if (this.options.coordinates) {
             this.options.coordinates.forEach((coords) => {
                 let o = this.options;
                 o.coordinates = coords;
-                this.enemies.push(new Enemy(o));
+                let choice = weightedRandom(this.statespool, this.weights.slice());
+                console.log(choice)
+                if (choice === 'hunter') { this.enemies.push(new Hunter(o)); }
+                else if (choice === 'snake') { this.enemies.push(new Snake(o)); }
+                else if (choice === 'bird') { this.enemies.push(new Bird(o)); }
             });
         }
     }
@@ -74,30 +81,6 @@ class Enemies {
 class Enemy extends Character {
     constructor(options) {
         super(options);
-        this.states = {
-            idle: {
-                north: { line: 0, length: 3 },
-                east: { line: 1, length: 3 },
-                south: { line: 2, length: 3 },
-                west: { line: 3, length: 3 },
-            }
-        }
-
-        this.sprite = new Sprite({
-            type: 'dynamic',
-            layer: this.layer,
-            src: './sprites/snake.png',
-            width: 64,
-            height: 64,
-            scale: 0.8,
-            anchor: [0.5, 0.7],
-            framerate: 300,
-            coordinates: this.coordinates,
-            states: this.states
-        }, () => {
-            this.sprite.animate();
-        });
-
         let colors = getColorsByClassNames('enemies-map', 'enemies-map-transparent');
 
         let sizeArea = this.basemap.params.game.tolerance.enemies;
@@ -191,4 +174,87 @@ class Enemy extends Character {
     }
 }
 
-export { Enemies, Enemy };
+class Hunter extends Enemy {
+    constructor(options) {
+        super(options);
+        this.orientable = false;
+
+        this.states = {
+            idle: { south: { line: 0, length: 5 } }
+        }
+
+        this.sprite = new Sprite({
+            type: 'dynamic',
+            layer: this.layer,
+            src: './sprites/hunter.png',
+            width: 64,
+            height: 64,
+            scale: 0.9,
+            anchor: [0.5, 0.8],
+            framerate: 150,
+            coordinates: this.coordinates,
+            states: this.states
+        }, () => {
+            this.sprite.animate();
+        });
+    }
+}
+
+class Snake extends Enemy {
+    constructor(options) {
+        super(options);
+        this.orientable = true;
+        this.states = {
+            idle: {
+                north: { line: 0, length: 5 },
+                east: { line: 1, length: 3 },
+                south: { line: 2, length: 3 },
+                west: { line: 3, length: 3 },
+            }
+        }
+
+        this.sprite = new Sprite({
+            type: 'dynamic',
+            layer: this.layer,
+            src: './sprites/snake.png',
+            width: 64,
+            height: 64,
+            scale: 0.8,
+            anchor: [0.5, 0.8],
+            framerate: 200,
+            coordinates: this.coordinates,
+            states: this.states
+        }, () => {
+            this.sprite.animate();
+        });
+    }
+}
+
+class Bird extends Enemy {
+    constructor(options) {
+        super(options);
+        this.orientable = false;
+        this.states = {
+            idle: {
+                south: { line: 2, length: 3 }
+            }
+        }
+
+        this.sprite = new Sprite({
+            type: 'dynamic',
+            layer: this.layer,
+            src: './sprites/bird.png',
+            width: 64,
+            height: 64,
+            scale: 0.9,
+            anchor: [0.5, 0.5],
+            framerate: 200,
+            coordinates: this.coordinates,
+            states: this.states
+        }, () => {
+            this.sprite.animate();
+        });
+    }
+}
+
+export { Enemies, Enemy, Hunter, Snake, Bird };

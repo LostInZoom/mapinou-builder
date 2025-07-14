@@ -179,6 +179,7 @@ class MainMap extends Basemap {
             basemap: this,
             level: level,
             coordinates: options.player,
+            orientable: true,
             zIndex: 50
         });
         this.player.setOrientation(options.target)
@@ -189,6 +190,7 @@ class MainMap extends Basemap {
             colors: [ 'brown', 'sand', 'grey' ],
             color: 'random',
             coordinates: options.target,
+            orientable: true,
             zIndex: 40
         });
 
@@ -197,6 +199,7 @@ class MainMap extends Basemap {
             level: level,
             coordinates: options.helpers,
             minZoom: this.params.game.routing,
+            orientable: false,
             zIndex: 30,
         });
 
