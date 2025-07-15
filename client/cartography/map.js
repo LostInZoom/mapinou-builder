@@ -42,10 +42,7 @@ class Basemap {
         if (options.class) { addClass(this.container, options.class); }
         this.parent.append(this.container);
 
-        this.view = new View({
-            center: options.center,
-            zoom: options.zoom,
-        });
+        this.view = new View({});
 
         this.baselayer = new TileLayer({
             preload: 'Infinity',
@@ -81,6 +78,26 @@ class Basemap {
         });
 
         this.setInteractions(false);
+
+        if (this.options.center) { this.view.setCenter(this.options.center); }
+        if (this.options.zoom) { this.view.setZoom(this.options.zoom); }
+        if (this.options.extent) {
+            let res = this.view.getResolutionForExtent(this.options.extent, this.map.getSize());
+            this.zoom = this.view.getZoomForResolution(res);
+            this.view.setZoom(this.zoom);
+        }
+
+        this.listeners = [];
+        this.routable = true;
+
+        this.maskcontainer = makeDiv(null, 'map-mask-container');
+        this.east = makeDiv(null, 'map-mask meridian east');
+        this.west = makeDiv(null, 'map-mask meridian west');
+        this.north = makeDiv(null, 'map-mask parallel north');
+        this.south = makeDiv(null, 'map-mask parallel south');
+        this.maskcontainer.append(this.east, this.west, this.north, this.south);
+        this.container.append(this.maskcontainer);
+
         this.map.once('loadend', callback);
     }
 
@@ -151,28 +168,6 @@ class Basemap {
     removeLayers() {
         this.layers.forEach(layer => { this.map.removeLayer(layer); })
     }
-}
-
-class MiniMap extends Basemap {
-    constructor(options, callback) {
-        super(options, callback);
-    }
-}
-
-class MainMap extends Basemap {
-    constructor(options, callback) {
-        super(options, callback);
-        this.mapListeners = [];
-        this.routable = true;
-
-        this.maskcontainer = makeDiv(null, 'map-mask-container');
-        this.east = makeDiv(null, 'map-mask meridian east');
-        this.west = makeDiv(null, 'map-mask meridian west');
-        this.north = makeDiv(null, 'map-mask parallel north');
-        this.south = makeDiv(null, 'map-mask parallel south');
-        this.maskcontainer.append(this.east, this.west, this.north, this.south);
-        this.container.append(this.maskcontainer);
-    }
 
     createCharacters(level, options) {
         this.player = new Player({
@@ -222,7 +217,7 @@ class MainMap extends Basemap {
                 this.player.travel(destination, callback);
             }
         });
-        this.mapListeners.push(movement);
+        this.listeners.push(movement);
 
         this.position = new Position({
             basemap: this,
@@ -238,15 +233,11 @@ class MainMap extends Basemap {
             }
             this.position.update();
         });
-        this.mapListeners.push(routing);
-    }
-
-    deactivateMovement() {
-        if (this.listener) { unByKey(this.listener); }
+        this.listeners.push(routing);
     }
 
     removeListeners() {
-        this.mapListeners.forEach((listener) => { unByKey(listener); });
+        this.listeners.forEach((listener) => { unByKey(listener); });
     }
 
     getExtentForData() {
@@ -311,7 +302,6 @@ class MainMap extends Basemap {
         } else { ++cleared }
     }
 }
-
 
 
 
@@ -564,4 +554,4 @@ class GameMap extends Basemap {
     }
 }
 
-export { Basemap, MiniMap, MainMap, GameMap, MenuMap };
+export { Basemap, GameMap, MenuMap };

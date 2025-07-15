@@ -1,14 +1,17 @@
 import { unByKey } from 'ol/Observable.js';
 
-import { middle, within } from "../cartography/analysis";
+import { middle, randomPointInCircle, within } from "../cartography/analysis";
 import Score from "../cartography/score";
 import Page from "../pages/page";
-import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
+import { addClass, easingIncrement, makeDiv, removeClass, wait } from "../utils/dom";
 import { inAndOut } from 'ol/easing';
 import { Enemy } from '../characters/enemies';
 import Target from '../characters/target';
 import Player from '../characters/player';
 import Levels from '../pages/levels';
+import { ajaxPost } from '../utils/ajax';
+import { Basemap } from '../cartography/map';
+import { easeOutExpo } from '../utils/math';
 
 class Level extends Page {
     constructor(options, callback) {
@@ -32,20 +35,21 @@ class Level extends Page {
         // Cancel current game and go back to level selection
         this.listening = false;
         this.back.addEventListener('click', () => {
-            if (this.listening) { this.clear('abort'); }
+            if (this.listening) { 
+                this.listening = false;
+                this.clear(callback);
+            }
         });
 
-        // this.phase1(() => {
-        //     this.phase2(() => {
-        //         this.clear('win');
-        //     });
-        // });
-
-        this.phase2(() => {
-            this.ending(() => {
-                this.clear('won');
+        this.phase1(() => {
+            this.phase2(() => {
+                this.ending();
             });
         });
+
+        // this.phase2(() => {
+        //     this.ending();
+        // });
     }
 
     phase1(callback) {
@@ -114,7 +118,6 @@ class Level extends Page {
 
         this.canceler = makeDiv(null, 'level-cancel-button', this.params.svgs.helm);
         this.container.append(this.canceler);
-
         this.canceler.addEventListener('click', () => {
             if (this.player.traveling) { this.player.stop(); }
         });
@@ -139,7 +142,7 @@ class Level extends Page {
                             // Here, the level has been won
                             if (win) {
                                 this.basemap.setInteractions(false);
-                                callback();
+                                this.clear(callback);
                             }
                         });
                     });
@@ -148,19 +151,134 @@ class Level extends Page {
         });
     }
 
-    ending(callback) {
-        callback = callback || function() {};
+    ending() {
         this.score.stop()
-        let score = this.score.get();
+        this.endScore = this.score.get();
         this.score.unpop(() => { this.score.destroy(); });
+
+        let results = {
+            session: this.params.session.index,
+            tier: this.levels.progression.tier,
+            level: this.levels.progression.level,
+            score: this.endScore,
+        }
+
+        const clearing = 2;
+        let cleared = 0;
+        ajaxPost('results', results, hs => {
+            this.highscores = hs.highscores;
+            if (++cleared === clearing) { this.leaderboard(); }
+        });
 
         this.basemap.fit(this.dataExtent, {
             duration: 500,
             easing: inAndOut,
             padding: [ 100, 50, 50, 50 ]
         }, () => {
-            
+            if (++cleared === clearing) { this.leaderboard(); }
         });
+    }
+
+    leaderboard() {
+        this.canceler.remove();
+
+        let score = 0;
+        this.highscoreContainer = makeDiv(null, 'highscore-container');
+        this.highscoreMap = makeDiv(null, 'highscore-map');
+        this.highscoreScore = makeDiv(null, 'highscore-score', score);
+        this.highscoreLeaderboardContainer = makeDiv(null, 'highscore-leaderboard-container');
+        this.highscoreLeaderboard = makeDiv(null, 'highscore-leaderboard no-scrollbar');
+        this.continue = makeDiv(null, 'highscore-continue-button', "Continuer")
+
+        this.highscoreLeaderboardContainer.append(this.highscoreScore, this.highscoreLeaderboard)
+        this.highscoreContainer.append(this.highscoreMap, this.highscoreLeaderboardContainer, this.continue);
+        this.container.append(this.highscoreContainer);
+
+        this.highscoreContainer.offsetWidth;
+        addClass(this.highscoreContainer, 'pop');
+
+        let c = this.level.target;
+        let r = this.params.game.tolerance.target;        
+        let hsmap = new Basemap({
+            app: this.app,
+            parent: this.highscoreMap,
+            center: this.level.target,
+            extent: [ c[0] - r*2, c[1] - r*2, c[0] + r*2, c[1] + r*2 ]
+        }, () => {
+            this.hsTarget = new Target({
+                basemap: hsmap,
+                level: this,
+                color: 'brown',
+                coordinates: randomPointInCircle(c, r),
+                orientable: true,
+                zIndex: 40
+            });
+            this.hsPlayer = new Target({
+                basemap: hsmap,
+                level: this,
+                color: 'white',
+                coordinates: randomPointInCircle(c, r),
+                orientable: true,
+                zIndex: 50
+            });
+            this.hsTarget.spawn();
+            this.hsPlayer .spawn();
+        });
+
+        let delay = 300;
+        delay += 200;
+
+        wait(delay, () => {
+            addClass(this.highscoreScore, 'pop');
+            addClass(this.continue, 'pop');
+        });
+        delay += 500;
+
+        wait(delay, () => {
+            addClass(this.highscoreScore, 'incrementing');
+            easingIncrement({
+                element: this.highscoreScore,
+                maximum: this.endScore,
+                easing: easeOutExpo
+            }, () => {
+                removeClass(this.highscoreScore, 'incrementing');
+                addClass(this.highscoreScore, 'stop');
+                this.continue.addEventListener('click', () => {
+                    const clearing = 2;
+                    let cleared = 0;
+                    removeClass(this.highscoreContainer, 'pop');
+                    this.hsPlayer.despawn(() => {
+                        if (++cleared === clearing) { this.toLevels(); }
+                    });
+                    this.hsTarget.despawn(() => {
+                        if (++cleared === clearing) { this.toLevels(); }
+                    });
+                }, { once: true })
+            });
+        })
+        
+        this.highscores.sort((a, b) => a.score - b.score);
+        let personal;
+        for (let e = 1; e < this.highscores.length; e++) {
+            let entry = this.highscores[e];
+            let boardEntry = makeDiv(null, 'highscore-leaderboard-entry');
+            let html = `${e}.`;
+            if (this.params.session.index === entry.session) {
+                html += ' Vous';
+                addClass(boardEntry, 'active');
+                personal = boardEntry;
+            }
+            let boardPlace = makeDiv(null, 'highscore-leaderboard-place', html);
+            let boardScore = makeDiv(null, 'highscore-leaderboard-score', entry.score);
+            boardEntry.append(boardPlace, boardScore);
+            this.highscoreLeaderboard.append(boardEntry);
+        }
+
+        // Scroll to the user result
+        if (personal) {
+            let topScroll = personal.offsetTop;
+            this.highscoreLeaderboard.scrollTop = topScroll - this.highscoreLeaderboard.offsetHeight / 2;
+        }
     }
 
     routing() {
@@ -191,7 +309,9 @@ class Level extends Page {
         }
     }
 
-    clear(state) {
+    clear(callback) {
+        callback = callback || function() {};
+
         removeClass(this.back, 'pop');
         this.basemap.setInteractions(false);
         this.basemap.removeListeners();
@@ -201,17 +321,17 @@ class Level extends Page {
 
         wait(300, () => {
             this.back.remove();
-            if (++cleared === clearing) { this.toLevels(); }
+            if (++cleared === clearing) { callback(); }
         });
         this.basemap.clear(() => {
             this.basemap.removeLayers();
-            if (++cleared === clearing) { this.toLevels(); }
+            if (++cleared === clearing) { callback(); }
         });
         this.score.destroy(() => {
-            if (++cleared === clearing) { this.toLevels();}
+            if (++cleared === clearing) { callback();}
         });
         this.basemap.makeUnroutable(() => {
-            if (++cleared === clearing) { this.toLevels(); }
+            if (++cleared === clearing) { callback(); }
         });
     }
 

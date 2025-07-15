@@ -180,6 +180,13 @@ async function insertLevels() {
             (True, True),
             (True, True),
             (True, True),
+            (True, True),
+            (True, True),
+            (True, True),
+            (True, True),
+            (True, True),
+            (True, True),
+            (True, True),
             (True, True);
     `
 
@@ -193,7 +200,14 @@ async function insertLevels() {
             (2, 2, 1204),
             (3, 2, 103),
             (4, 2, 84),
-            (5, 2, 4);
+            (5, 2, 852),
+            (6, 2, 1),
+            (7, 2, 17),
+            (8, 2, 21),
+            (9, 2, 152),
+            (10, 2, 62),
+            (11, 2, 30),
+            (12, 2, 74);
     `
     await db.query(helpers);
 }

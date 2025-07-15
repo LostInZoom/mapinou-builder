@@ -9,6 +9,8 @@ class Sprite {
         this.options = options || {};
         callback = callback || function() {};
 
+        this.layer = this.options.layer;
+
         this.type = options.type || 'dynamic;';
         this.coordinates = options.coordinates;
         this.originalScale = options.scale || 1;
@@ -29,7 +31,7 @@ class Sprite {
         this.spawnIncrement = options.spawnIncrement || 0.15;
         this.spawnFramerate = options.spawnFramerate || 50;
 
-        this.options.layer.getSource().addFeature(this.feature);
+        this.layer.getSource().addFeature(this.feature);
         this.canvas = document.createElement('canvas');
 
         let width = this.canvas.width = options.width || 32;
@@ -74,31 +76,6 @@ class Sprite {
             this.draw();
             callback();
         }, { once: true });
-    }
-
-    makeDynamic(options) {
-        this.cancelScaleAnimation();
-        
-        this.framerate = options.framerate || 100;
-        this.states = options.states;
-        this.state = options.state || 'idle';
-        this.direction = options.direction || 'south';
-
-        if (options.loop !== undefined) { this.loop = options.loop } else { this.loop = true; }
-        if (options.src) { this.icon.img_.src = options.src; }
-        if (options.width) { this.width = options.width; }
-        if (options.height) { this.height = options.height; }
-        if (options.scale) {
-            this.icon.setScale(options.scale);
-            this.feature.setStyle(this.style);
-        }
-
-        this.offset = [ 0, this.states[this.state][this.direction].line*this.height ];
-
-        this.type = 'dynamic';
-        this.animate(() => {
-            this.hide();
-        });
     }
 
     spawn(callback) {
@@ -149,6 +126,22 @@ class Sprite {
         this.options.layer.values_.map.render();
     }
 
+    display() {
+        this.setOpacity(1);
+    }
+
+    hide() {
+        this.setOpacity(0);
+    }
+
+    resetGeometry() {
+        this.feature.setGeometry(new Point(this.coordinates));
+    }
+
+    removeGeometry() {
+        this.feature.setGeometry(null);
+    }
+
     getGeometryClone() {
         return this.feature.getGeometry().clone();
     }
@@ -168,14 +161,6 @@ class Sprite {
 
     getCoordinates() {
         return this.coordinates;
-    }
-
-    display() {
-        this.feature.setGeometry(new Point(this.coordinates));
-    }
-
-    hide() {
-        this.feature.setGeometry(null);
     }
 
     setDirectionFromAngle(angle) {
@@ -318,6 +303,12 @@ class Sprite {
 
     restoreScale() {
         this.setScale(this.originalScale);
+    }
+
+    destroy() {
+        this.cancelScaleAnimation();
+        this.freeze();
+        this.layer.getSource().removeFeature(this.feature);
     }
 }
 

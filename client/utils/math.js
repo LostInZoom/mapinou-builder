@@ -34,6 +34,14 @@ function easeOutQuint(x) {
     return 1 - Math.pow(1 - x, 5);
 }
 
+function easeOutCirc(x) {
+    return Math.sqrt(1 - Math.pow(x - 1, 2));
+}
+
+function easeOutExpo(x) {
+    return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+}
+
 function easeInSine(x) {
     return 1 - Math.cos((x * Math.PI) / 2);
 }
@@ -65,7 +73,7 @@ function remap(value, xmin, xmax, dmin=0, dmax=1) {
 export {
     generateRandomInteger, weightedRandom,
     easeInSine, easeInCubic, easeInQuint,
-    easeOutSine, easeOutCubic, easeOutQuint,
+    easeOutSine, easeOutCubic, easeOutQuint, easeOutCirc, easeOutExpo,
     easeInOutSine, easeInOutCubic, easeInOutQuint,
     remap
 };

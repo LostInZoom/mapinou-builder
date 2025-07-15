@@ -14,13 +14,11 @@ class Levels extends Page {
         super(options, callback);
         this.listen = false;
 
-        this.app.forbidRabbits();
+        this.progression = this.app.progression;
+        // DEBUGGING
+        this.progression = { tier: 2, level: 4 };
 
-        // Define the current advancement
-        let progression = {
-            position: 2,
-            subposition: 3
-        };
+        this.app.forbidRabbits();
 
         this.back = makeDiv(null, 'header-button left', this.params.svgs.arrowleft);
         this.app.header.insert(this.back);
@@ -37,7 +35,7 @@ class Levels extends Page {
 
             let zoom = this.app.basemap.getZoom();
             let levels = this.app.options.levels;
-            let pos = levels[progression.position];
+            let pos = levels[this.progression.tier];
 
             this.svg = new LevelEdges({ parent: this.container });
             this.minimaps = [];
@@ -70,24 +68,24 @@ class Levels extends Page {
                         }
                     });
 
-                    if (i <= progression.subposition) { delay +=300; } 
+                    if (i < this.progression.level) { delay +=300; } 
                 
                     wait(delay, () => {
-                        if (i < progression.subposition) {
+                        if (i < this.progression.level - 1) {
                             let nextpx = this.options.app.basemap.getPixel(pos.content[i + 1].target);
                             this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1]);
                         }
                     });
 
-                    if (i > progression.subposition) {
+                    if (i >= this.progression.level) {
                         addClass(minimapcontainer, 'remaining');
                         state.innerHTML = this.options.app.options.svgs.unknown;
                     } else {
-                        if (i < progression.subposition) {
+                        if (i < this.progression.level - 1) {
                             addClass(minimapcontainer, 'finished');
                             state.innerHTML = this.options.app.options.svgs.check;
                         }
-                        if (i === progression.subposition) {
+                        if (i === this.progression.level - 1) {
                             addClass(minimapcontainer, 'active');
                         }
                         delay += 300;

@@ -9,7 +9,7 @@ class Page {
 
         this.app = this.options.app;
         this.params = this.app.options;
-        this.basemap = this.options.basemap;
+        this.basemap = this.app.basemap;
         this.position = this.options.position;
 
         // Create DOM Element

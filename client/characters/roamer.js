@@ -55,7 +55,7 @@ class Roamer extends Rabbit {
         const length = line.getLength();
         const speed = this.speed;
         const position = this.sprite.getGeometryClone();
-        this.sprite.hide();
+        this.sprite.removeGeometry();
 
         let lastTime = Date.now();
         let distance = 0;
@@ -88,7 +88,7 @@ class Roamer extends Rabbit {
                 context.drawGeometry(position);
 
                 self.sprite.setCoordinates(destination);
-                self.sprite.display();
+                self.sprite.resetGeometry();
 
                 callback();
             }

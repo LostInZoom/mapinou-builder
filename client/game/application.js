@@ -1,6 +1,6 @@
 import Page from '../pages/page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
-import { MainMap } from '../cartography/map.js';
+import { Basemap } from '../cartography/map.js';
 import { easeInOutCubic, generateRandomInteger } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
 
@@ -50,7 +50,7 @@ class Application {
         let i = generateRandomInteger(0, centers.length - 1);
         this.center = centers[i];
 
-        this.basemap = new MainMap({
+        this.basemap = new Basemap({
             app: this,
             parent: this.container,
             class: 'basemap',

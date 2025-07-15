@@ -34,10 +34,11 @@ class Helpers {
 
     despawn(callback) {
         callback = callback || function () {};
-        let amount = this.getHelpers().length;
+        let amount = this.getActiveHelpers().length;
         let done = 0;
         this.helpers.forEach((helper) => {
             helper.despawn(() => {
+                helper.destroy();
                 if (++done === amount) { callback(); }
             });
         });
@@ -121,15 +122,25 @@ class Helper extends Character {
             amount: 3,
         });
 
-        this.sprite.makeDynamic({
+        this.sprite.destroy();
+        this.sprite = new Sprite({
+            type: 'dynamic',
+            layer: this.layer,
             src: './sprites/burst.png',
             loop: false,
             width: 64,
             height: 64,
-            framerate: 80,
             scale: 0.8,
+            anchor: [0.5, 0.5],
+            framerate: 80,
+            coordinates: this.coordinates,
             state: 'burst',
             states: { burst: { south: { line: 0, length: 6 }, } }
+        }, () => {
+            this.sprite.display();
+            this.sprite.animate(() => {
+                this.sprite.destroy();
+            });
         });
     }
 }

@@ -54,6 +54,12 @@ app.post('/cartogame/form', jsonParser, (req, res) => {
 	});
 });
 
+app.post('/cartogame/results', jsonParser, (req, res) => {
+	insertResults(req.body).then((highscores) => {
+		res.send(JSON.stringify(highscores));
+	});
+});
+
 app.listen(port, () => {
 	console.log(`Listening on port ${port}`);
 });
@@ -133,5 +139,40 @@ async function insertForm(data) {
 		return true
 	} catch {
 		return false;
+	}
+}
+
+async function insertResults(data) {
+	let levelQuery = `
+        SELECT id
+		FROM data.levels
+		WHERE tier = ${data.tier} AND level = ${data.level};
+    `
+
+	let highscores = { highscores: [] };
+	try {
+		let result = await db.query(levelQuery);
+		if (result.rows.length > 0) {
+			let level = result.rows[0].id;
+			let insertion = `
+				DELETE FROM data.games
+				WHERE session = ${data.session} AND level = ${level};
+
+				INSERT INTO data.games (session, level, score)
+				VALUES (${data.session}, ${level}, ${data.score});
+			`
+			await db.query(insertion);
+
+			let highscoresQuery = `
+				SELECT session, score
+				FROM data.games
+				WHERE level = ${level};
+			`
+			let hs = await db.query(highscoresQuery);
+			highscores.highscores = hs.rows;
+		}
+		return highscores;
+	} catch {
+		return highscores;
 	}
 }

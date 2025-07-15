@@ -62,7 +62,7 @@
     transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
     &.routing > svg {
-        animation: scale-breathing .5s linear infinite;
+        animation: scale-breathing .5s linear ease-in-out;
         transition: transform .2s linear;
     }
 

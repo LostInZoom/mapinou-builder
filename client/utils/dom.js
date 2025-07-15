@@ -1,4 +1,5 @@
 import { ajaxGet } from './ajax.js';
+import { remap } from './math.js';
 
 /**
  * Create a div with custom properties. Append the div to the parent if provided.
@@ -149,8 +150,25 @@ function isOverflown(element) {
   return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
 }
 
+function easingIncrement(options, callback) {
+    let element = options.element;
+    let maximum = options.maximum;
+    let easing = options.easing;
+    let value = 0;
+    element.innerHTML = value;
+    let duration = maximum * 10;
+    for (let i = 0; i <= maximum; ++i) {
+        let r = remap(i, 0, maximum);
+        let eased = 1 - easing(r);
+        let delay = remap(eased, 0, 1, 0, duration);
+        wait(delay, () => { element.innerHTML = value++; });
+    }
+    wait(duration, callback);
+}
+
 export {
     makeDiv, hasClass, addClass, removeClass, addClassList, removeClassList,
     activate, deactivate,
-    clearElement, addSVG, getCSSColors, remove, wait, isOverflown
+    clearElement, addSVG, getCSSColors, remove, wait, isOverflown,
+    easingIncrement
 }

@@ -41,7 +41,7 @@ class Player extends Rabbit {
         wait(duration, () => {
             this.sprite.disableFrameSkipping();
             this.invulnerable = false;
-        })
+        });
     }
 
     stop() {
@@ -64,7 +64,7 @@ class Player extends Rabbit {
         // Set router position
         this.router.setPosition(this.clone.getCoordinates());
 
-        this.sprite.display();
+        this.sprite.resetGeometry();
         this.sprite.setState('idle');
 
         this.level.deactivateMovementButton();
@@ -108,7 +108,7 @@ class Player extends Rabbit {
         this.distance = 0;
 
         // Hide the sprite (replaced with a clone during movement)
-        this.sprite.hide();
+        this.sprite.removeGeometry();
         // This listener is executed at each map frame rendered
         this.listener = this.layer.on('postrender', (event) => {
             // Get the time of the current frame

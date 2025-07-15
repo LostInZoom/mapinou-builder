@@ -71,7 +71,7 @@ game:
       helpers: -20
   tolerance:
     flag: 500
-    target: 200
+    target: 300
     enemies: 500
     helpers: 200
   visibility:

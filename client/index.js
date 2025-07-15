@@ -54,7 +54,16 @@ window.addEventListener("DOMContentLoaded", () => {
 
     register((sessionId) => {
         ajaxGet('configuration/', (params) => {
+            // Retrieve the current session progression
+            let progression = localStorage.getItem('progression');
+            if (!progression) {
+                progression = { tier: 0, level: 0 };
+                localStorage.setItem('progression', progression);
+            }
+
             params.session = sessionId;
+            params.progression = progression;
+
             new Application(params);
         });
     });

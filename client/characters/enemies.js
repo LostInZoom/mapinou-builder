@@ -17,7 +17,7 @@ class Enemies {
         this.options = options || {};
         this.params = this.options.basemap.params;
 
-        this.weights = [ 1, 2, 2 ];
+        this.weights = [ 1, 1, 1 ];
         this.statespool = [ 'hunter', 'snake', 'bird' ];
 
         this.enemies = [];
@@ -57,9 +57,13 @@ class Enemies {
         let amount = this.getEnemies().length;
         let done = 0;
         this.enemies.forEach((enemy) => {
-            enemy.despawn();
+            const clearing = 2;
+            let cleared = 0;
+            enemy.despawn(() => {
+                if (++cleared === clearing) { if (++done === amount) { enemy.destroy(); callback(); } }
+            });
             enemy.hideArea(() => {
-                if (++done === amount) { callback(); }
+                if (++cleared === clearing) { if (++done === amount) { enemy.destroy(); callback(); } }
             });
         });
     }
@@ -216,8 +220,8 @@ class Snake extends Enemy {
             src: './sprites/snake.png',
             width: 64,
             height: 64,
-            scale: 0.8,
-            anchor: [0.5, 0.8],
+            scale: 0.85,
+            anchor: [0.5, 0.6],
             framerate: 200,
             coordinates: this.coordinates,
             states: this.states
@@ -243,7 +247,7 @@ class Bird extends Enemy {
             src: './sprites/bird.png',
             width: 64,
             height: 64,
-            scale: 0.9,
+            scale: 1,
             anchor: [0.5, 0.5],
             framerate: 200,
             coordinates: this.coordinates,

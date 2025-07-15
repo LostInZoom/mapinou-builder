@@ -1,0 +1,142 @@
+@use '../colors';
+
+.highscore-container {
+    position: relative;
+    pointer-events: all;
+    width: 80%;
+    height: 80%;
+    max-width: 20rem;
+    max-height: 30rem;
+    
+    display: flex;
+    flex-direction: column;
+
+    font-family: 'Vincendo';
+
+    transform: scale(0);
+    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
+
+    &.pop {
+        transform: scale(1);
+        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+}
+
+.highscore-map {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 10rem;
+    max-width: 10rem;
+    aspect-ratio: 1/1;
+
+    z-index: 2;
+
+    border-radius: 50%;
+    border: solid .5rem colors.$secondary-color-dark;
+    overflow: hidden;
+
+    transform: translateX(-50%);
+}
+
+.highscore-leaderboard-container {
+    position: absolute;
+    top: 5.5rem;
+
+    height: calc(100% - 5.5rem);
+    width: 100%;
+    z-index: 1;
+
+    background-color: colors.$secondary-color-dark;
+    border-radius: .4rem;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.highscore-score {
+    position: relative;
+    margin-top: 6rem;
+    font-size: 3rem;
+    color: colors.$main-color-light;
+
+    transform: scale(0);
+    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
+
+    &.pop {
+        transform: scale(1);
+        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &.incrementing {
+        animation: leaderboard-score-increment .3s ease-in-out infinite;
+    }
+
+    &.stop {
+        animation: leaderboard-score-stop .2s ease-out;
+    }
+}
+
+.highscore-leaderboard {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    border-radius: .4rem;
+
+    width: calc(100% - 2rem);
+    margin: 1rem 1rem 4rem 1rem;
+}
+
+.highscore-leaderboard-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    height: 4rem;
+    font-size: .9rem;
+
+    padding: .5rem .5rem;
+
+    color: colors.$main-color-dark;
+    background-color: colors.$main-color-light;
+
+    &:nth-child(even) {
+        background-color: colors.$main-color-medium;
+    }
+
+    &.active {
+        color: colors.$main-color-light;
+        background-color: colors.$main-color-dark;
+    }
+}
+
+.highscore-continue-button {
+    position: absolute;
+    z-index: 3;
+    bottom: 1rem;
+    left: 50%;
+
+    font-family: 'Vincendo';
+    font-size: .9rem;
+    pointer-events: all;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: .4rem;
+    background-color: colors.$main-color-light;
+    color: colors.$main-color-dark;
+    padding: .5rem .8rem;
+
+    transform: translateX(-50%) scale(0);
+    transition: transform .2s cubic-bezier(0.36, 0, 0.66, -0.56);
+
+    &.pop {
+        transform: translateX(-50%) scale(1);
+        transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+}
