@@ -37,7 +37,9 @@ class Level extends Page {
         this.back.addEventListener('click', () => {
             if (this.listening) { 
                 this.listening = false;
-                this.clear(callback);
+                this.clear(() => {
+                    this.toLevels();
+                });
             }
         });
 
@@ -55,6 +57,10 @@ class Level extends Page {
     phase1(callback) {
         callback = callback || function() {};
         this.phase = 1;
+
+        this.score.pop();
+        this.score.setState('default');
+        this.score.start();
 
         this.hints = this.level.hints;
 
@@ -93,8 +99,10 @@ class Level extends Page {
                 unByKey(this.hintListener);
                 unByKey(this.selectionListener);
                 removeClass(this.hint, 'pop');
-                wait(300, () => { this.hint.remove(); })
-                callback();
+                wait(300, () => {
+                    this.hint.remove();
+                    callback();
+                });
             } else {
                 if (!activeWrong) {
                     activeWrong = true;
@@ -108,6 +116,7 @@ class Level extends Page {
         });
 
         this.listening = true;
+        this.basemap.addListeners(this.hintListener, this.selectionListener);
     }
 
     phase2(callback) {
@@ -119,7 +128,7 @@ class Level extends Page {
         this.canceler = makeDiv(null, 'level-cancel-button', this.params.svgs.helm);
         this.container.append(this.canceler);
         this.canceler.addEventListener('click', () => {
-            if (this.player.traveling) { this.player.stop(); }
+            if (this.basemap.player.traveling) { this.basemap.player.stop(); }
         });
 
         this.basemap.player.spawn(() => {
@@ -133,9 +142,6 @@ class Level extends Page {
                 this.basemap.target.spawn(() => {
                     this.basemap.enemies.spawn(1000, () => {
                         this.listening = true;
-                        this.score.pop();
-                        this.score.setState('default');
-                        this.score.start();
                         this.basemap.setInteractions(true);
 
                         this.basemap.activateMovement(win => {
@@ -182,10 +188,9 @@ class Level extends Page {
     leaderboard() {
         this.canceler.remove();
 
-        let score = 0;
         this.highscoreContainer = makeDiv(null, 'highscore-container');
         this.highscoreMap = makeDiv(null, 'highscore-map');
-        this.highscoreScore = makeDiv(null, 'highscore-score', score);
+        this.highscoreScore = makeDiv(null, 'highscore-score', 0);
         this.highscoreLeaderboardContainer = makeDiv(null, 'highscore-leaderboard-container');
         this.highscoreLeaderboard = makeDiv(null, 'highscore-leaderboard no-scrollbar');
         this.continue = makeDiv(null, 'highscore-continue-button', "Continuer")
@@ -313,6 +318,7 @@ class Level extends Page {
         callback = callback || function() {};
 
         removeClass(this.back, 'pop');
+        if (this.hint) { removeClass(this.hint, 'pop'); }
         this.basemap.setInteractions(false);
         this.basemap.removeListeners();
 

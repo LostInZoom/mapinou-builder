@@ -236,6 +236,10 @@ class Basemap {
         this.listeners.push(routing);
     }
 
+    addListeners(...listeners) {
+        listeners.forEach(l => { this.listeners.push(l); });
+    }
+
     removeListeners() {
         this.listeners.forEach((listener) => { unByKey(listener); });
     }
@@ -300,6 +304,7 @@ class Basemap {
                 if (++cleared === clearing) { callback(); }
             });
         } else { ++cleared }
+        if (cleared === clearing) { callback(); }
     }
 }
 

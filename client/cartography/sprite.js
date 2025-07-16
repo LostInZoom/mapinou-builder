@@ -207,18 +207,23 @@ class Sprite {
         this.freezed = false;
         this.pos = 0;
         this.animation = setInterval(() => {
-            let state = this.states[this.state][this.direction];
-            let last = false;
-            if (this.pos === state.length - 1) { this.pos = 0; last = true; }
-            else { ++this.pos; }
+            try {
+                let state = this.states[this.state][this.direction];
+                let last = false;
+                if (this.pos === state.length - 1) { this.pos = 0; last = true; }
+                else { ++this.pos; }
 
-            if (last && !this.loop) {
+                if (last && !this.loop) {
+                    this.freeze();
+                    callback();
+                } else {
+                    this.offset = [ (this.pos)*this.width, state.line*this.height ]
+                    this.draw();
+                }
+            } catch {
                 this.freeze();
                 callback();
-            } else {
-                this.offset = [ (this.pos)*this.width, state.line*this.height ]
-                this.draw();
-            }
+            } 
         }, this.framerate);
     }
 
@@ -253,22 +258,27 @@ class Sprite {
         if (scale !== value) {
             let inflate = scale < value ? true : false;
             this.scaleAnimation = setInterval(() => {
-                if (inflate) { scale += increment } else { scale -= increment }
-                let done = false;
-                if (inflate && scale >= value) { done = true; }
-                if (!inflate && scale <= value) { done = true; }
-                if (done) {
-                    this.setScale(value);
+                try {
+                    if (inflate) { scale += increment } else { scale -= increment }
+                    let done = false;
+                    if (inflate && scale >= value) { done = true; }
+                    if (!inflate && scale <= value) { done = true; }
+                    if (done) {
+                        this.setScale(value);
+                        clearInterval(this.scaleAnimation);
+                        callback();
+                    } else {
+                        // Remap the scale value, from [min, max] to [0, 1]
+                        let max = Math.max(scale, value);
+                        let min = Math.min(scale, value);
+                        let remapped = remap(scale, min, max);
+                        // Calculate the remapped easing out cubic value
+                        let eased = easing(remap(remapped, 0, 1, min, max));
+                        this.setScale(eased);
+                    }
+                } catch {
                     clearInterval(this.scaleAnimation);
                     callback();
-                } else {
-                    // Remap the scale value, from [min, max] to [0, 1]
-                    let max = Math.max(scale, value);
-                    let min = Math.min(scale, value);
-                    let remapped = remap(scale, min, max);
-                    // Calculate the remapped easing out cubic value
-                    let eased = easing(remap(remapped, 0, 1, min, max));
-                    this.setScale(eased);
                 }
             }, framerate);
         } else {

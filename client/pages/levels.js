@@ -37,6 +37,16 @@ class Levels extends Page {
             let levels = this.app.options.levels;
             let pos = levels[this.progression.tier];
 
+            this.tiercontainer = makeDiv(null, 'levels-tier-container');
+            this.tierprevious = makeDiv(null, 'levels-tier-entry levels-tier-previous', this.params.svgs.arrowleft);
+            this.tiercurrent = makeDiv(null, 'levels-tier-entry levels-tier-current');
+            this.tierfollowing = makeDiv(null, 'levels-tier-entry levels-tier-following', this.params.svgs.arrowright);
+            this.tiercontainer.append(this.tierprevious, this.tiercurrent, this.tierfollowing);
+            this.container.append(this.tiercontainer);
+            this.tiercontainer.offsetHeight;
+            
+            addClass(this.tiercontainer, 'pop');
+
             this.svg = new LevelEdges({ parent: this.container });
             this.minimaps = [];
 
@@ -45,6 +55,8 @@ class Levels extends Page {
                 for (let i = 0; i < pos.content.length; i++) {
                     let level = pos.content[i];
                     let px = this.app.basemap.getPixel(level.target);
+
+                    this.tiercurrent.innerHTML = 'Phase ' + this.progression.tier;
 
                     let minimapcontainer = makeDiv(null, 'levels-minimap-container');
                     let minimap = makeDiv(null, 'levels-minimap');
@@ -135,6 +147,7 @@ class Levels extends Page {
 
     hideElements() {
         removeClass(this.back, 'pop');
+        removeClass(this.tiercontainer, 'pop');
         if (this.minimaps) { this.minimaps.forEach((minimap) => { removeClass(minimap, 'pop'); }); }
         if (this.svg) { this.svg.thinOutLines(); }
     }
