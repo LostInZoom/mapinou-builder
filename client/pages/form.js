@@ -111,7 +111,15 @@ class Form extends Page {
     }
 
     levels() {
-
+        addClass(this.content, 'unpop');
+        this.options.app.killRabbits();
+        this.options.app.forbidRabbits();
+        wait(300, () => {
+            this.destroy();
+            wait(200, () => {
+                this.app.page = new Levels({ app: this.app, position: 'current' });
+            });
+        });
     }
 
     unselectAnswers(unique) {

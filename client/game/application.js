@@ -59,7 +59,7 @@ class Application {
         }, () => {
             this.loaded();
             // Create the current page
-            this.page = new Levels({
+            this.page = new Title({
                 app: this,
                 basemap: this.basemap,
                 position: 'current',

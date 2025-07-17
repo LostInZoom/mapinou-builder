@@ -1,5 +1,14 @@
 @use '../colors';
 
+.page-form {
+    & > .page-content {
+        &.unpop {
+            transform: scale(0);
+            transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
+        }
+    }
+}
+
 .form-text {
     width: 100%;
 
