@@ -42,7 +42,7 @@ function bufferAroundPolygon(coordinates, size) {
     // Project the resulting coordinates
     let v = []
     d.geometry.coordinates.forEach(linear => {
-        l = []
+        let l = []
         linear.forEach(c => { l.push(project('4326', '3857', c)); });
         v.push(l);
     });

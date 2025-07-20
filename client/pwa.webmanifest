@@ -1,15 +1,15 @@
 {
-    "name": "Cartogame",
-    "short_name": "cartogame",
+    "name": "Mapinou",
+    "short_name": "mapinou",
     "description": "A game about cartogaphic navigation.",
     "icons": [
         {
-        "src": "./img/cartogame-512x512.png",
+        "src": "./img/mapinou-512x512.png",
         "sizes": "512x512",
         "type": "image/png"
         }
     ],
-    "start_url": "/cartogame",
+    "start_url": "/mapinou",
     "display": "fullscreen",
     "theme_color": "#764ABC",
     "background_color": "#764ABC"

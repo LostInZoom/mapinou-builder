@@ -1,7 +1,6 @@
 import { db } from "../.database/credentials.js";
 
 import * as fs from 'fs';
-import * as path from 'path';
 import { load } from "js-yaml";
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -23,46 +22,49 @@ const port = 8001;
 
 const jsonParser = bodyParser.json();
 
+// app.use('/mapinou', express.static(path.join(__dirname, 'dist/mapinou')));
 app.use('/', express.static('dist'));
 
-app.get('/cartogame/configuration', (req, res) => {
+app.get('/mapinou/configuration', (req, res) => {
 	res.json(params);
 	return res;
 });
 
-app.post('/cartogame/registration', jsonParser, (req, res) => {
+app.post('/mapinou/registration', jsonParser, (req, res) => {
 	createSession(req.body).then((index) => {
 		res.send(JSON.stringify({ sessionId: index }));
 	});
 });
 
-app.post('/cartogame/verification', jsonParser, (req, res) => {
+app.post('/mapinou/verification', jsonParser, (req, res) => {
 	verifySession(req.body.sessionId).then((data) => {
 		res.send(JSON.stringify(data));
 	});
 });
 
-app.post('/cartogame/consent', jsonParser, (req, res) => {
+app.post('/mapinou/consent', jsonParser, (req, res) => {
 	giveConsent(req.body.session).then((done) => {
 		res.send(JSON.stringify({ done: done }));
 	});
 });
 
-app.post('/cartogame/form', jsonParser, (req, res) => {
+app.post('/mapinou/form', jsonParser, (req, res) => {
 	insertForm(req.body).then((done) => {
 		res.send(JSON.stringify({ done: done }));
 	});
 });
 
-app.post('/cartogame/results', jsonParser, (req, res) => {
+app.post('/mapinou/results', jsonParser, (req, res) => {
 	insertResults(req.body).then((highscores) => {
 		res.send(JSON.stringify(highscores));
 	});
 });
 
-app.listen(port, () => {
+let server = app.listen(port, () => {
 	console.log(`Listening on port ${port}`);
 });
+
+server.keepAliveTimeout = 30000;
 
 async function createSession(options) {
     let creation = `

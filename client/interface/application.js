@@ -40,7 +40,7 @@ class Application {
         themeButton.addEventListener('click', () => { this.switchTheme(); });
         header.append(themeButton);
 
-        let title = makeDiv(null, 'title', 'Cartogame');
+        let title = makeDiv(null, 'title', 'Mapinou');
         let startButton = makeDiv(null, 'button-start button-menu button ' + this.params.interface.theme, 'Play');
         content.append(title, startButton);
 
