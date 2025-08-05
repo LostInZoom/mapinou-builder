@@ -124,6 +124,10 @@ class Basemap {
         return this.container.offsetHeight;
     }
 
+    dispose() {
+        this.baselayer.dispose();
+    }
+
     animate(options, callback) {
         callback = callback || function () {};
         this.view.animate(options, callback);

@@ -48,18 +48,19 @@ class Levels extends Page {
             addClass(this.tiercontainer, 'pop');
 
             this.svg = new LevelEdges({ parent: this.container });
+            this.minimapscontainer = [];
             this.minimaps = [];
 
             const observer = new ResizeObserver(() => {
                 this.svg.resize(this.getWidth(), this.getHeight());
-                for (let i = 0; i < this.minimaps.length; i++) {
-                    let minimap = this.minimaps[i];
+                for (let i = 0; i < this.minimapscontainer.length; i++) {
+                    let minimap = this.minimapscontainer[i];
                     let position = [ parseFloat(minimap.getAttribute('x')), parseFloat(minimap.getAttribute('y')) ];
                     let px = this.app.basemap.getPixel(position);
                     minimap.style.left = px[0] + 'px';
                     minimap.style.top = px[1] + 'px';
 
-                    if (i < this.minimaps.length - 1) { this.svg.moveLineStart(i, px[0], px[1]); }
+                    if (i < this.minimapscontainer.length - 1) { this.svg.moveLineStart(i, px[0], px[1]); }
                     if (i > 0) { this.svg.moveLineEnd(i - 1, px[0], px[1]); }
                 }
             });
@@ -83,12 +84,18 @@ class Levels extends Page {
                     minimapcontainer.append(minimap);
                     minimapcontainer.style.left = px[0] + 'px';
                     minimapcontainer.style.top = px[1] + 'px';
-                    this.container.append(minimapcontainer);
+                    this.container.append(minimapcontainer);                   
 
-                    this.minimaps.push(minimapcontainer);
-
-                    // Create a minimap
-                    new Basemap({ app: this.options.app, parent: minimap, class: 'minimap', center: level.target, zoom: zoom + 1 });
+                    this.minimapscontainer.push(minimapcontainer);
+                    this.minimaps.push(
+                        new Basemap({
+                            app: this.options.app,
+                            parent: minimap,
+                            class: 'minimap',
+                            center: level.target,
+                            zoom: zoom + 1
+                        })
+                    );
 
                     wait(delay, () => {
                         addClass(minimapcontainer, 'pop');
@@ -122,8 +129,7 @@ class Levels extends Page {
 
                     minimapcontainer.addEventListener('click', () => {
                         if (hasClass(minimapcontainer, 'active') && this.listen) {
-                            this.hideElements();
-                            wait(500, () => {
+                            this.hideElements(() => {
                                 observer.unobserve(this.container);
                                 this.destroy();
                                 this.back.remove();
@@ -132,7 +138,7 @@ class Levels extends Page {
                                     levels: this,
                                     position: 'current',
                                     params: level
-                                });
+                                });                            
                             });
                         }
                     });
@@ -146,9 +152,7 @@ class Levels extends Page {
             this.back.addEventListener('click', () => {
                 if (this.listen) {
                     this.listen = false;
-                    this.hideElements();
-
-                    wait(500, () => {
+                    this.hideElements(() => {
                         observer.unobserve(this.container);
                         this.options.app.basemap.animate({
                             center: this.app.center,
@@ -160,17 +164,23 @@ class Levels extends Page {
                             this.back.remove();
                             this.app.page = new Title({ app: this.app, position: 'current' });
                         });
-                    })
+                    });
                 }
             });
         });
     }
 
-    hideElements() {
+    hideElements(callback) {
+        callback = callback || function () {};
         removeClass(this.back, 'pop');
         removeClass(this.tiercontainer, 'pop');
-        if (this.minimaps) { this.minimaps.forEach((minimap) => { removeClass(minimap, 'pop'); }); }
+        if (this.minimapscontainer) { this.minimapscontainer.forEach((minimap) => { removeClass(minimap, 'pop'); }); }
         if (this.svg) { this.svg.thinOutLines(); }
+
+        wait(500, () => {
+            this.minimaps.forEach((minimap) => { minimap.dispose(); });
+            callback();
+        });
     }
 }
 
