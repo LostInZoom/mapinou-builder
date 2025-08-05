@@ -153,10 +153,10 @@ function isOverflown(element) {
 function easingIncrement(options, callback) {
     let element = options.element;
     let maximum = options.maximum;
+    let duration = options.duration;
     let easing = options.easing;
     let value = 0;
     element.innerHTML = value;
-    let duration = maximum * 10;
     for (let i = 0; i <= maximum; ++i) {
         let r = remap(i, 0, maximum);
         let eased = 1 - easing(r);

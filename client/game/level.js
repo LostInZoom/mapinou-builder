@@ -241,6 +241,7 @@ class Level extends Page {
             easingIncrement({
                 element: this.highscoreScore,
                 maximum: this.endScore,
+                duration: 2000,
                 easing: easeOutExpo
             }, () => {
                 removeClass(this.highscoreScore, 'incrementing');
@@ -250,10 +251,16 @@ class Level extends Page {
                     let cleared = 0;
                     removeClass(this.highscoreContainer, 'pop');
                     this.hsPlayer.despawn(() => {
-                        if (++cleared === clearing) { this.toLevels(); }
+                        if (++cleared === clearing) {
+                            hsmap.dispose();
+                            this.toLevels();
+                        }
                     });
                     this.hsTarget.despawn(() => {
-                        if (++cleared === clearing) { this.toLevels(); }
+                        if (++cleared === clearing) {
+                            hsmap.dispose();
+                            this.toLevels();
+                        }
                     });
                 }, { once: true })
             });
