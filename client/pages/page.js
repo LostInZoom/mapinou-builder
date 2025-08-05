@@ -15,9 +15,14 @@ class Page {
         // Create DOM Element
         this.container = makeDiv(null, 'page ' + this.position);
         this.app.container.append(this.container);
+    }
 
-        this.width = this.container.offsetWidth;
-        this.height = this.container.offsetHeight;
+    getWidth() {
+        return this.container.offsetWidth;
+    }
+
+    getHeight() {
+        return this.container.offsetHeight;
     }
 
     addHeader(justification='center') {

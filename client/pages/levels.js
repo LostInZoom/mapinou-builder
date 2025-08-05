@@ -5,7 +5,7 @@ import { addClass, makeDiv, hasClass, addClass, removeClass, wait } from "../uti
 import Consent from "./consent";
 import Page from "./page";
 import Title from "./title";
-import { Basemap } from '../cartography/map.js';
+import Basemap from '../cartography/map.js';
 import { LevelEdges } from '../utils/svg.js';
 import Level from '../game/level.js';
 
@@ -50,6 +50,20 @@ class Levels extends Page {
             this.svg = new LevelEdges({ parent: this.container });
             this.minimaps = [];
 
+            const observer = new ResizeObserver(() => {
+                this.svg.resize(this.getWidth(), this.getHeight());
+                for (let i = 0; i < this.minimaps.length; i++) {
+                    let minimap = this.minimaps[i];
+                    let position = [ parseFloat(minimap.getAttribute('x')), parseFloat(minimap.getAttribute('y')) ];
+                    let px = this.app.basemap.getPixel(position);
+                    minimap.style.left = px[0] + 'px';
+                    minimap.style.top = px[1] + 'px';
+
+                    if (i < this.minimaps.length - 1) { this.svg.moveLineStart(i, px[0], px[1]); }
+                    if (i > 0) { this.svg.moveLineEnd(i - 1, px[0], px[1]); }
+                }
+            });
+
             if (pos.type === 'tier') {
                 let delay = 200;
                 for (let i = 0; i < pos.content.length; i++) {
@@ -59,6 +73,9 @@ class Levels extends Page {
                     this.tiercurrent.innerHTML = 'Phase ' + this.progression.tier;
 
                     let minimapcontainer = makeDiv(null, 'levels-minimap-container');
+                    minimapcontainer.setAttribute('x', level.target[0]);
+                    minimapcontainer.setAttribute('y', level.target[1]);
+
                     let minimap = makeDiv(null, 'levels-minimap');
                     let state = makeDiv(null, 'levels-state');
 
@@ -85,7 +102,7 @@ class Levels extends Page {
                     wait(delay, () => {
                         if (i < this.progression.level - 1) {
                             let nextpx = this.options.app.basemap.getPixel(pos.content[i + 1].target);
-                            this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1]);
+                            this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1], i, i + 1);
                         }
                     });
 
@@ -107,6 +124,7 @@ class Levels extends Page {
                         if (hasClass(minimapcontainer, 'active') && this.listen) {
                             this.hideElements();
                             wait(500, () => {
+                                observer.unobserve(this.container);
                                 this.destroy();
                                 this.back.remove();
                                 this.app.page = new Level({
@@ -115,11 +133,13 @@ class Levels extends Page {
                                     position: 'current',
                                     params: level
                                 });
-                            })
+                            });
                         }
                     });
                 }
             }
+
+            observer.observe(this.container);
 
             this.callback();
 
@@ -129,6 +149,7 @@ class Levels extends Page {
                     this.hideElements();
 
                     wait(500, () => {
+                        observer.unobserve(this.container);
                         this.options.app.basemap.animate({
                             center: this.app.center,
                             zoom: this.params.interface.map.start.zoom,

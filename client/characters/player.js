@@ -109,7 +109,7 @@ class Player extends Rabbit {
 
         // Hide the sprite (replaced with a clone during movement)
         this.sprite.removeGeometry();
-        // This listener is executed at each map frame rendered
+        // This listener is executed at each layer rendering
         this.listener = this.layer.on('postrender', (event) => {
             // Get the time of the current frame
             const time = event.frameState.time;

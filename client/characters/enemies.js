@@ -131,6 +131,7 @@ class Enemy extends Character {
                 this.hideArea();
             }
         });
+        this.basemap.addListeners(this.listener);
     }
 
     revealArea(callback) {
@@ -165,6 +166,7 @@ class Enemy extends Character {
 
                 if (stop) {
                     this.stopAnimation();
+                    unByKey(this.animation);
                     callback();
                 } else {
                     // Render the map to trigger the listener

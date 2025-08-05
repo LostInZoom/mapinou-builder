@@ -13,8 +13,6 @@ interface:
   map:
     levels: [-571380.89, 5066464.36, 1064167.68, 6636793.32]
     start:
-      ## center: [ 291041.84, 5629996.16 ]
-      ## zoom: 15
       centers:
         # Bordeaux
         - [ -64684, 5597363 ]
@@ -75,7 +73,7 @@ game:
     enemies: 500
     helpers: 200
   visibility:
-    helpers: 1500
+    helpers: 2500
   speed:
     travel: 5000 # in km/h
     roaming: 20 # in px/s

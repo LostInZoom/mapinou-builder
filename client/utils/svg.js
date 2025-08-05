@@ -18,19 +18,20 @@ class LevelEdges {
         this.svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
         this.svg.setAttribute('width', '100%');
         this.svg.setAttribute('height', '100%');
-        // this.svg.setAttribute('preserveAspectRatio', 'none');
 
         this.lines = [];
     }
 
-    addLine(x1, y1, x2, y2) {
+    addLine(x1, y1, x2, y2, start, end) {
         let line = document.createElementNS(this.namespace, 'line');
         line.setAttribute('x1', x1);
         line.setAttribute('y1', y1);
         line.setAttribute('x2', x2);
         line.setAttribute('y2', y2);
+        line.setAttribute('start', start);
+        line.setAttribute('end', end);
         this.svg.append(line);
-        let length = line.getTotalLength()
+        let length = line.getTotalLength();
         line.setAttribute('stroke-dasharray', length);
         line.setAttribute('stroke-dashoffset', length);
         line.setAttribute('stroke-linecap', 'round');
@@ -38,8 +39,36 @@ class LevelEdges {
         addClass(line, 'reveal');
     }
 
+    resize(width, height) {
+        this.width = width;
+        this.height = height;
+        this.svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
+    }
+
+    moveLineStart(i, x, y) {
+        if (this.lines[i]) {
+            this.lines[i].setAttribute('x1', x);
+            this.lines[i].setAttribute('y1', y);
+        }
+    }
+
+    moveLineEnd(i, x, y) {
+        if (this.lines[i]) {
+            this.lines[i].setAttribute('x2', x);
+            this.lines[i].setAttribute('y2', y);
+        }
+    }
+
     get() {
         return this.svg;
+    }
+
+    getLines() {
+        return this.lines;
+    }
+
+    getLinesNumber() {
+        return this.lines.length;
     }
 
     thinOutLines() {

@@ -4,6 +4,7 @@ import { getVectorContext } from "ol/render.js";
 import { angle, randomPointInCircle } from "../cartography/analysis.js";
 import { generateRandomInteger, weightedRandom } from "../utils/math.js";
 import Rabbit from "./rabbit.js";
+import { unByKey } from "ol/Observable.js";
 
 class Roamer extends Rabbit {
     constructor(options) {
@@ -60,39 +61,36 @@ class Roamer extends Rabbit {
         let lastTime = Date.now();
         let distance = 0;
 
-        this.layer.on('postrender', animate);
-
-        let self = this;
-        function animate(event) {
+        this.listener = this.layer.on('postrender', (event) => {
             const time = event.frameState.time;
             const context = getVectorContext(event);
-            context.setStyle(self.sprite.style);
+            context.setStyle(this.sprite.style);
 
             const elapsed = (time - lastTime) / 1000;
 
-            distance += speed * elapsed * self.basemap.view.getResolution();
+            distance += speed * elapsed * this.basemap.view.getResolution();
             lastTime = time;
 
             // If the travelled distance is below the length of the route, continue the animation
             if (distance < length) {
                 let coords = line.getCoordinateAt(distance / length);
-                self.sprite.setCoordinates(coords);
+                this.sprite.setCoordinates(coords);
 
                 position.setCoordinates(coords);
                 context.drawGeometry(position);
-                self.basemap.map.render();
+                this.basemap.map.render();
             }
             else {
-                self.layer.un('postrender', animate);
+                unByKey(this.listener);
                 position.setCoordinates(destination);
                 context.drawGeometry(position);
 
-                self.sprite.setCoordinates(destination);
-                self.sprite.resetGeometry();
+                this.sprite.setCoordinates(destination);
+                this.sprite.resetGeometry();
 
                 callback();
             }
-        }
+        });
     }
 }
 

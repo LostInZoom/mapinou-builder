@@ -1,16 +1,14 @@
 import { unByKey } from 'ol/Observable.js';
 
-import { middle, randomPointInCircle, within } from "../cartography/analysis";
+import { randomPointInCircle, within } from "../cartography/analysis";
 import Score from "../cartography/score";
 import Page from "../pages/page";
 import { addClass, easingIncrement, makeDiv, removeClass, wait } from "../utils/dom";
 import { inAndOut } from 'ol/easing';
-import { Enemy } from '../characters/enemies';
 import Target from '../characters/target';
-import Player from '../characters/player';
 import Levels from '../pages/levels';
 import { ajaxPost } from '../utils/ajax';
-import { Basemap } from '../cartography/map';
+import Basemap from '../cartography/map';
 import { easeOutExpo } from '../utils/math';
 
 class Level extends Page {
@@ -74,7 +72,7 @@ class Level extends Page {
 
         let player = this.level.player;
 
-        this.hintListener = this.basemap.map.on('postrender', () => {           
+        this.hintListener = this.basemap.map.on('postrender', () => {
             let visible = this.basemap.isVisible(player);
             let zoom = this.basemap.view.getZoom();
             for (let [m, h] of Object.entries(this.hints)) {
@@ -96,8 +94,7 @@ class Level extends Page {
         this.selectionListener = this.basemap.map.on('dblclick', (e) => {
             let target = this.basemap.map.getEventCoordinate(event);
             if (within(target, player, this.params.game.tolerance.target)) {
-                unByKey(this.hintListener);
-                unByKey(this.selectionListener);
+                this.basemap.removeListeners();
                 removeClass(this.hint, 'pop');
                 wait(300, () => {
                     this.hint.remove();
@@ -115,8 +112,8 @@ class Level extends Page {
             }
         });
 
-        this.listening = true;
         this.basemap.addListeners(this.hintListener, this.selectionListener);
+        this.listening = true;
     }
 
     phase2(callback) {

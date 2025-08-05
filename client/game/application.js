@@ -1,6 +1,6 @@
 import Page from '../pages/page.js';
 import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
-import { Basemap } from '../cartography/map.js';
+import Basemap from '../cartography/map.js';
 import { easeInOutCubic, generateRandomInteger } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
 

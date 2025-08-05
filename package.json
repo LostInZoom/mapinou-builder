@@ -39,6 +39,7 @@
     "@parcel/transformer-sass": "^2.13.3",
     "@parcel/transformer-webmanifest": "^2.13.3",
     "body-parser": "^2.2.0",
+    "buffer": "^6.0.3",
     "concurrently": "^9.1.2",
     "express": "^4.21.2",
     "js-yaml": "^4.1.0",

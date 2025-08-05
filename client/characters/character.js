@@ -3,6 +3,7 @@ import VectorSource from "ol/source/Vector.js";
 
 import { angle, within } from "../cartography/analysis.js";
 import { wait } from "../utils/dom.js";
+import { unByKey } from "ol/Observable.js";
 
 /**
  * Base class to create a new character on the map.

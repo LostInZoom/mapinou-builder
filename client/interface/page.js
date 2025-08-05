@@ -1,4 +1,4 @@
-import { addClass, addSVG, clearElement, makeDiv, removeClass, wait } from "../utils/dom.js";
+import { addClass, clearElement, makeDiv, removeClass } from "../utils/dom.js";
 
 class Page {
     constructor(app, position) {
