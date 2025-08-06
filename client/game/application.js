@@ -10,6 +10,7 @@ import Form from '../pages/form.js';
 import Levels from '../pages/levels.js';
 import Roamer from '../characters/roamer.js';
 import { Music, SoundEffects } from '../utils/soundbuttons.js';
+import Rabbits from '../characters/rabbits.js';
 
 class Application {
     constructor(options) {
@@ -25,7 +26,6 @@ class Application {
         this.container.append(this.mask);
         this.loading();
 
-        this.rabbits = [];
         this.maxrabbit = 5;
 
         // Boolean to flag if the page is sliding
@@ -70,26 +70,30 @@ class Application {
             });
         });
 
+        this.rabbits = new Rabbits({ basemap: this.basemap });
+
         // Rabbit spawner
         this.allowed = true;
         this.basemap.map.on('click', (e) => {
             if (this.allowed) {
                 this.allowed = false;
                 let coords = this.basemap.map.getEventCoordinate(event);
-                let rabbit = new Roamer({
-                    basemap: this.basemap,
-                    coordinates: coords,
-                    color: 'random',
-                    speed: this.options.game.speed.roaming
-                });
 
-                if (this.rabbits.length >= this.maxrabbit) {
-                    this.rabbits.shift().despawn();
+                // Despawn the first rabbit if the limit is reached
+                if (this.rabbits.getCharactersNumber() >= this.maxrabbit) {
+                    let first = this.rabbits.getCharacter(0);
+                    first.despawn(() => {
+                        this.rabbits.removeCharacter(first);
+                    });
                 }
 
-                rabbit.spawn(() => {
-                    this.rabbits.push(rabbit);
-                    rabbit.roam();
+                let r = new Roamer({
+                    layer: this.rabbits,
+                    coordinates: coords,
+                    color: 'random'
+                });
+
+                r.spawn(() => {
                     this.allowed = true;
                 });
             }
@@ -142,14 +146,14 @@ class Application {
     }
 
     hasRabbits() {
-        if (this.rabbits.length > 0) { return true; }
+        if (this.rabbits.getCharactersNumber() > 0) { return true; }
         else { return false; }
     }
 
     killRabbits() {
-        while (this.rabbits.length > 0) {
-            this.rabbits.pop().despawn();
-        }
+        this.rabbits.despawnCharacters(() => {
+            this.rabbits.clear();
+        });
     }
 
     loading() {

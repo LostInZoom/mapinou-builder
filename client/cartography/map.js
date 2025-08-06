@@ -160,8 +160,19 @@ class Basemap {
         });
     }
 
+    removeLayer(layer) {
+        for (let i = 0; i < this.layers.length; i++) {
+            if (this.layers[i] === layer) {
+                this.map.removeLayer(layer);
+                this.layers.splice(i, 1);
+                break;
+            }
+        }
+    }
+
     removeLayers() {
         this.layers.forEach(layer => { this.map.removeLayer(layer); })
+        this.layers = [];
     }
 
     createCharacters(level, options) {

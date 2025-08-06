@@ -9,7 +9,7 @@ import { unByKey } from "ol/Observable.js";
 class Roamer extends Rabbit {
     constructor(options) {
         super(options);
-        this.setRandomDirection();
+        // this.setRandomDirection();
     }
 
     setRandomDirection() {

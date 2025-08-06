@@ -5,17 +5,23 @@ import Character from "./character.js";
 class Rabbit extends Character {
     constructor(options) {
         super(options);
-        this.colors = options.colors || [ 'white', 'grey', 'brown', 'sand' ];
+        this.colors = [ 'white', 'sand', 'brown', 'grey'];
         this.color = options.color || 'white';
-        this.speed = options.speed || 20;
+        this.offsets = {
+            'white': [0, 0],
+            'sand': [0, 624],
+            'brown': [0, 624*2],
+            'grey': [0, 624*3],
+        }
 
         if (this.color === 'random') {
             let i = generateRandomInteger(0, this.colors.length - 1);
             this.color = this.colors[i];
         }
 
-        this.width = 52;
-        this.height = 52;
+        this.feature.set('offset', this.offsets[this.color]);
+
+        this.speed = options.speed || 20;
         this.weights = [ 1, 10, 30 ];
         this.statespool = [ 'move', 'graze', 'idle' ];
 
@@ -40,20 +46,20 @@ class Rabbit extends Character {
             }
         }
 
-        this.sprite = new Sprite({
-            type: 'dynamic',
-            layer: this.layer,
-            src: `./sprites/rabbit-${this.color}.png`,
-            width: this.width,
-            height: this.height,
-            scale: 1,
-            anchor: [0.5, 0.8],
-            framerate: 150,
-            coordinates: this.coordinates,
-            states: this.states,
-        }, () => {
-            this.sprite.animate();
-        });
+        // this.sprite = new Sprite({
+        //     type: 'dynamic',
+        //     layer: this.layer,
+        //     src: `./sprites/rabbit-${this.color}.png`,
+        //     width: this.width,
+        //     height: this.height,
+        //     scale: 1,
+        //     anchor: [0.5, 0.8],
+        //     framerate: 150,
+        //     coordinates: this.coordinates,
+        //     states: this.states,
+        // }, () => {
+        //     this.sprite.animate();
+        // });
     }
 }
 
