@@ -66,6 +66,25 @@ class Character {
         this.layer.removeCharacter(this);
     }
 
+    animateFrame(callback) {
+        callback = callback || function() {};
+        this.frameAnimation = setInterval(() => {
+            let state = this.states[this.state][this.frameDirection];
+            let last = false;
+            if (this.framePosition === state.length - 1) { this.framePosition = 0; last = true; }
+            else { ++this.framePosition; }
+
+            if (last && !this.frameLoop) {
+                clearInterval(this.frameAnimation);
+                callback();
+            } else {
+                this.offset[0] = this.frameSize * this.framePosition;
+                // this.feature.set('offset', this.offset);
+                this.layer.update({'offset': this.offset});
+            }
+        }, this.frameRate);
+    }
+
     animateScale(options, callback) {
         callback = callback || function() {};
 

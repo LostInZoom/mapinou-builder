@@ -5,21 +5,24 @@ import Character from "./character.js";
 class Rabbit extends Character {
     constructor(options) {
         super(options);
+        this.sheetSize = 624;
         this.colors = [ 'white', 'sand', 'brown', 'grey'];
         this.color = options.color || 'white';
-        this.offsets = {
-            'white': [0, 0],
-            'sand': [0, 624],
-            'brown': [0, 624*2],
-            'grey': [0, 624*3],
-        }
+
+        this.frameLoop = true;
+        this.frameSize = 52;
+        this.frameRate = 150;
+        this.frameLoop = options.frameLoop === undefined ? true : options.frameLoop;
+        this.framePosition = options.framePosition || 0;
+        this.frameDirection = 'south';
 
         if (this.color === 'random') {
             let i = generateRandomInteger(0, this.colors.length - 1);
             this.color = this.colors[i];
         }
 
-        this.feature.set('offset', this.offsets[this.color]);
+        this.offset = [this.frameSize * this.framePosition, this.colors.indexOf(this.color) * this.sheetSize]
+        this.feature.set('offset', this.offset);
 
         this.speed = options.speed || 20;
         this.weights = [ 1, 10, 30 ];
@@ -45,6 +48,8 @@ class Rabbit extends Character {
                 west: { line: 7, length: 4 },
             }
         }
+        this.state = options.state || 'idle';
+        this.animateFrame();
 
         // this.sprite = new Sprite({
         //     type: 'dynamic',

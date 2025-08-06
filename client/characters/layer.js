@@ -22,8 +22,12 @@ class Layer {
         this.layer = new WebGLVectorLayer({
             source: this.source,
             zIndex: this.zIndex,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true
+            // updateWhileAnimating: true,
+            // updateWhileInteracting: true
+            variables: {
+                offset: [0, 0],
+                scale: 1
+            }
         });
 
         if (this.maxZoom) { this.layer.setMaxZoom(this.maxZoom); }
@@ -33,6 +37,14 @@ class Layer {
         this.basemap.layers.push(this.layer);
 
         this.characters = [];
+    }
+
+    update(variables) {
+        this.layer.updateStyleVariables(variables);
+    }
+
+    refresh() {
+        this.layer.changed();
     }
 
     getLayer() {
@@ -62,7 +74,7 @@ class Layer {
 
     removeCharacter(character) {
         for (let i = 0; i < this.characters.length; i++) {
-            if (this.characters[i] === character) {
+            if (this.characters[i] == character) {
                 this.source.removeFeature(character.getFeature());
                 this.characters.splice(i, 1);
                 break;
