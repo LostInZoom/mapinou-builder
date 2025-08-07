@@ -79,8 +79,8 @@ class Character {
                 callback();
             } else {
                 this.offset[0] = this.frameSize * this.framePosition;
-                // this.feature.set('offset', this.offset);
-                this.layer.update({'offset': this.offset});
+                this.feature.set('offset', this.offset);
+                // this.layer.update({'offset': this.offset});
             }
         }, this.frameRate);
     }
