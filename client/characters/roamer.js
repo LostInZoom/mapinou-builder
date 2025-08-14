@@ -5,17 +5,19 @@ import { angle, randomPointInCircle } from "../cartography/analysis.js";
 import { generateRandomInteger, weightedRandom } from "../utils/math.js";
 import Rabbit from "./rabbit.js";
 import { unByKey } from "ol/Observable.js";
+import { wait } from "../utils/dom.js";
 
 class Roamer extends Rabbit {
     constructor(options) {
         super(options);
-        // this.setRandomDirection();
+        this.setRandomDirection();
+        this.animateFrame();
     }
 
     setRandomDirection() {
         let pool = Object.keys(this.states.idle);
         let d = pool[pool.length * Math.random() | 0];
-        this.sprite.setDirection(d);
+        this.setDirection(d);
     }
 
     roam() {
@@ -28,10 +30,10 @@ class Roamer extends Rabbit {
                 if (this.target) {
                     destination = randomPointInCircle(this.origin, this.radius);
                 } else {
-                    let e = this.basemap.container;
-                    let x = generateRandomInteger(0, e.offsetWidth - this.sprite.width);
-                    let y = generateRandomInteger(0, e.offsetHeight - this.sprite.height);
-                    destination = this.basemap.map.getCoordinateFromPixel([x, y]);
+                    let e = this.layer.basemap.container;
+                    let x = generateRandomInteger(0, e.offsetWidth - this.frameSize);
+                    let y = generateRandomInteger(0, e.offsetHeight - this.frameSize);
+                    destination = this.layer.basemap.map.getCoordinateFromPixel([x, y]);
                 }
 
                 this.travel(destination, () => {
@@ -39,58 +41,39 @@ class Roamer extends Rabbit {
                     this.roam();
                 });
             } else {
-                this.animate(choice, () => {
+                this.setState(choice);
+                wait(this.getAnimationDuration(), () => {
                     this.roam();
-                })
+                });
             }
         }
     }
 
     travel(destination, callback) {
         callback = callback || function () {};
-
-        this.sprite.setState('move');
-        this.sprite.setDirectionFromAngle(angle(this.coordinates, destination));
-
+        this.setState('move');
+        this.setDirectionFromAngle(angle(this.coordinates, destination));
         const line = new LineString([ this.coordinates, destination ]);
         const length = line.getLength();
         const speed = this.speed;
-        const position = this.sprite.getGeometryClone();
-        this.sprite.removeGeometry();
-
-        let lastTime = Date.now();
         let distance = 0;
-
-        this.listener = this.layer.on('postrender', (event) => {
-            const time = event.frameState.time;
-            const context = getVectorContext(event);
-            context.setStyle(this.sprite.style);
-
-            const elapsed = (time - lastTime) / 1000;
-
-            distance += speed * elapsed * this.basemap.view.getResolution();
+        let lastTime = performance.now();
+        const animation = (time) => {
+            let elapsed = (time - lastTime) / 1000;
+            distance += speed * elapsed * this.layer.basemap.getResolution();
             lastTime = time;
-
             // If the travelled distance is below the length of the route, continue the animation
             if (distance < length) {
-                let coords = line.getCoordinateAt(distance / length);
-                this.sprite.setCoordinates(coords);
-
-                position.setCoordinates(coords);
-                context.drawGeometry(position);
-                this.basemap.map.render();
+                this.setCoordinates(line.getCoordinateAt(distance / length));
+                requestAnimationFrame(animation);
             }
             else {
                 unByKey(this.listener);
-                position.setCoordinates(destination);
-                context.drawGeometry(position);
-
-                this.sprite.setCoordinates(destination);
-                this.sprite.resetGeometry();
-
+                this.setCoordinates(destination);
                 callback();
             }
-        });
+        };
+        requestAnimationFrame(animation);
     }
 }
 

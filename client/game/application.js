@@ -59,7 +59,7 @@ class Application {
         }, () => {
             this.loaded();
             // Create the current page
-            this.page = new Title({
+            this.page = new Levels({
                 app: this,
                 basemap: this.basemap,
                 position: 'current',
@@ -90,11 +90,12 @@ class Application {
                 let r = new Roamer({
                     layer: this.rabbits,
                     coordinates: coords,
-                    color: 'random'
+                    color: 'random',
                 });
-
+                
                 r.spawn(() => {
                     this.allowed = true;
+                    r.roam();
                 });
             }
         });

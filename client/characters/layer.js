@@ -22,12 +22,8 @@ class Layer {
         this.layer = new WebGLVectorLayer({
             source: this.source,
             zIndex: this.zIndex,
-            // updateWhileAnimating: true,
-            // updateWhileInteracting: true
-            variables: {
-                offset: [0, 0],
-                scale: 1
-            }
+            updateWhileAnimating: true,
+            updateWhileInteracting: true
         });
 
         if (this.maxZoom) { this.layer.setMaxZoom(this.maxZoom); }
@@ -37,14 +33,6 @@ class Layer {
         this.basemap.layers.push(this.layer);
 
         this.characters = [];
-    }
-
-    update(variables) {
-        this.layer.updateStyleVariables(variables);
-    }
-
-    refresh() {
-        this.layer.changed();
     }
 
     getLayer() {

@@ -9,25 +9,6 @@ class Rabbit extends Character {
         this.colors = [ 'white', 'sand', 'brown', 'grey'];
         this.color = options.color || 'white';
 
-        this.frameLoop = true;
-        this.frameSize = 52;
-        this.frameRate = 150;
-        this.frameLoop = options.frameLoop === undefined ? true : options.frameLoop;
-        this.framePosition = options.framePosition || 0;
-        this.frameDirection = 'south';
-
-        if (this.color === 'random') {
-            let i = generateRandomInteger(0, this.colors.length - 1);
-            this.color = this.colors[i];
-        }
-
-        this.offset = [this.frameSize * this.framePosition, this.colors.indexOf(this.color) * this.sheetSize]
-        this.feature.set('offset', this.offset);
-
-        this.speed = options.speed || 20;
-        this.weights = [ 1, 10, 30 ];
-        this.statespool = [ 'move', 'graze', 'idle' ];
-
         this.states = {
             idle: {
                 north: { line: 9, length: 4 },
@@ -48,23 +29,27 @@ class Rabbit extends Character {
                 west: { line: 7, length: 4 },
             }
         }
-        this.state = options.state || 'idle';
-        this.animateFrame();
+        this.weights = [ 1, 10, 30 ];
+        this.statespool = [ 'move', 'graze', 'idle' ];
 
-        // this.sprite = new Sprite({
-        //     type: 'dynamic',
-        //     layer: this.layer,
-        //     src: `./sprites/rabbit-${this.color}.png`,
-        //     width: this.width,
-        //     height: this.height,
-        //     scale: 1,
-        //     anchor: [0.5, 0.8],
-        //     framerate: 150,
-        //     coordinates: this.coordinates,
-        //     states: this.states,
-        // }, () => {
-        //     this.sprite.animate();
-        // });
+        this.state = options.state || 'idle';
+
+        this.frameSize = 52;
+        this.frameRate = 150;
+        this.frameLoop = options.frameLoop === undefined ? true : options.frameLoop;
+        this.framePosition = options.framePosition || 0;
+        this.frameDirection = 'south';
+
+        if (this.color === 'random') {
+            let i = generateRandomInteger(0, this.colors.length - 1);
+            this.color = this.colors[i];
+        }
+        this.offset = [
+            this.frameSize * this.framePosition,
+            (this.colors.indexOf(this.color) * this.sheetSize) + (this.frameSize * this.states[this.state].south.line)
+        ]
+        this.feature.set('offset', this.offset);
+        this.speed = options.speed || 20;
     }
 }
 

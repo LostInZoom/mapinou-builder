@@ -41,15 +41,15 @@ class Level extends Page {
             }
         });
 
-        this.phase1(() => {
-            this.phase2(() => {
-                this.ending();
-            });
-        });
-
-        // this.phase2(() => {
-        //     this.ending();
+        // this.phase1(() => {
+        //     this.phase2(() => {
+        //         this.ending();
+        //     });
         // });
+
+        this.phase2(() => {
+            this.ending();
+        });
     }
 
     phase1(callback) {
