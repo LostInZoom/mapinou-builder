@@ -17,11 +17,9 @@ class Player extends Rabbit {
         this.router = new Router({ position: this.coordinates });
         this.moving = false;
 
-        this.context = undefined;
         this.destination = undefined;
         this.traveling = false;
 
-        this.clone = this.sprite.getGeometryClone();
         this.distance = 0;
         this.position = this.coordinates;
 
@@ -37,9 +35,9 @@ class Player extends Rabbit {
 
     makeInvulnerable(duration) {
         this.invulnerable = true;
-        this.sprite.enableFrameSkipping();
+        this.enableFrameSkipping();
         wait(duration, () => {
-            this.sprite.disableFrameSkipping();
+            this.disableFrameSkipping();
             this.invulnerable = false;
         });
     }
@@ -74,13 +72,13 @@ class Player extends Rabbit {
     }
 
     move(route, callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
 
         // Set routing button to moving mode
         this.level.moving();
         // Set the sprite to moving state
-        this.sprite.setState('move');
-        
+        this.setState('move');
+
         // Retrieve the vertexes composing the calculated route
         let vertexes = [];
         let nodes = route.geometry.coordinates;
@@ -93,28 +91,21 @@ class Player extends Rabbit {
             zIndex: 35
         });
         this.flowers.push(flower);
-        
+
         // Create the path line and calculate its length
         const line = new LineString(vertexes);
         const length = line.getLength();
 
         // Retrieve the time
-        let lastTime = Date.now();
+        let lastTime = performance.now();
 
         // Get the speed in meters/second
         const speed = this.params.game.speed.travel / 3.6;
-        
+
         // Start the distance counter
         this.distance = 0;
 
-        // Hide the sprite (replaced with a clone during movement)
-        this.sprite.removeGeometry();
-        // This listener is executed at each layer rendering
-        this.listener = this.layer.on('postrender', (event) => {
-            // Get the time of the current frame
-            const time = event.frameState.time;
-            this.context = getVectorContext(event);
-
+        const animation = (time) => {
             // Calculate the elapsed time in seconds
             const elapsed = (time - lastTime) / 1000;
             // Calculate the distance traveled depending on the elapsed time and the speed
@@ -123,19 +114,16 @@ class Player extends Rabbit {
             lastTime = time;
 
             // If the travelled distance is below the length of the route, continue the animation
-            if (this.distance < length) {
+            if (distance < length) {
                 // Calculate the position of the point along the route line
                 this.position = line.getCoordinateAt(this.distance / length);
 
                 // Change the direction of the sprite according to its current movement
-                let a = angle(this.clone.getCoordinates(), this.position);
-                this.sprite.setDirectionFromAngle(a);
-
-                // Update the sprite coordinates
-                this.sprite.setCoordinates(this.position);
+                let a = angle(this.getCoordinates(), this.position);
+                this.setDirectionFromAngle(a);
 
                 // Retrieve the helpers oustide and inside the visibible range
-                let [inside, outside] = this.getWithin(this.basemap.helpers.getActiveHelpers(), this.params.game.visibility.helpers);
+                let [inside, outside] = this.getWithin(this.layer.basemap.helpers.getActiveHelpers(), this.params.game.visibility.helpers);
                 // Treating helpers outside the visible rande
                 outside.forEach((helper) => {
                     // If they are visible, hide them
@@ -155,7 +143,7 @@ class Player extends Rabbit {
                 });
 
                 // Retrieve the enemies oustide and inside the visibible range
-                [inside, outside] = this.getWithin(this.basemap.enemies.getEnemies(), this.params.game.tolerance.enemies);
+                [inside, outside] = this.getWithin(this.layer.basemap.enemies.getEnemies(), this.params.game.tolerance.enemies);
                 // Treating enemies within range
                 inside.forEach(enemy => {
                     // Check if the enemy has not already striked
@@ -177,38 +165,127 @@ class Player extends Rabbit {
                     }
                 });
 
-                // Set the new coordinates to the clone
-                this.clone.setCoordinates(this.position);
-                // Apply the style to the clone for orientation
-                this.context.setStyle(this.sprite.style);
-                // Redraw the clone
-                this.context.drawGeometry(this.clone);
+                this.setCoordinates(this.position);
 
                 // If enemies are present, orient them towards the player
-                if (this.basemap.enemies) {
-                    this.basemap.enemies.setOrientation(this.position);
+                if (this.layer.basemap.enemies) {
+                    this.layer.basemap.enemies.setOrientation(this.position);
                 }
 
                 // If target is in range, win the level
-                if (within(this.position, this.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
+                if (within(this.position, this.layer.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
                     this.stop();
                     callback(true);
                 }
-
-                // Render the map to trigger the listener
-                this.basemap.map.render();
+                requestAnimationFrame(animation);
             }
-            // Here, destination reached
             else {
-                // Stop the animation
-                this.stop();
-                callback(false);
+                this.setCoordinates(destination);
+                callback();
             }
-        });
+        };
+        requestAnimationFrame(animation);
+
+        // // This listener is executed at each layer rendering
+        // this.listener = this.layer.on('postrender', (event) => {
+        //     // Get the time of the current frame
+        //     const time = event.frameState.time;
+        //     this.context = getVectorContext(event);
+
+        //     // Calculate the elapsed time in seconds
+        //     const elapsed = (time - lastTime) / 1000;
+        //     // Calculate the distance traveled depending on the elapsed time and the speed
+        //     this.distance = this.distance + (elapsed * speed);
+        //     // Set the previous time as the current one
+        //     lastTime = time;
+
+        //     // If the travelled distance is below the length of the route, continue the animation
+        //     if (this.distance < length) {
+        //         // Calculate the position of the point along the route line
+        //         this.position = line.getCoordinateAt(this.distance / length);
+
+        //         // Change the direction of the sprite according to its current movement
+        //         let a = angle(this.clone.getCoordinates(), this.position);
+        //         this.sprite.setDirectionFromAngle(a);
+
+        //         // Update the sprite coordinates
+        //         this.sprite.setCoordinates(this.position);
+
+        //         // Retrieve the helpers oustide and inside the visibible range
+        //         let [inside, outside] = this.getWithin(this.basemap.helpers.getActiveHelpers(), this.params.game.visibility.helpers);
+        //         // Treating helpers outside the visible rande
+        //         outside.forEach((helper) => {
+        //             // If they are visible, hide them
+        //             if (helper.isVisible()) { helper.hide(); }
+        //         });
+        //         // Treating helpers inside the visible range
+        //         inside.forEach((helper) => {
+        //             // Reveal them if they are hidden
+        //             if (!helper.isVisible()) {
+        //                 helper.reveal(() => { helper.breathe(); });
+        //             }
+        //             // Consume them if within consuming range
+        //             if (within(this.getCoordinates(), helper.getCoordinates(), this.params.game.tolerance.helpers)) {
+        //                 helper.consume();
+        //                 this.level.score.addModifier('helpers');
+        //             }
+        //         });
+
+        //         // Retrieve the enemies oustide and inside the visibible range
+        //         [inside, outside] = this.getWithin(this.basemap.enemies.getEnemies(), this.params.game.tolerance.enemies);
+        //         // Treating enemies within range
+        //         inside.forEach(enemy => {
+        //             // Check if the enemy has not already striked
+        //             if (!this.closeEnemies.includes(enemy)) {
+        //                 this.closeEnemies.push(enemy);
+        //                 if (!this.isInvulnerable()) {
+        //                     this.level.score.addModifier('enemies');
+        //                     this.makeInvulnerable(this.params.game.invulnerability);
+        //                 }
+        //             }
+        //         });
+        //         // Treating enemies outside range
+        //         outside.forEach(enemy => {
+        //             // If it was in close enemies
+        //             if (this.closeEnemies.includes(enemy)) {
+        //                 // Remove it from the list
+        //                 let i = this.closeEnemies.indexOf(enemy);
+        //                 if (i > -1) { this.closeEnemies.splice(i, 1); }
+        //             }
+        //         });
+
+        //         // Set the new coordinates to the clone
+        //         this.clone.setCoordinates(this.position);
+        //         // Apply the style to the clone for orientation
+        //         this.context.setStyle(this.sprite.style);
+        //         // Redraw the clone
+        //         this.context.drawGeometry(this.clone);
+
+        //         // If enemies are present, orient them towards the player
+        //         if (this.basemap.enemies) {
+        //             this.basemap.enemies.setOrientation(this.position);
+        //         }
+
+        //         // If target is in range, win the level
+        //         if (within(this.position, this.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
+        //             this.stop();
+        //             callback(true);
+        //         }
+
+        //         // Render the map to trigger the listener
+        //         this.basemap.map.render();
+        //     }
+        //     // Here, destination reached
+        //     else {
+        //         // Stop the animation
+        //         this.stop();
+        //         callback(false);
+        //     }
+        // });
     }
 
     travel(destination, callback) {
-        callback = callback || function () {};
+        callback = callback || function () { };
 
         if (this.traveling) { this.stop(); }
         this.traveling = true;

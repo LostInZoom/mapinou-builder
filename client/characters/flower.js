@@ -5,6 +5,8 @@ class Flower extends Character {
     constructor(options) {
         super(options);
         this.level = options.level;
+        this.orientable = false;
+
         this.states = {
             idle: { south: { line: 1, length: 1 } },
             grow: { south: { line: 0, length: 6 } },

@@ -21,6 +21,7 @@ class Character {
         this.coordinates = this.options.coordinates;
         this.origin = this.options.coordinates;
         this.scale = this.options.scale || 0;
+        this.orientable = this.options.orientable === undefined ? false : this.options.orientable;
 
         this.active = true;
         this.destroyed = false;
@@ -61,10 +62,20 @@ class Character {
     }
 
     setDirectionFromAngle(angle) {
-        if (angle >= Math.PI/4 && angle <= 3*Math.PI/4) { this.setDirection('north'); }
-        else if (angle > 3*Math.PI/4 && angle < 5*Math.PI/4) { this.setDirection('west'); }
-        else if (angle >= 5*Math.PI/4 && angle <= 7*Math.PI/4) { this.setDirection('south'); }
+        if (angle >= Math.PI / 4 && angle <= 3 * Math.PI / 4) { this.setDirection('north'); }
+        else if (angle > 3 * Math.PI / 4 && angle < 5 * Math.PI / 4) { this.setDirection('west'); }
+        else if (angle >= 5 * Math.PI / 4 && angle <= 7 * Math.PI / 4) { this.setDirection('south'); }
         else { this.setDirection('east'); }
+    }
+
+    isOrientable() {
+        return this.orientable;
+    }
+
+    setOrientation(coordinates) {
+        if (this.isOrientable()) {
+            this.setDirectionFromAngle(angle(this.coordinates, coordinates));
+        }
     }
 
     getState() {
@@ -102,7 +113,7 @@ class Character {
     }
 
     spawn(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         this.feature.set('scale', [0, 0]);
         this.animateScale({
             value: 1,
@@ -112,7 +123,7 @@ class Character {
     }
 
     despawn(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         this.animateScale({
             value: 0,
             duration: this.spawnDuration,
@@ -163,7 +174,7 @@ class Character {
     }
 
     animateScale(options, callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
 
         const origin = this.feature.get('scale')[0];
         const value = options.value;

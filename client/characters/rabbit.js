@@ -6,7 +6,7 @@ class Rabbit extends Character {
     constructor(options) {
         super(options);
         this.sheetSize = 624;
-        this.colors = [ 'white', 'sand', 'brown', 'grey'];
+        this.colors = options.colors || ['white', 'sand', 'brown', 'grey'];
         this.color = options.color || 'white';
 
         this.states = {
@@ -29,10 +29,11 @@ class Rabbit extends Character {
                 west: { line: 7, length: 4 },
             }
         }
-        this.weights = [ 1, 10, 30 ];
-        this.statespool = [ 'move', 'graze', 'idle' ];
+        this.weights = [1, 10, 30];
+        this.statespool = ['move', 'graze', 'idle'];
 
         this.state = options.state || 'idle';
+        this.orientable = true;
 
         this.frameSize = 52;
         this.frameRate = 150;

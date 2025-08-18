@@ -20,13 +20,14 @@ import Target from '../characters/target.js';
 import { Helpers } from '../characters/helpers.js';
 import Position from '../game/position.js';
 import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
+import Rabbits from '../characters/rabbits.js';
 
 class Basemap {
     constructor(options, callback) {
-        callback = callback || function () {};
+        callback = callback || function () { };
         this.options = options || {};
         this.params = options.app.options;
-        
+
         this.layers = [];
         this.parent = this.options.parent;
 
@@ -63,7 +64,7 @@ class Basemap {
         this.interactions = defaults();
         this.map = new Map({
             target: this.container,
-            layers: [ this.baselayer ],
+            layers: [this.baselayer],
             view: this.view,
             interactions: this.interactions,
         });
@@ -129,7 +130,7 @@ class Basemap {
     }
 
     animate(options, callback) {
-        callback = callback || function () {};
+        callback = callback || function () { };
         this.view.animate(options, callback);
     }
 
@@ -138,17 +139,17 @@ class Basemap {
         this.map.getView().fit(extent, options);
     }
 
-    isVisible(position, padding=50) {
+    isVisible(position, padding = 50) {
         let visible = false;
         let size = this.map.getSize();
-        let [minx, maxy] = this.map.getCoordinateFromPixel([ padding, padding ]);
-        let [maxx, miny] = this.map.getCoordinateFromPixel([ size[0] - padding, size[1] - padding ]);
+        let [minx, maxy] = this.map.getCoordinateFromPixel([padding, padding]);
+        let [maxx, miny] = this.map.getCoordinateFromPixel([size[0] - padding, size[1] - padding]);
         let [x, y] = position;
         if (x > minx && x < maxx && y > miny && y < maxy) { visible = true; }
         return visible;
     }
 
-    setInteractions(interactable=false) {
+    setInteractions(interactable = false) {
         this.interactions.forEach((interaction) => {
             if (interactable) {
                 if (interaction instanceof MouseWheelZoom) { interaction.setActive(true); }
@@ -176,11 +177,14 @@ class Basemap {
     }
 
     createCharacters(level, options) {
+        this.rabbits = new Rabbits({ basemap: this });
+
         this.player = new Player({
             basemap: this,
             level: level,
+            layer: this.rabbits,
+            color: 'white',
             coordinates: options.player,
-            orientable: true,
             zIndex: 50
         });
         this.player.setOrientation(options.target)
@@ -188,34 +192,33 @@ class Basemap {
         this.target = new Target({
             basemap: this,
             level: level,
-            colors: [ 'brown', 'sand', 'grey' ],
+            layer: this.rabbits,
+            colors: ['brown', 'sand', 'grey'],
             color: 'random',
             coordinates: options.target,
-            orientable: true,
             zIndex: 40
         });
 
-        this.helpers = new Helpers({
-            basemap: this,
-            level: level,
-            coordinates: options.helpers,
-            minZoom: this.params.game.routing,
-            orientable: false,
-            zIndex: 30,
-        });
+        // this.helpers = new Helpers({
+        //     basemap: this,
+        //     level: level,
+        //     coordinates: options.helpers,
+        //     minZoom: this.params.game.routing,
+        //     zIndex: 30,
+        // });
 
-        this.enemies = new Enemies({
-            basemap: this,
-            level: level,
-            coordinates: options.enemies,
-            zIndex: 20,
-        });
-        this.enemies.setOrientation(options.player);
-        this.enemies.distanceOrder(options.player);
+        // this.enemies = new Enemies({
+        //     basemap: this,
+        //     level: level,
+        //     coordinates: options.enemies,
+        //     zIndex: 20,
+        // });
+        // this.enemies.setOrientation(options.player);
+        // this.enemies.distanceOrder(options.player);
     }
 
     activateMovement(callback) {
-        callback = callback || function () {};
+        callback = callback || function () { };
 
         let movement = this.map.on('click', () => {
             if (this.routable) {
@@ -261,7 +264,7 @@ class Basemap {
     }
 
     makeRoutable(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         if (this.routable) { callback(); }
         else {
             this.routable = true;
@@ -271,7 +274,7 @@ class Basemap {
     }
 
     makeUnroutable(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         if (!this.routable) { callback(); }
         else {
             this.routable = false;
@@ -281,7 +284,7 @@ class Basemap {
     }
 
     clear(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         let cleared = 0;
         const clearing = 5;
 
