@@ -22,8 +22,6 @@ class Layer {
         this.layer = new WebGLVectorLayer({
             source: this.source,
             zIndex: this.zIndex,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true
         });
 
         if (this.maxZoom) { this.layer.setMaxZoom(this.maxZoom); }
@@ -75,7 +73,7 @@ class Layer {
     }
 
     despawnCharacters(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         let delay = 0;
         this.characters.forEach(character => {
             let d = character.getSpawnDuration();
@@ -83,6 +81,10 @@ class Layer {
             character.despawn();
         });
         wait(delay, callback);
+    }
+
+    render() {
+        this.layer.render();
     }
 
     clear() {

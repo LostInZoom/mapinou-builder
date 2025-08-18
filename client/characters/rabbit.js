@@ -9,6 +9,8 @@ class Rabbit extends Character {
         this.colors = options.colors || ['white', 'sand', 'brown', 'grey'];
         this.color = options.color || 'white';
 
+        this.colorsPosition = ['white', 'sand', 'brown', 'grey'];
+
         this.states = {
             idle: {
                 north: { line: 9, length: 4 },
@@ -36,10 +38,6 @@ class Rabbit extends Character {
         this.orientable = true;
 
         this.frameSize = 52;
-        this.frameRate = 150;
-        this.frameLoop = options.frameLoop === undefined ? true : options.frameLoop;
-        this.framePosition = options.framePosition || 0;
-        this.frameDirection = 'south';
 
         if (this.color === 'random') {
             let i = generateRandomInteger(0, this.colors.length - 1);
@@ -47,7 +45,7 @@ class Rabbit extends Character {
         }
         this.offset = [
             this.frameSize * this.framePosition,
-            (this.colors.indexOf(this.color) * this.sheetSize) + (this.frameSize * this.states[this.state].south.line)
+            (this.colorsPosition.indexOf(this.color) * this.sheetSize) + (this.frameSize * this.states[this.state].south.line)
         ]
         this.feature.set('offset', this.offset);
         this.speed = options.speed || 20;

@@ -27,6 +27,8 @@ class Player extends Rabbit {
         this.flowers = [];
 
         this.invulnerable = false;
+
+        this.animateFrame();
     }
 
     isInvulnerable() {

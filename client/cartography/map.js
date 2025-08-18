@@ -14,7 +14,7 @@ import PinchZoom from 'ol/interaction/PinchZoom.js';
 import PointerInteraction from 'ol/interaction/Pointer.js';
 import { unByKey } from 'ol/Observable.js';
 
-import { Enemies } from '../characters/enemies.js';
+import Enemies from '../characters/enemies.js';
 import Player from '../characters/player.js';
 import Target from '../characters/target.js';
 import { Helpers } from '../characters/helpers.js';
@@ -207,14 +207,15 @@ class Basemap {
         //     zIndex: 30,
         // });
 
-        // this.enemies = new Enemies({
-        //     basemap: this,
-        //     level: level,
-        //     coordinates: options.enemies,
-        //     zIndex: 20,
-        // });
-        // this.enemies.setOrientation(options.player);
-        // this.enemies.distanceOrder(options.player);
+        this.enemies = new Enemies({
+            basemap: this,
+            level: level,
+            coordinates: options.enemies,
+            zIndex: 20,
+        });
+
+        this.enemies.setOrientation(options.player);
+        this.enemies.distanceOrder(options.player);
     }
 
     activateMovement(callback) {

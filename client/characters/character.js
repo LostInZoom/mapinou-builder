@@ -28,6 +28,11 @@ class Character {
         this.animate = false;
 
         this.spawnDuration = this.options.spawnDuration || 200;
+        this.frameRate = options.frameDirection || 150;
+        this.frameLoop = options.frameLoop === undefined ? true : options.frameLoop;
+        this.framePosition = options.framePosition || 0;
+        this.frameScale = options.frameScale || 1;
+        this.frameDirection = options.frameDirection || 'south';
 
         this.feature = new Feature({ geometry: new Point(options.coordinates) });
         if (this.options.index) { this.feature.set('id', index); }
@@ -53,12 +58,18 @@ class Character {
     }
 
     getDirection() {
-        return this.frameDirection;
+        if (this.orientable) {
+            return this.frameDirection;
+        } else {
+            return undefined;
+        }
     }
 
     setDirection(direction) {
-        this.frameDirection = direction;
-        this.updateOffset();
+        if (this.orientable) {
+            this.frameDirection = direction;
+            this.updateOffset();
+        }
     }
 
     setDirectionFromAngle(angle) {
@@ -93,7 +104,8 @@ class Character {
     }
 
     getAnimationDuration() {
-        return this.states[this.state][this.frameDirection].length * this.frameRate;
+        if (this.orientable) { return this.states[this.state][this.frameDirection].length * this.frameRate; }
+        else { return this.states[this.state].length * this.frameRate; }
     }
 
     getOffset() {
@@ -102,11 +114,13 @@ class Character {
 
     updateOffset() {
         requestAnimationFrame(() => {
+            let l;
+            if (this.orientable) { l = this.states[this.state][this.frameDirection].line; }
+            else { l = this.states[this.state].line; }
             let x = this.frameSize * this.framePosition;
-            let y = this.frameSize * this.states[this.state][this.frameDirection].line;
-            if (this.colors) {
-                y = y + (this.colors.indexOf(this.color) * this.sheetSize)
-            }
+            let y = this.frameSize * l;
+            if (this.colorsPosition) { y += (this.colorsPosition.indexOf(this.color) * this.sheetSize) }
+            if (this.frameOffset) { y += this.frameOffset }
             this.offset = [x, y];
             this.feature.set('offset', [x, y]);
         });
@@ -116,7 +130,7 @@ class Character {
         callback = callback || function () { };
         this.feature.set('scale', [0, 0]);
         this.animateScale({
-            value: 1,
+            value: this.frameScale,
             duration: this.spawnDuration,
             easing: easeOutCubic
         }, callback);
@@ -143,7 +157,10 @@ class Character {
                 wait(this.frameRate, () => {
                     if (!this.destroyed) {
                         let finish = true;
-                        let state = this.states[this.state][this.frameDirection];
+                        let state;
+                        if (this.orientable) { state = this.states[this.state][this.frameDirection]; }
+                        else { state = this.states[this.state]; }
+
                         if (this.framePosition === state.length - 1) {
                             if (callback !== undefined) {
                                 finish = false;
