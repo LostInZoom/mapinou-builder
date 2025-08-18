@@ -15,7 +15,7 @@ import Rabbits from '../characters/rabbits.js';
 class Application {
     constructor(options) {
         this.options = options;
-        
+
         // Create the DOM Element
         this.container = makeDiv('application', null);
         document.body.append(this.container);
@@ -63,6 +63,7 @@ class Application {
                 app: this,
                 basemap: this.basemap,
                 position: 'current',
+                initState: 'slide',
                 init: true
             }, () => {
                 this.music.display(true);
@@ -92,7 +93,7 @@ class Application {
                     coordinates: coords,
                     color: 'random',
                 });
-                
+
                 r.spawn(() => {
                     this.allowed = true;
                     r.roam();
@@ -108,7 +109,7 @@ class Application {
      * @param {*} callback 
      */
     slide(options, callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
 
         // Make sure the page isn't sliding
         if (!this.sliding) {
@@ -119,7 +120,7 @@ class Application {
 
             if (options.position === 'previous') { center[0] += increment; }
             else { center[0] -= increment; }
-            
+
             this.basemap.animate({
                 center: center,
                 duration: 500,

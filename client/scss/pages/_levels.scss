@@ -15,8 +15,8 @@
     display: flex;
     gap: 1rem;
 
-    
-    &.pop > .levels-tier-entry {
+
+    &.pop>.levels-tier-entry {
         transform: scale(1);
         transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -41,7 +41,7 @@
     transform: scale(0);
     transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
-    & > svg {
+    &>svg {
         margin: 0 .3rem;
         width: 2.5rem;
         height: 2.5rem;
@@ -62,22 +62,20 @@
     opacity: 1;
     transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
-    &.active > .levels-minimap {
+    &.active>.levels-minimap {
         width: 4rem;
         height: 4rem;
 
         border: solid .4rem #0000;
-        background: conic-gradient(
-                from var(--angle),
+        background: conic-gradient(from var(--angle),
                 colors.$main-color-medium,
                 colors.$main-color-dark,
                 colors.$main-color-dark,
                 colors.$main-color-medium,
                 colors.$main-color-dark,
                 colors.$main-color-dark,
-                colors.$main-color-medium
-            ) border-box;
-        
+                colors.$main-color-medium ) border-box;
+
         animation:
             6s border-rotation linear infinite,
             3s scale-breathing ease-in-out infinite .3s;
@@ -85,11 +83,16 @@
 
     &.remaining {
         opacity: .7;
-        & > .levels-minimap > .levels-state { opacity: 1; }
+
+        &>.levels-minimap>.levels-state {
+            opacity: 1;
+        }
     }
 
     &.finished {
-        & > .levels-minimap > .levels-state { opacity: 0.8; }
+        &>.levels-minimap>.levels-state {
+            opacity: 0.8;
+        }
     }
 
     &.pop {
@@ -122,7 +125,7 @@
     opacity: 0;
     transition: opacity .2s linear;
 
-    & > svg {
+    &>svg {
         color: colors.$main-color-dark;
         width: inherit;
         height: inherit;
@@ -137,18 +140,24 @@
     height: 100%;
     width: 100%;
 
-    & > svg {
+    &>svg {
         display: block;
         height: 100%;
         width: 100%;
 
-        & > line {
+        &>line {
             stroke: colors.$main-color-dark;
             stroke-width: .5rem;
             transition: stroke-width .2s cubic-bezier(0.36, 0, 0.66, -0.56);
+
+            &.appear {
+                stroke-dashoffset: 0;
+            }
+
             &.reveal {
                 animation: line-reveal .3s ease-out forwards;
             }
+
             &.thinout {
                 stroke-width: 0;
             }
@@ -179,7 +188,7 @@
 
     background-color: colors.$secondary-color-dark;
     color: colors.$main-color-light;
-    
+
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -259,6 +268,7 @@
     font-family: 'Cabin';
     font-weight: bold;
     flex: 1;
+
     &:first-child {
         border-bottom-left-radius: .4rem;
         border-top-left-radius: .4rem;

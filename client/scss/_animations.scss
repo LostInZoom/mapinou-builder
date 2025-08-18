@@ -1,152 +1,397 @@
 @use 'colors';
 
 @keyframes horizontal-bounce {
-    0% { transform: scale(1); }
-    10% { transform: scale(0.8, 1.2); }
-    25% { transform: scale(1.15, 0.85); }
-    55% { transform: scale(0.9, 1.1); }
-    75% { transform: scale(1.05, 0.95); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    10% {
+        transform: scale(0.8, 1.2);
+    }
+
+    25% {
+        transform: scale(1.15, 0.85);
+    }
+
+    55% {
+        transform: scale(0.9, 1.1);
+    }
+
+    75% {
+        transform: scale(1.05, 0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes full-bounce {
-    0% { transform: scale(1); }
-    20% { transform: scale(1.2); }
-    40% { transform: scale(0.85); }
-    60% { transform: scale(1.1); }
-    80% { transform: scale(0.95); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    20% {
+        transform: scale(1.2);
+    }
+
+    40% {
+        transform: scale(0.85);
+    }
+
+    60% {
+        transform: scale(1.1);
+    }
+
+    80% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes vertical-bounce {
-    0% { transform: scale(1); }
-    15% { transform: scale(1.2, 0.8); }
-    40% { transform: scale(0.9, 1.1); }
-    70% { transform: scale(1.05, 0.95); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    15% {
+        transform: scale(1.2, 0.8);
+    }
+
+    40% {
+        transform: scale(0.9, 1.1);
+    }
+
+    70% {
+        transform: scale(1.05, 0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes page-button-bounce {
-    0% { transform: scale(1); }
-    20% { transform: scale(1.1, 0.9); }
-    50% { transform: scale(0.95, 1.05); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    20% {
+        transform: scale(1.1, 0.9);
+    }
+
+    50% {
+        transform: scale(0.95, 1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes build-button-bounce {
-    0% { transform: scale(1) translate(-50%, 0%); }
-    20% { transform: scale(1.1, 0.9) translate(-50%, 0%); }
-    50% { transform: scale(0.95, 1.05) translate(-50%, 0%); }
-    100% { transform: scale(1) translate(-50%, 0%); }
+    0% {
+        transform: scale(1) translate(-50%, 0%);
+    }
+
+    20% {
+        transform: scale(1.1, 0.9) translate(-50%, 0%);
+    }
+
+    50% {
+        transform: scale(0.95, 1.05) translate(-50%, 0%);
+    }
+
+    100% {
+        transform: scale(1) translate(-50%, 0%);
+    }
 }
 
 @keyframes button-vertical-bounce {
-    0% { transform: scale(1, 0); }
-    10% { transform: scale(0.9, 1.2); }
-    25% { transform: scale(0.9, 1.2); }
-    50% { transform: scale(0.9, 1.2); }
-    75% { transform: scale(1.05, 0.95); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1, 0);
+    }
+
+    10% {
+        transform: scale(0.9, 1.2);
+    }
+
+    25% {
+        transform: scale(0.9, 1.2);
+    }
+
+    50% {
+        transform: scale(0.9, 1.2);
+    }
+
+    75% {
+        transform: scale(1.05, 0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes line-reveal {
-    to { stroke-dashoffset: 0; }
+    to {
+        stroke-dashoffset: 0;
+    }
 }
 
 @keyframes border-rotation {
-    0% { --angle: 0deg; }
-    50% { --angle: 180deg; }
-    100% { --angle: 360deg; }
+    0% {
+        --angle: 0deg;
+    }
+
+    50% {
+        --angle: 180deg;
+    }
+
+    100% {
+        --angle: 360deg;
+    }
 }
 
 @keyframes scale-breathing {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes wrong-double-click {
-    0% { transform: rotateZ(0); }
-    10% { transform: rotateZ(-5deg); }
-    30% { transform: rotateZ(2.5deg); }
-    60% { transform: rotateZ(1deg); }
-    100% { transform: rotateZ(0); }
+    0% {
+        transform: rotateZ(0);
+    }
+
+    10% {
+        transform: rotateZ(-5deg);
+    }
+
+    30% {
+        transform: rotateZ(2.5deg);
+    }
+
+    60% {
+        transform: rotateZ(1deg);
+    }
+
+    100% {
+        transform: rotateZ(0);
+    }
 }
 
 @keyframes score-default-left {
-    0% { transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1) }
-    10% { transform: perspective(8rem) rotateY(5deg) rotateZ(5deg) scale(1.1) }
-    30% { transform: perspective(8rem) rotateY(-2.5deg) rotateZ(-2.5deg) scale(0.95) }
-    60% { transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1) }
-    100% { transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1) }
+    0% {
+        transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1)
+    }
+
+    10% {
+        transform: perspective(8rem) rotateY(5deg) rotateZ(5deg) scale(1.1)
+    }
+
+    30% {
+        transform: perspective(8rem) rotateY(-2.5deg) rotateZ(-2.5deg) scale(0.95)
+    }
+
+    60% {
+        transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1)
+    }
+
+    100% {
+        transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1)
+    }
 }
 
 @keyframes score-default-right {
-    0% { transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1) }
-    10% { transform: perspective(8rem) rotateY(-5deg) rotateZ(-5deg) scale(1.1) }
-    30% { transform: perspective(8rem) rotateY(2.5deg) rotateZ(2.5deg) scale(0.95) }
-    60% { transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1) }
-    100% { transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1) }
+    0% {
+        transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1)
+    }
+
+    10% {
+        transform: perspective(8rem) rotateY(-5deg) rotateZ(-5deg) scale(1.1)
+    }
+
+    30% {
+        transform: perspective(8rem) rotateY(2.5deg) rotateZ(2.5deg) scale(0.95)
+    }
+
+    60% {
+        transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1)
+    }
+
+    100% {
+        transform: perspective(8rem) rotateY(0) rotateZ(0) scale(1)
+    }
 }
 
 @keyframes score-movement-left {
-    0% { transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1) }
-    10% { transform: perspective(6rem) rotateY(5deg) rotateZ(5deg) scale(1.2) }
-    30% { transform: perspective(6rem) rotateY(-2.5deg) rotateZ(-2.5deg) scale(0.9) }
-    60% { transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1) }
-    100% { transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1) }
+    0% {
+        transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1)
+    }
+
+    10% {
+        transform: perspective(6rem) rotateY(5deg) rotateZ(5deg) scale(1.2)
+    }
+
+    30% {
+        transform: perspective(6rem) rotateY(-2.5deg) rotateZ(-2.5deg) scale(0.9)
+    }
+
+    60% {
+        transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1)
+    }
+
+    100% {
+        transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1)
+    }
 }
 
 @keyframes score-movement-right {
-    0% { transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1) }
-    10% { transform: perspective(6rem) rotateY(-5deg) rotateZ(-5deg) scale(1.2) }
-    30% { transform: perspective(6rem) rotateY(2.5deg) rotateZ(2.5deg) scale(0.9) }
-    60% { transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1) }
-    100% { transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1) }
+    0% {
+        transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1)
+    }
+
+    10% {
+        transform: perspective(6rem) rotateY(-5deg) rotateZ(-5deg) scale(1.2)
+    }
+
+    30% {
+        transform: perspective(6rem) rotateY(2.5deg) rotateZ(2.5deg) scale(0.9)
+    }
+
+    60% {
+        transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1)
+    }
+
+    100% {
+        transform: perspective(6rem) rotateY(0) rotateZ(0) scale(1)
+    }
 }
 
 @keyframes score-enemies {
-    0% { transform: scale(1); }
-    10% { transform: scale(1.4); color: colors.$score-enemies-light; }
-    30% { transform: scale(1); }
-    60% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    10% {
+        transform: scale(1.4);
+        color: colors.$score-enemies-light;
+    }
+
+    30% {
+        transform: scale(1);
+    }
+
+    60% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes score-helpers {
-    0% { transform: scale(1); }
-    10% { transform: scale(1.3); color: colors.$score-helpers-light; }
-    30% { transform: scale(1.2); }
-    60% { transform: scale(1.3); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    10% {
+        transform: scale(1.3);
+        color: colors.$score-helpers-light;
+    }
+
+    30% {
+        transform: scale(1.2);
+    }
+
+    60% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes leaderboard-score-increment {
-    0% { transform: rotate(0) scale(1); }
-    25% { transform: rotate(5deg) scale(1.1); }
-    50% { transform: rotate(0) scale(1); }
-    75% { transform: rotate(-5deg) scale(1.1); }
-    100% { transform: rotate(0) scale(1); }
+    0% {
+        transform: rotate(0) scale(1);
+    }
+
+    25% {
+        transform: rotate(5deg) scale(1.1);
+    }
+
+    50% {
+        transform: rotate(0) scale(1);
+    }
+
+    75% {
+        transform: rotate(-5deg) scale(1.1);
+    }
+
+    100% {
+        transform: rotate(0) scale(1);
+    }
 }
 
 @keyframes leaderboard-score-stop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.5); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes rotationccw {
-    0% { transform: rotate(360deg); }
-    100% { transform: rotate(0deg); }
+    0% {
+        transform: rotate(360deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
 }
 
 @keyframes rotationcw {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-@keyframes opacity { 
-    0% { opacity: 0; }
-    50% { opacity: 1; }
-    100% { opacity: 0; }
+@keyframes opacity {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }

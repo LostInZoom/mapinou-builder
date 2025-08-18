@@ -5,6 +5,7 @@ class LevelEdges {
         this.options = options;
         this.parent = options.parent;
         this.namespace = 'http://www.w3.org/2000/svg';
+        this.animation = options.animation;
 
         this.container = makeDiv(null, 'levels-svg');
         this.svg = document.createElementNS(this.namespace, 'svg');
@@ -36,7 +37,8 @@ class LevelEdges {
         line.setAttribute('stroke-dashoffset', length);
         line.setAttribute('stroke-linecap', 'round');
         this.lines.push(line);
-        addClass(line, 'reveal');
+        if (this.animation) { addClass(line, 'reveal'); }
+        else { addClass(line, 'appear'); }
     }
 
     resize(width, height) {
