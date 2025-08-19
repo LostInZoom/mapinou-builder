@@ -11,6 +11,7 @@ import Levels from '../pages/levels.js';
 import Roamer from '../characters/roamer.js';
 import { Music, SoundEffects } from '../utils/soundbuttons.js';
 import Rabbits from '../layers/rabbits.js';
+import { toLongLat } from '../cartography/analysis.js';
 
 class Application {
     constructor(options) {
@@ -24,6 +25,8 @@ class Application {
         this.loader = makeDiv(null, 'loader');
         this.mask.append(this.loader);
         this.container.append(this.mask);
+
+        // Display the loader
         this.loading();
 
         this.maxrabbit = 5;
@@ -55,50 +58,67 @@ class Application {
             parent: this.container,
             class: 'basemap',
             center: this.center,
-            zoom: this.options.interface.map.start.zoom
+            zoom: this.options.interface.map.start.zoom,
+            interactive: false
         }, () => {
             this.loaded();
+
             // Create the current page
-            this.page = new Levels({
+            this.page = new Title({
                 app: this,
                 basemap: this.basemap,
                 position: 'current',
-                initState: 'slide',
+                // initState: 'slide',
                 init: true
             }, () => {
                 this.music.display(true);
                 this.sounds.display(false);
             });
-        });
 
-        this.rabbits = new Rabbits({ basemap: this.basemap });
+            this.rabbits = new Rabbits({ basemap: this.basemap }, () => { this.allowed = true; });
 
-        // Rabbit spawner
-        this.allowed = true;
-        this.basemap.map.on('click', (e) => {
-            if (this.allowed) {
-                this.allowed = false;
-                let coords = this.basemap.map.getEventCoordinate(event);
+            this.basemap.map.on('click', (e) => {
+                if (this.allowed) {
+                    this.allowed = false;
+                    let coords = e.lngLat;
 
-                // Despawn the first rabbit if the limit is reached
-                if (this.rabbits.getCharactersNumber() >= this.maxrabbit) {
-                    let first = this.rabbits.getCharacter(0);
-                    first.despawn(() => {
-                        this.rabbits.removeCharacter(first);
+                    // if (this.rabbits.getCharactersNumber() >= this.maxrabbit) {
+                    //     let first = this.rabbits.getCharacter(0);
+                    //     first.despawn(() => {
+                    //         this.rabbits.removeCharacter(first);
+                    //     });
+                    // }
+
+                    console.log(coords);
+
+                    let r = new Roamer({
+                        layer: this.rabbits,
+                        coordinates: coords,
+                        color: 'random',
                     });
-                }
 
-                let r = new Roamer({
-                    layer: this.rabbits,
-                    coordinates: coords,
-                    color: 'random',
-                });
-
-                r.spawn(() => {
                     this.allowed = true;
-                    r.roam();
-                });
-            }
+
+                    // // Despawn the first rabbit if the limit is reached
+                    // if (this.rabbits.getCharactersNumber() >= this.maxrabbit) {
+                    //     let first = this.rabbits.getCharacter(0);
+                    //     first.despawn(() => {
+                    //         this.rabbits.removeCharacter(first);
+                    //     });
+                    // }
+
+                    // let r = new Roamer({
+                    //     layer: this.rabbits,
+                    //     coordinates: coords,
+                    //     color: 'random',
+                    // });
+
+                    // r.spawn(() => {
+                    //     this.allowed = true;
+                    //     r.roam();
+                    // });
+                }
+            });
         });
     }
 

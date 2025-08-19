@@ -10,8 +10,8 @@ import { wait } from "../utils/dom.js";
 class Roamer extends Rabbit {
     constructor(options) {
         super(options);
-        this.setRandomDirection();
-        this.animateFrame();
+        // this.setRandomDirection();
+        // this.animateFrame();
     }
 
     setRandomDirection() {

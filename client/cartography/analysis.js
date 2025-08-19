@@ -1,6 +1,7 @@
 import * as turf from "@turf/turf";
 import { Polygon } from "ol/geom.js";
 
+import { LngLat } from "maplibre-gl";
 import proj4 from "proj4";
 
 /**
@@ -18,7 +19,7 @@ function buffer(coordinates, size) {
 
     // Project the resulting coordinates
     let v = []
-    for (let i = 0; i < b.geometry.coordinates[0].length; i++) { v.push(project('4326', '3857',  b.geometry.coordinates[0][i])); }
+    for (let i = 0; i < b.geometry.coordinates[0].length; i++) { v.push(project('4326', '3857', b.geometry.coordinates[0][i])); }
 
     // Return an openlayer polygon from the list of vertexes
     return new Polygon([v]);
@@ -59,9 +60,9 @@ function bufferAroundPolygon(coordinates, size) {
  */
 function middle(position1, position2) {
     let x1, y1, x2, y2;
-    [ x1, y1 ] = position1;
-    [ x2, y2 ] = position2;
-    return [ (x1 + x2) / 2, (y1 + y2) / 2 ];
+    [x1, y1] = position1;
+    [x2, y2] = position2;
+    return [(x1 + x2) / 2, (y1 + y2) / 2];
 }
 
 /**
@@ -75,7 +76,7 @@ function within(position1, position2, distance) {
     let c1 = project('3857', '4326', position1);
     let c2 = project('3857', '4326', position2);
     let d = turf.distance(turf.point(c1), turf.point(c2), { units: "meters" });
-    
+
     if (d > distance) { return false; }
     else { return true; }
 }
@@ -90,7 +91,7 @@ function angle(position1, position2) {
     let x = position2[0] - position1[0];
     let y = position2[1] - position1[1];
     let a = Math.atan2(y, x);
-    if (a < 0) { return a + 2*Math.PI }
+    if (a < 0) { return a + 2 * Math.PI }
     else { return a }
 }
 
@@ -103,6 +104,11 @@ function angle(position1, position2) {
  */
 function project(epsg1, epsg2, coordinates) {
     return proj4(proj4.defs('EPSG:' + epsg1), proj4.defs('EPSG:' + epsg2), coordinates);
+}
+
+function toLongLat(coordinates) {
+    let c = proj4(proj4.defs('EPSG:3857'), proj4.defs('EPSG:4326'), coordinates);
+    return new LngLat(c[0], c[1]);
 }
 
 /**
@@ -119,4 +125,4 @@ function randomPointInCircle(center, radius) {
     return [center[0] + adjacent, center[1] + opposite]
 }
 
-export { buffer, bufferAroundPolygon, middle, within, project, angle, randomPointInCircle }
+export { buffer, bufferAroundPolygon, middle, within, project, angle, randomPointInCircle, toLongLat }
