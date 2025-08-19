@@ -33,6 +33,10 @@ class Layer {
         this.characters = [];
     }
 
+    changed() {
+        this.source.changed();
+    }
+
     getLayer() {
         return this.layer;
     }

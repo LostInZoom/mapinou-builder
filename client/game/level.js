@@ -33,7 +33,7 @@ class Level extends Page {
         // Cancel current game and go back to level selection
         this.listening = false;
         this.back.addEventListener('click', () => {
-            if (this.listening) { 
+            if (this.listening) {
                 this.listening = false;
                 this.clear(() => {
                     this.toLevels();
@@ -53,7 +53,7 @@ class Level extends Page {
     }
 
     phase1(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         this.phase = 1;
 
         this.score.pop();
@@ -117,7 +117,7 @@ class Level extends Page {
     }
 
     phase2(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         this.phase = 2;
         this.basemap.setInteractions(false);
         this.basemap.createCharacters(this, this.level);
@@ -134,20 +134,20 @@ class Level extends Page {
             this.basemap.fit(this.dataExtent, {
                 duration: 500,
                 easing: inAndOut,
-                padding: [ 100, 50, 50, 50 ]
+                padding: [100, 50, 50, 50]
             }, () => {
                 this.basemap.target.spawn(() => {
                     this.basemap.enemies.spawn(1000, () => {
                         this.listening = true;
                         this.basemap.setInteractions(true);
 
-                        this.basemap.activateMovement(win => {
-                            // Here, the level has been won
-                            if (win) {
-                                this.basemap.setInteractions(false);
-                                this.clear(callback);
-                            }
-                        });
+                        // this.basemap.activateMovement(win => {
+                        //     // Here, the level has been won
+                        //     if (win) {
+                        //         this.basemap.setInteractions(false);
+                        //         this.clear(callback);
+                        //     }
+                        // });
                     });
                 });
             })
@@ -176,7 +176,7 @@ class Level extends Page {
         this.basemap.fit(this.dataExtent, {
             duration: 500,
             easing: inAndOut,
-            padding: [ 100, 50, 50, 50 ]
+            padding: [100, 50, 50, 50]
         }, () => {
             if (++cleared === clearing) { this.leaderboard(); }
         });
@@ -200,12 +200,12 @@ class Level extends Page {
         addClass(this.highscoreContainer, 'pop');
 
         let c = this.level.target;
-        let r = this.params.game.tolerance.target;        
+        let r = this.params.game.tolerance.target;
         let hsmap = new Basemap({
             app: this.app,
             parent: this.highscoreMap,
             center: this.level.target,
-            extent: [ c[0] - r*2, c[1] - r*2, c[0] + r*2, c[1] + r*2 ]
+            extent: [c[0] - r * 2, c[1] - r * 2, c[0] + r * 2, c[1] + r * 2]
         }, () => {
             this.hsTarget = new Target({
                 basemap: hsmap,
@@ -224,7 +224,7 @@ class Level extends Page {
                 zIndex: 50
             });
             this.hsTarget.spawn();
-            this.hsPlayer .spawn();
+            this.hsPlayer.spawn();
         });
 
         let delay = 300;
@@ -265,7 +265,7 @@ class Level extends Page {
                 }, { once: true })
             });
         })
-        
+
         this.highscores.sort((a, b) => a.score - b.score);
         let personal;
         for (let e = 1; e < this.highscores.length; e++) {
@@ -319,7 +319,7 @@ class Level extends Page {
     }
 
     clear(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
 
         removeClass(this.back, 'pop');
         if (this.hint) { removeClass(this.hint, 'pop'); }
@@ -338,7 +338,7 @@ class Level extends Page {
             if (++cleared === clearing) { callback(); }
         });
         this.score.destroy(() => {
-            if (++cleared === clearing) { callback();}
+            if (++cleared === clearing) { callback(); }
         });
         this.basemap.makeUnroutable(() => {
             if (++cleared === clearing) { callback(); }

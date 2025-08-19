@@ -2,8 +2,8 @@ import { distance } from "ol/coordinate.js";
 
 import { wait } from "../utils/dom.js";
 import { weightedRandom } from "../utils/math.js";
-import Layer from "./layer.js";
-import { Bird, Hunter, Snake } from "./enemy.js";
+import Layer from "../characters/layer.js";
+import { Bird, Hunter, Snake } from "../characters/enemy.js";
 
 class Enemies extends Layer {
     constructor(options) {

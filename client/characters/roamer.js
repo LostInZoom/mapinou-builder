@@ -50,10 +50,10 @@ class Roamer extends Rabbit {
     }
 
     travel(destination, callback) {
-        callback = callback || function () {};
+        callback = callback || function () { };
         this.setState('move');
         this.setDirectionFromAngle(angle(this.coordinates, destination));
-        const line = new LineString([ this.coordinates, destination ]);
+        const line = new LineString([this.coordinates, destination]);
         const length = line.getLength();
         const speed = this.speed;
         let distance = 0;

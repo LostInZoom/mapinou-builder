@@ -10,7 +10,7 @@ import Form from '../pages/form.js';
 import Levels from '../pages/levels.js';
 import Roamer from '../characters/roamer.js';
 import { Music, SoundEffects } from '../utils/soundbuttons.js';
-import Rabbits from '../characters/rabbits.js';
+import Rabbits from '../layers/rabbits.js';
 
 class Application {
     constructor(options) {

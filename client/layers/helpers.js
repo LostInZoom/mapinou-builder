@@ -7,7 +7,7 @@ import { LineString } from "ol/geom";
 
 import { getColorsByClassNames } from "../utils/parse.js";
 import { easeInSine, easeOutSine, generateRandomInteger } from "../utils/math.js";
-import Character from "./character.js";
+import Character from "../characters/character.js";
 import { buffer } from "../cartography/analysis.js";
 import Sprite from "../cartography/sprite.js";
 
@@ -33,7 +33,7 @@ class Helpers {
     }
 
     despawn(callback) {
-        callback = callback || function () {};
+        callback = callback || function () { };
         let amount = this.getActiveHelpers().length;
         let done = 0;
         this.helpers.forEach((helper) => {
@@ -71,7 +71,7 @@ class Helper extends Character {
             scale: this.scale,
             framerate: 50,
             // The image is a random sprite inside the provided vegetables
-            offset: [ generateRandomInteger(0, 9) * 64, 0 ],
+            offset: [generateRandomInteger(0, 9) * 64, 0],
             coordinates: this.coordinates,
             maxScale: 1,
             minScale: 0.6,
@@ -82,7 +82,7 @@ class Helper extends Character {
     }
 
     reveal(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         this.cancelScaleAnimation();
         this.visible = true;
         let goal = this.scale;
@@ -94,7 +94,7 @@ class Helper extends Character {
     }
 
     hide(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         this.cancelScaleAnimation();
         this.visible = false;
         this.sprite.animateScale(0, easeOutSine, this.sprite.spawnIncrement, this.sprite.spawnFramerate, () => {

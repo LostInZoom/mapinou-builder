@@ -50,6 +50,7 @@ class Character {
     }
 
     setCoordinates(coordinates) {
+        this.coordinates = coordinates;
         return this.feature.getGeometry().setCoordinates(coordinates);
     }
 
@@ -177,6 +178,8 @@ class Character {
                         if (finish) {
                             this.offset[0] = this.frameSize * this.framePosition;
                             this.feature.set('offset', [this.offset[0], this.offset[1]]);
+                            this.setCoordinates(this.coordinates);
+                            this.layer.changed();
                             requestAnimationFrame(animation);
                         }
                     }

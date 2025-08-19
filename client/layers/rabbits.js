@@ -1,4 +1,4 @@
-import Layer from './layer.js';
+import Layer from '../characters/layer.js';
 
 class Rabbits extends Layer {
     constructor(options) {

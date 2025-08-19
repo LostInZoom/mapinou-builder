@@ -14,13 +14,13 @@ import PinchZoom from 'ol/interaction/PinchZoom.js';
 import PointerInteraction from 'ol/interaction/Pointer.js';
 import { unByKey } from 'ol/Observable.js';
 
-import Enemies from '../characters/enemies.js';
+import Enemies from '../layers/enemies.js';
 import Player from '../characters/player.js';
 import Target from '../characters/target.js';
-import { Helpers } from '../characters/helpers.js';
+import { Helpers } from '../layers/helpers.js';
 import Position from '../game/position.js';
 import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
-import Rabbits from '../characters/rabbits.js';
+import Rabbits from '../layers/rabbits.js';
 
 class Basemap {
     constructor(options, callback) {
@@ -62,6 +62,8 @@ class Basemap {
         });
 
         this.interactions = defaults();
+        this.interactions.PinchRotate = false;
+
         this.map = new Map({
             target: this.container,
             layers: [this.baselayer],
@@ -91,6 +93,12 @@ class Basemap {
         this.container.append(this.maskcontainer);
 
         this.map.once('loadend', callback);
+
+        // this.renderLoop = () => {
+        //     this.map.render();
+        //     requestAnimationFrame(this.renderLoop);
+        // }
+        // this.renderLoop();
     }
 
     setCenter(center) {
