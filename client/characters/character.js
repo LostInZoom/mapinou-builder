@@ -16,8 +16,11 @@ class Character {
         this.options = options || {};
         this.layer = this.options.layer;
         this.params = this.layer.params;
+        this.orientations = ['north', 'south', 'east', 'west'];
 
         this.id = this.options.id || this.generateUniqueId();
+
+        this.loop = this.loop !== undefined ? this.loop : true;
         this.coordinates = this.options.coordinates;
         this.origin = this.options.coordinates;
         this.zIndex = this.options.zIndex || 1;
@@ -29,58 +32,82 @@ class Character {
         this.scale = this.options.scale || 1;
         this.frame = this.options.frame || 0;
         this.framerate = this.options.framerate || 200;
+
+        this.feature = {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: this.coordinates
+            },
+            properties: {
+                id: this.id
+            }
+        };
     }
 
     generateUniqueId() {
         let id;
         do { id = crypto.randomUUID(); }
-        while (this.layer.getCharacters().some(c => c.properties.id === id));
+        while (this.layer.getFeatures().some(c => c.properties.id === id));
         return id;
+    }
+
+    getColor() {
+        return this.color;
+    }
+
+    setColor(color) {
+        this.color = color;
+        this.feature.properties.color = color;
+        this.layer.updateSource();
+    }
+
+    getOrientation() {
+        return this.orientation;
     }
 
     setOrientation(orientation) {
         this.orientation = orientation;
-        this.frame = 0;
+        this.feature.properties.orientation = orientation;
+        this.layer.updateSource();
+    }
+
+    setRandomOrientation() {
+        let o = this.orientations[this.orientations.length * Math.random() | 0];
+        this.setOrientation(o);
+    }
+
+    getState() {
+        return this.state;
     }
 
     setState(state) {
         this.state = state;
-        this.frame = 0;
+        this.feature.properties.state = state;
+        this.layer.updateSource();
     }
 
-    getCurrentFrame() {
-        const key = this.getFrameKey();
-        if (!this.layer.frames[key]) return null;
-        return this.layer.frames[key][this.frame];
+    getFrame() {
+        return this.frame;
     }
 
-    getFeature() {
-        return {
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: this.coords },
-            properties: { id: this.id, frame: this.getCurrentFrame() }
-        };
-    }
-
-    updateFeature() {
-        this.layer.updateCharacter(this.id, this.getFeature());
-    }
-
-    getFrameKey() {
-        return `${this.color}_${this.orientation}_${this.state}`;
+    setFrame(frame) {
+        this.frame = frame;
+        this.feature.properties.frame = frame;
+        this.layer.updateSource();
     }
 
     animateFrame() {
-        const key = this.getFrameKey();
-        if (!this.layer.frames[key]) {
-            requestAnimationFrame(() => this.animateFrame());
-            return;
-        }
+        wait(this.framerate, () => {
+            this.setFrame((this.frame + 1) % 4);
+            requestAnimationFrame(() => {
+                this.animateFrame();
+            });
+        });
 
-        this.frame = (this.frame + 1) % this.layer.frames[key].length;
-        this.updateFeature();
-
-        setTimeout(() => requestAnimationFrame(() => this.animateFrame()), this.framerate);
+        // setTimeout(() => {
+        //     requestAnimationFrame(() => this.animateFrame())
+        // }, this.framerate);
     }
 
 

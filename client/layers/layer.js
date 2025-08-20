@@ -11,84 +11,45 @@ class Layer {
 
         this.basemap = this.options.basemap;
         this.params = this.basemap.options.app.options;
+        this.index = 0;
 
         this.zIndex = this.options.zIndex || 1;
         this.minZoom = this.options.minZoom || null;
         this.maxZoom = this.options.maxZoom || null;
         this.orientable = this.options.orientable === undefined ? false : this.options.orientable;
 
+        this.characters = [];
         this.features = [];
 
         this.source = {
             type: 'geojson',
-            data: { type: 'FeatureCollection', features: this.features }
-        };
-
-        this.layer = {
-            type: 'symbol',
-            layout: {
-                'icon-image': ['get', 'frame'],
-                'icon-size': 1
+            data: {
+                type: 'FeatureCollection',
+                features: this.features
             }
         };
-
-        this.characters = [];
-        this.frames = {};
+        this.layer = { type: 'symbol' };
     }
 
-    addCharacter(character) {
-        this.characters.push(character);
-        this._updateSource();
+    getFeatures() {
+        return this.features;
     }
 
-    getCharacters() {
-        return this.characters;
+    addFeature(feature) {
+        this.features.push(feature);
+        this.updateSource();
     }
 
-    updateCharacter(id, character) {
-        const index = this.characters.findIndex(c => c.properties.id === id);
-        if (index !== -1) {
-            this.characters[index] = character;
-            this._updateSource();
-        }
+    updateFeature(index) {
+        
     }
 
-    _updateSource() {
-        const source = this.basemap.map.getSource(this.id);
+    updateSource() {
+        const source = this.basemap.map.getSource(this.index);
         if (source) {
-            source.setData({ type: 'FeatureCollection', features: this.features });
-        }
-    }
-
-    async _loadSpriteSheet(sprite, json) {
-        const img = new Image();
-        img.src = sprite;
-        await img.decode();
-        const response = await fetch(json);
-        const data = await response.json();
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        for (const [name, def] of Object.entries(data)) {
-            const { x, y, width, height, pixelRatio } = def;
-            canvas.width = width;
-            canvas.height = height;
-            ctx.clearRect(0, 0, width, height);
-            ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
-            if (!this.basemap.map.hasImage(name)) {
-                this.basemap.map.addImage(name, ctx.getImageData(0, 0, width, height), { pixelRatio: pixelRatio || 1 });
-            }
-            const parts = name.split("_");
-            const key = `${parts[0]}_${parts[1]}_${parts[2]}`;
-            if (!this.frames[key]) this.frames[key] = [];
-            this.frames[key].push(name);
-        }
-
-        // Order frames for animation
-        for (const key in this.frames) {
-            this.frames[key].sort((a, b) => {
-                const n1 = parseInt(a.split("_").pop(), 10);
-                const n2 = parseInt(b.split("_").pop(), 10);
-                return n1 - n2;
+            source.setData({
+                type: 'FeatureCollection',
+                features: this.features
             });
         }
     }

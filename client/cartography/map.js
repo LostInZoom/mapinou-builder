@@ -23,6 +23,9 @@ class Basemap {
         this.options = options || {};
         this.params = options.app.options;
 
+        this.spritesheets = ['rabbits'];
+        this.sprite = []
+
         this.layers = [];
         this.parent = this.options.parent;
 
@@ -73,6 +76,12 @@ class Basemap {
                         'source': 'PLANIGN',
                         'minzoom': 0,
                         'maxzoom': 22
+                    }
+                ],
+                "sprite": [
+                    {
+                        "id": "rabbits",
+                        "url": "http://localhost:8001/mapinou/sprites/rabbits"
                     }
                 ]
             },

@@ -1,6 +1,7 @@
 import { generateRandomInteger } from "../utils/math.js";
 import Sprite from "../cartography/sprite.js";
 import Character from "./character.js";
+import { wait } from "../utils/dom.js";
 
 class Rabbit extends Character {
     constructor(options) {
@@ -24,15 +25,14 @@ class Rabbit extends Character {
         this.orientable = true;
         this.orientation = options.orientation || 'south';
 
-        
-    }
+        this.feature.properties.color = this.color;
+        this.feature.properties.state = this.state;
+        this.feature.properties.orientation = this.orientation;
+        this.feature.properties.frame = this.frame;
+        this.layer.addFeature(this.feature);
 
-    setColor(color) {
-        this.color = color;
-        this.frame = 0;
+        this.animateFrame();
     }
 }
-
-
 
 export default Rabbit;

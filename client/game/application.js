@@ -75,7 +75,8 @@ class Application {
                 this.sounds.display(false);
             });
 
-            this.rabbits = new Rabbits({ basemap: this.basemap }, () => { this.allowed = true; });
+            this.rabbits = new Rabbits({ basemap: this.basemap });
+            this.allowed = true;
 
             this.basemap.map.on('click', (e) => {
                 if (this.allowed) {
@@ -89,11 +90,9 @@ class Application {
                     //     });
                     // }
 
-                    console.log(coords);
-
                     let r = new Roamer({
                         layer: this.rabbits,
-                        coordinates: coords,
+                        coordinates: [ coords.lng, coords.lat ],
                         color: 'random',
                     });
 
