@@ -31,6 +31,40 @@ class Layer {
         this.layer = { type: 'symbol' };
     }
 
+    getNumber() {
+        return this.characters.length;
+    }
+
+    getCharacter(index) {
+        if (index < this.getNumber()) {
+            return this.characters[index];
+        } else {
+            return undefined;
+        }
+    }
+
+    addCharacter(character) {
+        this.characters.push(character);
+        this.addFeature(character.getFeature());
+    }
+
+    removeCharacter(character) {
+        let id = character.getId();
+        for (let i = 0; i < this.characters.length; i++) {
+            if (this.characters[i] == character) {
+                this.characters.splice(i, 1);
+                break;
+            }
+        }
+        for (let i = 0; i < this.features.length; i++) {
+            if (this.features[i].properties.id == id) {
+                this.features.splice(i, 1);
+                break;
+            }
+        }
+        this.updateSource();
+    }
+
     getFeatures() {
         return this.features;
     }
@@ -38,10 +72,6 @@ class Layer {
     addFeature(feature) {
         this.features.push(feature);
         this.updateSource();
-    }
-
-    updateFeature(index) {
-        
     }
 
     updateSource() {
@@ -54,7 +84,7 @@ class Layer {
         }
     }
 
-    
+
 
 
 

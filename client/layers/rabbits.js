@@ -18,7 +18,7 @@ class Rabbits extends Layer {
                 ['get', 'state'], '_',
                 ['get', 'frame']
             ],
-            'icon-size': 1,
+            'icon-size': ['get', 'scale'],
             'icon-allow-overlap': true,
             'icon-ignore-placement': true,
         };

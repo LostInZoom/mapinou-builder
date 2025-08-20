@@ -81,41 +81,22 @@ class Application {
             this.basemap.map.on('click', (e) => {
                 if (this.allowed) {
                     this.allowed = false;
-                    let coords = e.lngLat;
 
-                    // if (this.rabbits.getCharactersNumber() >= this.maxrabbit) {
-                    //     let first = this.rabbits.getCharacter(0);
-                    //     first.despawn(() => {
-                    //         this.rabbits.removeCharacter(first);
-                    //     });
-                    // }
+                    if (this.rabbits.getNumber() >= this.maxrabbit) {
+                        let first = this.rabbits.getCharacter(0);
+                        first.despawn(() => { first.destroy(); });
+                    }
 
-                    let r = new Roamer({
+                    let roamer = new Roamer({
                         layer: this.rabbits,
-                        coordinates: [ coords.lng, coords.lat ],
+                        coordinates: e.lngLat.toArray(),
                         color: 'random',
                     });
 
-                    this.allowed = true;
-
-                    // // Despawn the first rabbit if the limit is reached
-                    // if (this.rabbits.getCharactersNumber() >= this.maxrabbit) {
-                    //     let first = this.rabbits.getCharacter(0);
-                    //     first.despawn(() => {
-                    //         this.rabbits.removeCharacter(first);
-                    //     });
-                    // }
-
-                    // let r = new Roamer({
-                    //     layer: this.rabbits,
-                    //     coordinates: coords,
-                    //     color: 'random',
-                    // });
-
-                    // r.spawn(() => {
-                    //     this.allowed = true;
-                    //     r.roam();
-                    // });
+                    roamer.spawn(() => {
+                        this.allowed = true;
+                        roamer.roam();
+                    });
                 }
             });
         });

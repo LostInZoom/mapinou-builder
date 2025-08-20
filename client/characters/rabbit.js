@@ -29,8 +29,9 @@ class Rabbit extends Character {
         this.feature.properties.state = this.state;
         this.feature.properties.orientation = this.orientation;
         this.feature.properties.frame = this.frame;
-        this.layer.addFeature(this.feature);
+        this.feature.properties.scale = this.scale;
 
+        this.layer.addCharacter(this);
         this.animateFrame();
     }
 }

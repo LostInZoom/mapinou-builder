@@ -88,8 +88,10 @@ function within(position1, position2, distance) {
  * @return {number} - The angle formed by the two positions.
  */
 function angle(position1, position2) {
-    let x = position2[0] - position1[0];
-    let y = position2[1] - position1[1];
+    let p1 = project('4326', '3857', position1);
+    let p2 = project('4326', '3857', position2);
+    let x = p2[0] - p1[0];
+    let y = p2[1] - p1[1];
     let a = Math.atan2(y, x);
     if (a < 0) { return a + 2 * Math.PI }
     else { return a }

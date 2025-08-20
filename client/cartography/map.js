@@ -103,6 +103,10 @@ class Basemap {
         this.container.append(this.maskcontainer);
     }
 
+    getContainer() {
+        return this.container;
+    }
+
     setCenter(center) {
         this.map.setCenter(center);
     }
@@ -120,7 +124,17 @@ class Basemap {
     }
 
     getResolution() {
-        return this.view.getResolution();
+        const R = 6378137;
+        const tileSize = 256;
+        const zoom = this.map.getZoom();
+        const res = (2 * Math.PI * R) / (tileSize * Math.pow(2, zoom));
+        const lat = this.map.getCenter().lat * Math.PI / 180;
+        const resLat = res * Math.cos(lat);
+        return resLat;
+    }
+
+    getCoordinatesAtPixel(coordinates) {
+        return this.map.unproject(coordinates).toArray();
     }
 
     getPixel(coordinates) {

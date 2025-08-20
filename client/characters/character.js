@@ -14,6 +14,7 @@ import { easeInCubic, easeOutCubic } from "../utils/math.js";
 class Character {
     constructor(options) {
         this.options = options || {};
+
         this.layer = this.options.layer;
         this.params = this.layer.params;
         this.orientations = ['north', 'south', 'east', 'west'];
@@ -24,14 +25,17 @@ class Character {
         this.coordinates = this.options.coordinates;
         this.origin = this.options.coordinates;
         this.zIndex = this.options.zIndex || 1;
+        this.spawnDuration = this.options.spawnDuration || 300;
 
         this.active = true;
         this.destroyed = false;
         this.animate = false;
 
-        this.scale = this.options.scale || 1;
         this.frame = this.options.frame || 0;
         this.framerate = this.options.framerate || 200;
+        this.framescale = this.options.scale || 1;
+        // Set the scale to zero because the character need to be spawned
+        this.scale = 0;
 
         this.feature = {
             type: 'Feature',
@@ -52,6 +56,19 @@ class Character {
         return id;
     }
 
+    destroy() {
+        this.active = false;
+        this.layer.removeCharacter(this);
+    }
+
+    getId() {
+        return this.id;
+    }
+
+    getFeature() {
+        return this.feature;
+    }
+
     getColor() {
         return this.color;
     }
@@ -70,6 +87,13 @@ class Character {
         this.orientation = orientation;
         this.feature.properties.orientation = orientation;
         this.layer.updateSource();
+    }
+
+    setOrientationFromAngle(angle) {
+        if (angle >= Math.PI / 4 && angle <= 3 * Math.PI / 4) { this.setOrientation('north'); }
+        else if (angle > 3 * Math.PI / 4 && angle < 5 * Math.PI / 4) { this.setOrientation('west'); }
+        else if (angle >= 5 * Math.PI / 4 && angle <= 7 * Math.PI / 4) { this.setOrientation('south'); }
+        else { this.setOrientation('east'); }
     }
 
     setRandomOrientation() {
@@ -97,17 +121,107 @@ class Character {
         this.layer.updateSource();
     }
 
-    animateFrame() {
-        wait(this.framerate, () => {
-            this.setFrame((this.frame + 1) % 4);
-            requestAnimationFrame(() => {
-                this.animateFrame();
-            });
-        });
+    getScale() {
+        return this.scale;
+    }
 
-        // setTimeout(() => {
-        //     requestAnimationFrame(() => this.animateFrame())
-        // }, this.framerate);
+    setScale(scale) {
+        this.scale = scale;
+        this.feature.properties.scale = scale;
+        this.layer.updateSource();
+    }
+
+    getCoordinates() {
+        return this.coordinates;
+    }
+
+    setCoordinates(coordinates) {
+        this.coordinates = coordinates;
+        this.feature.geometry.coordinates = coordinates;
+        this.layer.updateSource();
+    }
+
+    animateFrame() {
+        if (this.active) {
+            wait(this.framerate, () => {
+                this.setFrame((this.frame + 1) % 4);
+                requestAnimationFrame(() => {
+                    this.animateFrame();
+                });
+            });
+        }
+    }
+
+    spawn(callback) {
+        callback = callback || function () { };
+        this.animateScale({
+            value: this.framescale,
+            duration: this.spawnDuration,
+            easing: easeOutCubic
+        }, callback);
+    }
+
+    despawn(callback) {
+        callback = callback || function () { };
+        this.animateScale({
+            value: 0,
+            duration: this.spawnDuration,
+            easing: easeInCubic,
+        }, callback);
+    }
+
+    animateScale(options, callback) {
+        callback = callback || function () { };
+
+        if (this.active) {
+            const origin = this.scale;
+            const value = options.value;
+            const duration = options.duration || 200;
+            const overshoot = options.overshoot || 1.1;
+            const easing = options.easing || linear;
+            let overshootRatio = options.overshootRatio || 0.7;
+            overshootRatio = Math.max(0.01, Math.min(0.99, overshootRatio));
+
+            const start = performance.now();
+            const animation = (time) => {
+                const elapsed = time - start;
+                const t = Math.min(Math.max(elapsed / duration, 0), 1);
+                let scale;
+                const hasOvershoot = Math.abs(overshoot - 1) > 0.0001;
+                if (origin < value) {
+                    if (!hasOvershoot) {
+                        scale = easing(t);
+                    } else if (t < overshootRatio) {
+                        const t1 = t / overshootRatio;
+                        scale = easing(t1) * overshoot;
+                    } else {
+                        const t2 = (t - overshootRatio) / (1 - overshootRatio);
+                        scale = overshoot - easing(t2) * (overshoot - 1);
+                    }
+                } else {
+                    if (!hasOvershoot) {
+                        scale = 1 - easing(t);
+                    } else if (t < (1 - overshootRatio)) {
+                        const t1 = t / (1 - overshootRatio);
+                        scale = 1 + easing(t1) * (overshoot - 1);
+                    } else {
+                        const t2 = (t - (1 - overshootRatio)) / overshootRatio;
+                        scale = overshoot * (1 - easing(t2));
+                    }
+                }
+
+                this.setScale(scale);
+
+                if (t < 1) {
+                    requestAnimationFrame(animation);
+                } else {
+                    this.setScale(value);
+                    callback();
+                }
+            };
+
+            requestAnimationFrame(animation);
+        }
     }
 
 
@@ -275,61 +389,7 @@ class Character {
     //     this.animate = false;
     // }
 
-    // animateScale(options, callback) {
-    //     callback = callback || function () { };
 
-    //     const origin = this.feature.get('scale')[0];
-    //     const value = options.value;
-
-    //     const duration = options.duration || 200;
-    //     const overshoot = options.overshoot || 1.1;
-    //     const easing = options.easing || linear;
-    //     let overshootRatio = options.overshootRatio || 0.7;
-    //     overshootRatio = Math.max(0.01, Math.min(0.99, overshootRatio));
-
-    //     const start = performance.now();
-    //     const animation = (time) => {
-    //         const elapsed = time - start;
-    //         const t = Math.min(Math.max(elapsed / duration, 0), 1);
-
-    //         let scale;
-    //         const hasOvershoot = Math.abs(overshoot - 1) > 0.0001;
-
-    //         if (origin < value) {
-    //             if (!hasOvershoot) {
-    //                 scale = easing(t);
-    //             } else if (t < overshootRatio) {
-    //                 const t1 = t / overshootRatio;
-    //                 scale = easing(t1) * overshoot;
-    //             } else {
-    //                 const t2 = (t - overshootRatio) / (1 - overshootRatio);
-    //                 scale = overshoot - easing(t2) * (overshoot - 1);
-    //             }
-    //         } else {
-    //             if (!hasOvershoot) {
-    //                 scale = 1 - easing(t);
-    //             } else if (t < (1 - overshootRatio)) {
-    //                 const t1 = t / (1 - overshootRatio);
-    //                 scale = 1 + easing(t1) * (overshoot - 1);
-    //             } else {
-    //                 const t2 = (t - (1 - overshootRatio)) / overshootRatio;
-    //                 scale = overshoot * (1 - easing(t2));
-    //             }
-    //         }
-
-    //         this.scale = [scale, scale];
-    //         this.feature.set('scale', [scale, scale]);
-
-    //         if (t < 1) {
-    //             requestAnimationFrame(animation);
-    //         } else {
-    //             this.scale = [value, value];
-    //             this.feature.set('scale', [value, value]);
-    //             callback();
-    //         }
-    //     };
-    //     requestAnimationFrame(animation);
-    // }
 
 
 
