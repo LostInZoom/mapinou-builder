@@ -77,12 +77,6 @@ class Basemap {
                         'maxzoom': 22
                     }
                 ],
-                // "sprite": [
-                //     {
-                //         "id": "rabbits",
-                //         "url": "http://localhost:8001/mapinou/sprites/rabbits"
-                //     }
-                // ],
                 "fadeDuration": 0
             },
         });
