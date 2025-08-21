@@ -11,7 +11,7 @@ import Levels from '../pages/levels.js';
 import Roamer from '../characters/roamer.js';
 import { Music, SoundEffects } from '../utils/soundbuttons.js';
 import Rabbits from '../layers/rabbits.js';
-import { toLongLat } from '../cartography/analysis.js';
+import { project, toLongLat } from '../cartography/analysis.js';
 
 class Application {
     constructor(options) {
@@ -61,43 +61,45 @@ class Application {
             zoom: this.options.interface.map.start.zoom,
             interactive: false
         }, () => {
-            this.loaded();
+            this.basemap.loadSprites().then(() => {
+                this.loaded();
 
-            // Create the current page
-            this.page = new Title({
-                app: this,
-                basemap: this.basemap,
-                position: 'current',
-                // initState: 'slide',
-                init: true
-            }, () => {
-                this.music.display(true);
-                this.sounds.display(false);
-            });
+                // Create the current page
+                this.page = new Title({
+                    app: this,
+                    basemap: this.basemap,
+                    position: 'current',
+                    // initState: 'slide',
+                    // init: true
+                }, () => {
+                    this.music.display(true);
+                    this.sounds.display(false);
+                });
 
-            this.rabbits = new Rabbits({ basemap: this.basemap });
-            this.allowed = true;
+                this.rabbits = new Rabbits({ basemap: this.basemap });
+                this.allowed = true;
 
-            this.basemap.map.on('click', (e) => {
-                if (this.allowed) {
-                    this.allowed = false;
+                this.basemap.map.on('click', (e) => {
+                    if (this.allowed) {
+                        this.allowed = false;
 
-                    if (this.rabbits.getNumber() >= this.maxrabbit) {
-                        let first = this.rabbits.getCharacter(0);
-                        first.despawn(() => { first.destroy(); });
+                        if (this.rabbits.getNumber() >= this.maxrabbit) {
+                            let first = this.rabbits.getCharacter(0);
+                            first.despawn(() => { first.destroy(); });
+                        }
+
+                        let roamer = new Roamer({
+                            layer: this.rabbits,
+                            coordinates: e.lngLat.toArray(),
+                            color: 'random',
+                        });
+
+                        roamer.spawn(() => {
+                            this.allowed = true;
+                            roamer.roam();
+                        });
                     }
-
-                    let roamer = new Roamer({
-                        layer: this.rabbits,
-                        coordinates: e.lngLat.toArray(),
-                        color: 'random',
-                    });
-
-                    roamer.spawn(() => {
-                        this.allowed = true;
-                        roamer.roam();
-                    });
-                }
+                });
             });
         });
     }
@@ -117,12 +119,13 @@ class Application {
 
             let center = this.basemap.getCenter();
             let increment = this.basemap.getResolution() * 100;
-
-            if (options.position === 'previous') { center[0] += increment; }
-            else { center[0] -= increment; }
+            let p = project('4326', '3857', center.toArray());
+            if (options.position === 'previous') { p[0] += increment; }
+            else { p[0] -= increment; }
+            let newcenter = project('3857', '4326', p);
 
             this.basemap.animate({
-                center: center,
+                center: newcenter,
                 duration: 500,
                 easing: easeInOutCubic
             });
@@ -148,7 +151,7 @@ class Application {
     }
 
     hasRabbits() {
-        if (this.rabbits.getCharactersNumber() > 0) { return true; }
+        if (this.rabbits.getNumber() > 0) { return true; }
         else { return false; }
     }
 

@@ -24,7 +24,6 @@ class Basemap {
         this.params = options.app.options;
 
         this.spritesheets = ['rabbits'];
-        this.sprite = []
 
         this.layers = [];
         this.parent = this.options.parent;
@@ -36,16 +35,16 @@ class Basemap {
         let center = this.options.center || [0, 0];
         let zoom = this.options.zoom || 1;
 
-        // if (this.options.extent) {
-        //     let res = this.map.getResolutionForExtent(this.options.extent, this.map.getSize());
-        //     this.zoom = this.view.getZoomForResolution(res);
-        //     this.view.setZoom(this.zoom);
-        // }
+        if (this.options.extent) {
+            const o = this.map.cameraForBounds(this.options.extent);
+            zoom = o.zoom;
+            center = o.center;
+        }
 
         this.map = new Map({
             container: this.container,
-            center: this.options.center || [0, 0],
-            zoom: this.options.zoom || 1,
+            center: center,
+            zoom: zoom,
             interactive: this.options.interactive === undefined ? true : this.options.interactive,
             canvasContextAttributes: { antialias: true },
             style: {
@@ -78,18 +77,17 @@ class Basemap {
                         'maxzoom': 22
                     }
                 ],
-                "sprite": [
-                    {
-                        "id": "rabbits",
-                        "url": "http://localhost:8001/mapinou/sprites/rabbits"
-                    }
-                ]
+                // "sprite": [
+                //     {
+                //         "id": "rabbits",
+                //         "url": "http://localhost:8001/mapinou/sprites/rabbits"
+                //     }
+                // ],
+                "fadeDuration": 0
             },
         });
 
-        this.map.on('load', () => {
-            callback();
-        });
+        this.map.on('load', () => { callback(); });
 
         this.listeners = [];
         this.routable = true;
@@ -101,6 +99,10 @@ class Basemap {
         this.south = makeDiv(null, 'map-mask parallel south');
         this.maskcontainer.append(this.east, this.west, this.north, this.south);
         this.container.append(this.maskcontainer);
+    }
+
+    remove() {
+        this.map.remove();
     }
 
     getContainer() {
@@ -133,12 +135,13 @@ class Basemap {
         return resLat;
     }
 
-    getCoordinatesAtPixel(coordinates) {
-        return this.map.unproject(coordinates).toArray();
+    getPixelAtCoordinates(coordinates) {
+        let p = this.map.project(coordinates);
+        return [p.x, p.y];
     }
 
-    getPixel(coordinates) {
-        return this.map.getPixelFromCoordinate(coordinates);
+    getCoordinatesAtPixel(coordinates) {
+        return this.map.unproject(coordinates).toArray();
     }
 
     getWidth() {
@@ -149,18 +152,18 @@ class Basemap {
         return this.container.offsetHeight;
     }
 
-    dispose() {
-        this.baselayer.dispose();
-    }
-
     animate(options, callback) {
         callback = callback || function () { };
-        this.view.animate(options, callback);
+        this.map.easeTo(options);
+        this.map.once('moveend', callback);
     }
 
     fit(extent, options, callback) {
-        options.callback = callback;
-        this.map.getView().fit(extent, options);
+        const padding = options.padding || 0;
+        const o = this.map.cameraForBounds(extent, { padding: padding });
+        options.center = o.center;
+        options.zoom = o.zoom;
+        this.animate(options, callback);
     }
 
     isVisible(position, padding = 50) {
@@ -340,6 +343,47 @@ class Basemap {
             });
         } else { ++cleared }
         if (cleared === clearing) { callback(); }
+    }
+
+    async loadSprites() {
+        for (let i = 0; i < this.spritesheets.length; i++) {
+            const name = this.spritesheets[i];
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = './sprites/' + name + '.png';
+
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+
+            let json = await fetch('./sprites/' + name + '.json');
+            let data = await json.json();
+
+            console.log(data);
+
+            for (const key in data) {
+                const icon = data[key];
+                const canvas = document.createElement('canvas');
+                canvas.width = icon.width;
+                canvas.height = icon.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(
+                    img,
+                    icon.x, icon.y, icon.width, icon.height,
+                    0, 0, icon.width, icon.height
+                );
+                const bitmap = await createImageBitmap(canvas);
+                this.map.addImage(`${name}:${key}`, bitmap, {
+                    x: icon.x,
+                    y: icon.y,
+                    width: icon.width,
+                    height: icon.height,
+                    pixelRatio: icon.pixelRatio
+                });
+            }
+        }
     }
 }
 

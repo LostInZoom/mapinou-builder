@@ -4,7 +4,7 @@ import { addClass, clearElement, makeDiv, removeClass } from "../utils/dom.js";
 class Page {
     constructor(options, callback) {
         this.options = options || {};
-        this.callback = callback || function() {};
+        this.callback = callback || function () { };
         this.listen = true;
 
         this.app = this.options.app;
@@ -15,6 +15,7 @@ class Page {
         // Create DOM Element
         this.container = makeDiv(null, 'page ' + this.position);
         this.app.container.append(this.container);
+        this.container.offsetWidth;
     }
 
     getWidth() {
@@ -25,17 +26,17 @@ class Page {
         return this.container.offsetHeight;
     }
 
-    addHeader(justification='center') {
+    addHeader(justification = 'center') {
         this.header = new Header(this);
         this.header.setJustification(justification);
     }
 
-    addContent(justification='center') {
+    addContent(justification = 'center') {
         this.content = new Content(this);
         this.content.setJustification(justification);
     }
 
-    addFooter(justification='center') {
+    addFooter(justification = 'center') {
         this.footer = new Footer(this);
         this.footer.setJustification(justification);
     }

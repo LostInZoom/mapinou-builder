@@ -38,7 +38,7 @@ class Title extends Page {
         }
 
         this.letterArray = [];
-        
+
         // Loop through the name to get individual letters
         for (let i = 0; i < this.name.length; i++) {
             // Create the letter element translated by the width of the page * 1.1
@@ -59,7 +59,7 @@ class Title extends Page {
             let animationtime = width * 10;
             // Calculate individual letters animation time
             let lettertime = animationtime / this.name.length;
-            
+
             let j = this.letterArray.length - 1;
             this.letterArray.forEach((l) => {
                 l.style.transform = `translateX(-${width}rem)`;
@@ -100,7 +100,7 @@ class Title extends Page {
 
         delay += 300;
         // For each button slide and increment the delay
-        [ this.start, this.credits ].forEach((button) => {
+        [this.start, this.credits].forEach((button) => {
             if (init) {
                 wait(delay, () => { addClass(button, 'pop'); });
             } else {
@@ -123,7 +123,7 @@ class Title extends Page {
             this.listen = true;
             this.callback();
         }
-        
+
         this.titlelisten = true;
         this.title.addEventListener('click', () => {
             if (this.titlelisten) {
@@ -157,7 +157,7 @@ class Title extends Page {
     }
 
     levels() {
-        addClassList([ this.letters, this.start, this.credits, this.buildinfos ], 'unpop');
+        addClassList([this.letters, this.start, this.credits, this.buildinfos], 'unpop');
         this.options.app.killRabbits();
         this.options.app.forbidRabbits();
         wait(300, () => {

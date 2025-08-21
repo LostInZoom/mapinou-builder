@@ -13,7 +13,6 @@ class Roamer extends Rabbit {
 
     roam() {
         this.setFrame(0);
-
         if (this.active) {
             if (generateRandomInteger(0, 4) === 4) { this.setRandomOrientation(); }
             let choice = weightedRandom(this.statespool, this.weights.slice());

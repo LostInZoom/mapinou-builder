@@ -18,7 +18,7 @@ function weightedRandom(items, weights) {
     for (i = 0; i < weights.length; i++) {
         if (weights[i] > random)
             break;
-    }    
+    }
     return items[i];
 }
 
@@ -66,7 +66,7 @@ function easeInOutQuint(x) {
     return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
 }
 
-function remap(value, xmin, xmax, dmin=0, dmax=1) {
+function remap(value, xmin, xmax, dmin = 0, dmax = 1) {
     return dmin + ((value - xmin) / (xmax - xmin)) * (dmax - dmin);
 }
 

@@ -170,6 +170,10 @@ class Character {
         }, callback);
     }
 
+    getSpawnDuration() {
+        return this.spawnDuration;
+    }
+
     animateScale(options, callback) {
         callback = callback || function () { };
 

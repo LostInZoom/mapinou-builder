@@ -84,6 +84,28 @@ class Layer {
         }
     }
 
+    despawnCharacters(callback) {
+        callback = callback || function () { };
+        let delay = 0;
+        this.characters.forEach(character => {
+            let d = character.getSpawnDuration();
+            if (d > delay) { delay = d; }
+            character.despawn();
+        });
+        wait(delay, callback);
+    }
+
+    clear() {
+        this.characters.forEach(character => { this.removeCharacter(character) });
+        this.characters = [];
+    }
+
+    destroy() {
+        this.clear();
+        this.layer.dispose();
+        this.basemap.map.removeLayer(this.layer);
+    }
+
 
 
 
