@@ -73,10 +73,7 @@ function middle(position1, position2) {
  * @return {boolean}        true if both position are within a given distance from each other.
  */
 function within(position1, position2, distance) {
-    let c1 = project('3857', '4326', position1);
-    let c2 = project('3857', '4326', position2);
-    let d = turf.distance(turf.point(c1), turf.point(c2), { units: "meters" });
-
+    let d = turf.distance(turf.point(position1), turf.point(position2), { units: "meters" });
     if (d > distance) { return false; }
     else { return true; }
 }

@@ -1,7 +1,7 @@
 import Page from '../pages/page.js';
-import { makeDiv, addSVG, addClass, hasClass, removeClass, wait } from '../utils/dom.js';
+import { makeDiv, addClass, removeClass, wait } from '../utils/dom.js';
 import Basemap from '../cartography/map.js';
-import { easeInOutCubic, generateRandomInteger } from '../utils/math.js';
+import { generateRandomInteger } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
 
 import Title from '../pages/title.js';
@@ -11,7 +11,6 @@ import Levels from '../pages/levels.js';
 import Roamer from '../characters/roamer.js';
 import { Music, SoundEffects } from '../utils/soundbuttons.js';
 import Rabbits from '../layers/rabbits.js';
-import { project, toLongLat } from '../cartography/analysis.js';
 
 class Application {
     constructor(options) {
@@ -65,18 +64,20 @@ class Application {
                 this.loaded();
 
                 // Create the current page
-                this.page = new Title({
+                this.page = new Levels({
                     app: this,
                     basemap: this.basemap,
                     position: 'current',
-                    // initState: 'slide',
+                    initState: 'slide',
                     // init: true
                 }, () => {
                     this.music.display(true);
                     this.sounds.display(false);
                 });
 
-                this.rabbits = new Rabbits({ basemap: this.basemap });
+                this.rabbits = new Rabbits({
+                    basemap: this.basemap
+                });
                 this.allowed = true;
 
                 this.basemap.map.on('click', (e) => {

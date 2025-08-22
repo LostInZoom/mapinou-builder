@@ -158,8 +158,8 @@ class Title extends Page {
 
     levels() {
         addClassList([this.letters, this.start, this.credits, this.buildinfos], 'unpop');
-        this.options.app.killRabbits();
-        this.options.app.forbidRabbits();
+        this.app.killRabbits();
+        this.app.forbidRabbits();
         wait(300, () => {
             this.destroy();
             this.app.page = new Levels({ app: this.app, position: 'current' });

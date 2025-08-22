@@ -46,7 +46,7 @@ class Basemap {
             container: this.container,
             center: center,
             zoom: zoom,
-            interactive: this.options.interactive === undefined ? true : this.options.interactive,
+            interactive: true,
             canvasContextAttributes: { antialias: true },
             style: {
                 'version': 8,
@@ -82,7 +82,19 @@ class Basemap {
             },
         });
 
-        this.map.on('load', () => { callback(); });
+        this.map.on('load', () => {
+            this.map.boxZoom.disable();
+            this.map.dragRotate.disable();
+            this.map.keyboard.disable();
+            this.map.touchZoomRotate.disable();
+            this.map.doubleClickZoom.disable();
+
+            if (!this.options.interactive) {
+                this.map.scrollZoom.disable();
+                this.map.dragPan.disable();
+            }
+            callback();
+        });
 
         this.listeners = [];
         this.routable = true;
@@ -96,12 +108,16 @@ class Basemap {
         this.container.append(this.maskcontainer);
     }
 
+    render() {
+        this.map.triggerRepaint();
+    }
+
     remove() {
         this.map.remove();
     }
 
     getContainer() {
-        return this.container;
+        return this.map.getContainer();
     }
 
     setCenter(center) {
@@ -140,11 +156,11 @@ class Basemap {
     }
 
     getWidth() {
-        return this.container.offsetWidth;
+        return this.getContainer().offsetWidth;
     }
 
     getHeight() {
-        return this.container.offsetHeight;
+        return this.getContainer().offsetHeight;
     }
 
     animate(options, callback) {
@@ -178,35 +194,49 @@ class Basemap {
         }, callback);
     }
 
+    enableInteractions() {
+        this.map.scrollZoom.enable();
+        this.map.dragPan.enable();
+    }
 
+    disableInteractions() {
+        this.map.scrollZoom.disable();
+        this.map.dragPan.disable();
+    }
 
+    addListener(type, listener) {
+        this.map.on(type, listener);
+        this.listeners.push({
+            type: type,
+            listener: listener
+        });
+    }
 
-
-
-
-
+    removeListeners() {
+        for (let i = 0; i < this.listeners.length; i++) {
+            const l = this.listeners[i];
+            this.map.off(l.type, l.listener);
+        }
+        this.listeners = [];
+    }
 
     isVisible(position, padding = 50) {
         let visible = false;
-        let size = this.map.getSize();
-        let [minx, maxy] = this.map.getCoordinateFromPixel([padding, padding]);
-        let [maxx, miny] = this.map.getCoordinateFromPixel([size[0] - padding, size[1] - padding]);
+        let width = this.getWidth();
+        let height = this.getHeight();
+        let [minx, maxy] = this.getCoordinatesAtPixel([padding, padding]);
+        let [maxx, miny] = this.getCoordinatesAtPixel([width - padding, height - padding]);
         let [x, y] = position;
         if (x > minx && x < maxx && y > miny && y < maxy) { visible = true; }
         return visible;
     }
 
-    setInteractions(interactable = false) {
-        this.interactions.forEach((interaction) => {
-            if (interactable) {
-                if (interaction instanceof MouseWheelZoom) { interaction.setActive(true); }
-                else if (interaction instanceof DragPan) { interaction.setActive(true); }
-                else if (interaction instanceof PinchZoom) { interaction.setActive(true); }
-                else if (interaction instanceof PointerInteraction) { interaction.setActive(true); }
-                else { interaction.setActive(false); }
-            } else { interaction.setActive(false); }
-        });
-    }
+
+
+
+
+
+
 
     removeLayer(layer) {
         for (let i = 0; i < this.layers.length; i++) {
@@ -291,15 +321,6 @@ class Basemap {
         });
 
         this.addListeners(movement, routing);
-    }
-
-    addListeners(...listeners) {
-        listeners.forEach(l => { this.listeners.push(l); });
-    }
-
-    removeListeners() {
-        this.listeners.forEach((listener) => { unByKey(listener); });
-        this.listeners = [];
     }
 
     getExtentForData() {

@@ -19,6 +19,8 @@ class Level extends Page {
         this.levels = this.options.levels;
         this.basemap = this.options.app.basemap;
 
+        this.options.app.forbidRabbits();
+
         this.score = new Score({
             level: this,
             parent: this.options.app.header,
@@ -68,13 +70,13 @@ class Level extends Page {
         this.container.append(this.hint);
         this.hint.offsetHeight;
 
-        this.basemap.setInteractions(true);
+        this.basemap.enableInteractions();
 
         let player = this.level.player;
 
-        this.hintListener = this.basemap.map.on('postrender', () => {
+        const hintListener = () => {
             let visible = this.basemap.isVisible(player);
-            let zoom = this.basemap.view.getZoom();
+            let zoom = this.basemap.getZoom();
             for (let [m, h] of Object.entries(this.hints)) {
                 if (!visible) {
                     let t = this.params.game.lost;
@@ -86,13 +88,13 @@ class Level extends Page {
                     }
                 }
             }
-        });
+        }
 
-        this.basemap.map.render();
+        this.basemap.addListener('render', hintListener);
 
         let activeWrong = false;
-        this.selectionListener = this.basemap.map.on('dblclick', (e) => {
-            let target = this.basemap.map.getEventCoordinate(event);
+        const selectionListener = (e) => {
+            let target = e.lngLat.toArray();
             if (within(target, player, this.params.game.tolerance.target)) {
                 this.basemap.removeListeners();
                 removeClass(this.hint, 'pop');
@@ -103,23 +105,24 @@ class Level extends Page {
             } else {
                 if (!activeWrong) {
                     activeWrong = true;
-                    addClass(this.basemap.container, 'wrong');
+                    addClass(this.basemap.getContainer(), 'wrong');
                     wait(500, () => {
-                        removeClass(this.basemap.container, 'wrong');
+                        removeClass(this.basemap.getContainer(), 'wrong');
                         activeWrong = false;
                     })
                 }
             }
-        });
-
-        this.basemap.addListeners(this.hintListener, this.selectionListener);
+        }
+        this.basemap.addListener('click', selectionListener);
+        this.basemap.render();
         this.listening = true;
     }
 
     phase2(callback) {
         callback = callback || function () { };
+
         this.phase = 2;
-        this.basemap.setInteractions(false);
+        this.basemap.disableInteractions();
         this.basemap.createCharacters(this, this.level);
 
         this.canceler = makeDiv(null, 'level-cancel-button', this.params.svgs.helm);
@@ -323,7 +326,7 @@ class Level extends Page {
 
         removeClass(this.back, 'pop');
         if (this.hint) { removeClass(this.hint, 'pop'); }
-        this.basemap.setInteractions(false);
+        this.basemap.disableInteractions();
         this.basemap.removeListeners();
 
         const clearing = 4;
