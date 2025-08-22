@@ -117,18 +117,8 @@ class Application {
         if (!this.sliding) {
             this.sliding = true;
 
-            let center = this.basemap.getCenter();
-            let increment = this.basemap.getResolution() * 100;
-            let p = project('4326', '3857', center.toArray());
-            if (options.position === 'previous') { p[0] += increment; }
-            else { p[0] -= increment; }
-            let newcenter = project('3857', '4326', p);
-
-            this.basemap.animate({
-                center: newcenter,
-                duration: 500,
-                easing: easeInOutCubic
-            });
+            if (options.position === 'previous') { this.basemap.slide('right'); }
+            else { this.basemap.slide('left'); }
 
             this.page.setPosition(options.position);
             options.page.setPosition('current');

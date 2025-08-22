@@ -16,6 +16,7 @@ import Position from '../game/position.js';
 import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
 import Rabbits from '../layers/rabbits.js';
 import { project, toLongLat } from './analysis.js';
+import { easeInOutCubic } from '../utils/math.js';
 
 class Basemap {
     constructor(options, callback) {
@@ -159,6 +160,31 @@ class Basemap {
         options.zoom = o.zoom;
         this.animate(options, callback);
     }
+
+    slide(direction, callback) {
+        let center = this.getCenter();
+        let increment = this.getResolution() * 100;
+
+        let p = project('4326', '3857', center.toArray());
+        if (direction === 'right') { p[0] += increment; }
+        else { p[0] -= increment; }
+
+        let newcenter = project('3857', '4326', p);
+
+        this.animate({
+            center: newcenter,
+            duration: 500,
+            easing: easeInOutCubic
+        }, callback);
+    }
+
+
+
+
+
+
+
+
 
     isVisible(position, padding = 50) {
         let visible = false;
@@ -338,6 +364,17 @@ class Basemap {
         } else { ++cleared }
         if (cleared === clearing) { callback(); }
     }
+
+
+
+
+
+
+
+
+
+
+
 
     async addSprites(sprites) {
         for (let name in sprites) {
