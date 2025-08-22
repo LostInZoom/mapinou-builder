@@ -339,44 +339,74 @@ class Basemap {
         if (cleared === clearing) { callback(); }
     }
 
-    async loadSprites() {
-        for (let i = 0; i < this.spritesheets.length; i++) {
-            const name = this.spritesheets[i];
-
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.src = './sprites/' + name + '.png';
-
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-            });
-
-            let json = await fetch('./sprites/' + name + '.json');
-            let data = await json.json();
-
-            console.log(data);
-
-            for (const key in data) {
-                const icon = data[key];
-                const canvas = document.createElement('canvas');
-                canvas.width = icon.width;
-                canvas.height = icon.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(
-                    img,
-                    icon.x, icon.y, icon.width, icon.height,
-                    0, 0, icon.width, icon.height
-                );
-                const bitmap = await createImageBitmap(canvas);
-                this.map.addImage(`${name}:${key}`, bitmap, {
-                    x: icon.x,
-                    y: icon.y,
-                    width: icon.width,
-                    height: icon.height,
-                    pixelRatio: icon.pixelRatio
-                });
+    async addSprites(sprites) {
+        for (let name in sprites) {
+            for (let i = 0; i < sprites[name].length; i++) {
+                const s = sprites[name][i];
+                const image = new Image();
+                image.src = s.image;
+                image.onload = async () => {
+                    if (!this.map.hasImage(s.name)) {
+                        this.map.addImage(s.name, image, s.properties);
+                    }
+                };
             }
+        }
+    }
+
+    async loadSprites() {
+        let s = JSON.parse(localStorage.getItem('sprites'));
+        if (s) {
+            this.addSprites(s);
+        } else {
+            let sprites = {};
+
+            for (let i = 0; i < this.spritesheets.length; i++) {
+                const name = this.spritesheets[i];
+                sprites[name] = [];
+
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = './sprites/' + name + '.png';
+
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                });
+
+                let json = await fetch('./sprites/' + name + '.json');
+                let data = await json.json();
+
+                for (const key in data) {
+                    const icon = data[key];
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = icon.width;
+                    canvas.height = icon.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(
+                        img,
+                        icon.x, icon.y, icon.width, icon.height,
+                        0, 0, icon.width, icon.height
+                    );
+
+                    let sprite = {
+                        name: `${name}:${key}`,
+                        image: canvas.toDataURL("image/png"),
+                        properties: {
+                            x: icon.x,
+                            y: icon.y,
+                            width: icon.width,
+                            height: icon.height,
+                            pixelRatio: icon.pixelRatio
+                        }
+                    }
+                    sprites[name].push(sprite);
+                }
+            }
+
+            localStorage.setItem('sprites', JSON.stringify(sprites));
+            this.addSprites(sprites);
         }
     }
 }
