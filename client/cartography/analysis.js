@@ -117,11 +117,26 @@ function toLongLat(coordinates) {
  * @returns {Array} - Random point coordinates.
  */
 function randomPointInCircle(center, radius) {
-    let angle = Math.random() * 2 * Math.PI;
-    let hypothenus = Math.sqrt(Math.random()) * radius;
-    let adjacent = Math.cos(angle) * hypothenus;
-    let opposite = Math.sin(angle) * hypothenus;
-    return [center[0] + adjacent, center[1] + opposite]
+    const pcenter = project('4326', '3857', center);
+    const angle = Math.random() * 2 * Math.PI;
+    const hypothenus = Math.sqrt(Math.random()) * radius;
+    const adjacent = Math.cos(angle) * hypothenus;
+    const opposite = Math.sin(angle) * hypothenus;
+    let point = [pcenter[0] + adjacent, pcenter[1] + opposite]
+    return project('3857', '4326', point);
 }
 
-export { buffer, bufferAroundPolygon, middle, within, project, angle, randomPointInCircle, toLongLat }
+function flatten(coordinates) {
+    const coords = [];
+    function rec(c) {
+        if (typeof c[0] === 'number' && typeof c[1] === 'number') {
+            coords.push(c);
+        } else {
+            c.forEach(flatten);
+        }
+    }
+    rec(coordinates);
+    return coords;
+}
+
+export { buffer, flatten, bufferAroundPolygon, middle, within, project, angle, randomPointInCircle, toLongLat }

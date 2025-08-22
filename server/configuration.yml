@@ -60,7 +60,7 @@ game:
     roaming: 20 # in px/s
     enemies: 10 # in px/s
   invulnerability: 3000
-  routing: 13.4
+  routing: 12.5
   lost: 'Revenez en arrière !'
 ###########################
 #### FORM DEFINITION ######
@@ -233,8 +233,6 @@ levels:
           10: Au nord de St-Sauveur le Vicomte
           11: Dans le village de Ste-Colombe
         enemies:
-          - [ -177699.2555626998, 6376894.565223834 ]
-          - [-183590.97961300143, 6380824.064745133]
           - [-1.5962995724863411,49.59770396257331]
           - [-1.6492258301283464,49.620577848469765]
           - [-1.5757475056945813,49.635431513095874]

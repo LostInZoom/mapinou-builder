@@ -15,7 +15,7 @@ import { Helpers } from '../layers/helpers.js';
 import Position from '../game/position.js';
 import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
 import Rabbits from '../layers/rabbits.js';
-import { project, toLongLat } from './analysis.js';
+import { flatten, project, toLongLat } from './analysis.js';
 import { easeInOutCubic } from '../utils/math.js';
 
 class Basemap {
@@ -24,7 +24,7 @@ class Basemap {
         this.options = options || {};
         this.params = options.app.options;
 
-        this.spritesheets = ['rabbits'];
+        this.spritesheets = ['rabbits', 'enemies'];
 
         this.layers = [];
         this.parent = this.options.parent;
@@ -163,6 +163,11 @@ class Basemap {
         return this.getContainer().offsetHeight;
     }
 
+    addLayer(layer) {
+        this.layers.push(layer);
+        this.map.addLayer(layer.layer);
+    }
+
     animate(options, callback) {
         callback = callback || function () { };
         this.map.easeTo(options);
@@ -231,6 +236,79 @@ class Basemap {
         return visible;
     }
 
+    createCharacters(level, options) {
+        this.rabbits = new Rabbits({
+            name: 'level-rabbits',
+            basemap: this
+        });
+
+        this.player = new Player({
+            level: level,
+            layer: this.rabbits,
+            color: 'white',
+            coordinates: options.player,
+            zIndex: 50
+        });
+        this.player.setOrientationFromCoordinates(options.target);
+
+        this.target = new Target({
+            level: level,
+            layer: this.rabbits,
+            colors: ['brown', 'sand', 'grey'],
+            color: 'random',
+            coordinates: options.target,
+            zIndex: 40
+        });
+
+        // // this.helpers = new Helpers({
+        // //     name: 'level-helpers',
+        // //     basemap: this,
+        // //     level: level,
+        // //     coordinates: options.helpers,
+        // //     minZoom: this.params.game.routing,
+        // //     zIndex: 30,
+        // // });
+
+        this.enemies = new Enemies({
+            name: 'level-enemies',
+            basemap: this,
+            level: level,
+            coordinates: options.enemies,
+            zIndex: 20,
+        });
+
+        this.enemies.setOrientationFromCoordinates(options.player);
+        this.enemies.orderByDistance(options.player);
+    }
+
+    getExtentForData() {
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+
+        this.layers.forEach(layer => {
+            const sourceId = this.map.getLayer(layer.getName()).source;
+            const source = this.map.getSource(sourceId);
+
+            if (source && source.type === 'geojson') {
+                const data = source._data;
+                if (!data) return;
+
+                data.features.forEach(f => {
+                    let coordinates = flatten(f.geometry.coordinates);
+                    coordinates.forEach(([lng, lat]) => {
+                        if (lng < minX) minX = lng;
+                        if (lat < minY) minY = lat;
+                        if (lng > maxX) maxX = lng;
+                        if (lat > maxY) maxY = lat;
+                    });
+                });
+            }
+        });
+        return [minX, minY, maxX, maxY];
+    }
+
+
+
 
 
 
@@ -253,47 +331,7 @@ class Basemap {
         this.layers = [];
     }
 
-    createCharacters(level, options) {
-        this.rabbits = new Rabbits({ basemap: this });
 
-        this.player = new Player({
-            basemap: this,
-            level: level,
-            layer: this.rabbits,
-            color: 'white',
-            coordinates: options.player,
-            zIndex: 50
-        });
-        this.player.setOrientation(options.target)
-
-        this.target = new Target({
-            basemap: this,
-            level: level,
-            layer: this.rabbits,
-            colors: ['brown', 'sand', 'grey'],
-            color: 'random',
-            coordinates: options.target,
-            zIndex: 40
-        });
-
-        // this.helpers = new Helpers({
-        //     basemap: this,
-        //     level: level,
-        //     coordinates: options.helpers,
-        //     minZoom: this.params.game.routing,
-        //     zIndex: 30,
-        // });
-
-        this.enemies = new Enemies({
-            basemap: this,
-            level: level,
-            coordinates: options.enemies,
-            zIndex: 20,
-        });
-
-        this.enemies.setOrientation(options.player);
-        this.enemies.distanceOrder(options.player);
-    }
 
     activateMovement(callback) {
         callback = callback || function () { };
@@ -323,14 +361,7 @@ class Basemap {
         this.addListeners(movement, routing);
     }
 
-    getExtentForData() {
-        let extent;
-        this.layers.forEach((layer) => {
-            if (extent === undefined) { extent = layer.getSource().getExtent() }
-            else { extent = extend(extent, layer.getSource().getExtent()) }
-        });
-        return extent;
-    }
+
 
     makeRoutable(callback) {
         callback = callback || function () { };

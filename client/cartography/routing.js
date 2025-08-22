@@ -4,7 +4,6 @@
  */
 
 import { ajaxGet } from "../utils/ajax.js";
-import { project } from "./analysis.js";
 
 class Router {
     constructor(options) {
@@ -16,15 +15,13 @@ class Router {
     }
 
     calculateRoute(target, callback) {
-        callback = callback || function() {};
-        const origin = project('3857', '4326', this.position);
-        const destination = project('3857', '4326', target);
+        callback = callback || function () { };
         let url = 'https://data.geopf.fr/navigation/itineraire?'
             + 'resource=bdtopo-osrm'
             + '&profile=pedestrian'
             + '&optimization=shortest'
-            + '&start='+origin[0]+','+origin[1]
-            + '&end='+destination[0]+','+destination[1]
+            + `&start=${this.position[0]}, ${this.position[1]}`
+            + `&end=${target[0]}, ${target[1]}`
             + '&geometryFormat=geojson'
 
         ajaxGet(url, (route) => {

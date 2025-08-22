@@ -12,58 +12,65 @@ import { getColorsByClassNames } from "../utils/parse.js";
 class Enemy extends Character {
     constructor(options) {
         super(options);
-        this.frameSize = 64;
+        this.size = 64;
+        this.state = options.state || 'idle';
+        this.orientation = options.orientation || 'south';
+
+        this.feature.properties.state = this.state;
+        this.feature.properties.orientation = this.orientation;
+        this.feature.properties.frame = this.frame;
+        this.feature.properties.scale = this.scale;
 
         let colors = getColorsByClassNames('enemies-map', 'enemies-map-transparent');
 
-        let sizeArea = this.params.game.tolerance.enemies;
-        this.width1 = 50;
-        this.width2 = 10;
+        // let sizeArea = this.params.game.tolerance.enemies;
+        // this.width1 = 50;
+        // this.width2 = 10;
 
-        let b1 = buffer(this.coordinates, sizeArea - this.width1);
-        let coords1 = b1.getLinearRings()[0].getCoordinates();
-        this.border1 = new Feature({ geometry: bufferAroundPolygon(coords1, this.width1) });
-        this.style1 = new Style({
-            fill: new Fill({ color: colors['enemies-map-transparent'] })
-        });
-        this.border1.setStyle(this.style1);
+        // let b1 = buffer(this.coordinates, sizeArea - this.width1);
+        // let coords1 = b1.getLinearRings()[0].getCoordinates();
+        // this.border1 = new Feature({ geometry: bufferAroundPolygon(coords1, this.width1) });
+        // this.style1 = new Style({
+        //     fill: new Fill({ color: colors['enemies-map-transparent'] })
+        // });
+        // this.border1.setStyle(this.style1);
 
-        let b2 = buffer(this.coordinates, sizeArea - this.width2);
-        let coords2 = b2.getLinearRings()[0].getCoordinates();
-        this.border2 = new Feature({ geometry: bufferAroundPolygon(coords2, this.width2) });
-        this.style2 = new Style({
-            fill: new Fill({ color: colors['enemies-map'] })
-        });
-        this.border2.setStyle(this.style2);
+        // let b2 = buffer(this.coordinates, sizeArea - this.width2);
+        // let coords2 = b2.getLinearRings()[0].getCoordinates();
+        // this.border2 = new Feature({ geometry: bufferAroundPolygon(coords2, this.width2) });
+        // this.style2 = new Style({
+        //     fill: new Fill({ color: colors['enemies-map'] })
+        // });
+        // this.border2.setStyle(this.style2);
 
-        this.area = new VectorLayer({
-            source: new VectorSource({
-                features: [this.border1, this.border2],
-            }),
-            zIndex: this.zIndex - 1,
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-            opacity: 0,
-        });
+        // this.area = new VectorLayer({
+        //     source: new VectorSource({
+        //         features: [this.border1, this.border2],
+        //     }),
+        //     zIndex: this.zIndex - 1,
+        //     updateWhileAnimating: true,
+        //     updateWhileInteracting: true,
+        //     opacity: 0,
+        // });
 
-        this.areaVisible = false;
+        // this.areaVisible = false;
 
-        this.layer.basemap.map.addLayer(this.area);
-        this.layer.basemap.layers.push(this.area);
+        // this.layer.basemap.map.addLayer(this.area);
+        // this.layer.basemap.layers.push(this.area);
 
-        this.listener = this.layer.basemap.map.on('postrender', () => {
-            let threshold = this.params.game.routing;
-            let zoom = this.layer.basemap.view.getZoom();
-            if (zoom >= threshold && !this.areaVisible) {
-                this.areaVisible = true;
-                this.revealArea();
-            }
-            else if (zoom < threshold && this.areaVisible) {
-                this.areaVisible = false;
-                this.hideArea();
-            }
-        });
-        this.layer.basemap.addListeners(this.listener);
+        // this.listener = this.layer.basemap.map.on('postrender', () => {
+        //     let threshold = this.params.game.routing;
+        //     let zoom = this.layer.basemap.view.getZoom();
+        //     if (zoom >= threshold && !this.areaVisible) {
+        //         this.areaVisible = true;
+        //         this.revealArea();
+        //     }
+        //     else if (zoom < threshold && this.areaVisible) {
+        //         this.areaVisible = false;
+        //         this.hideArea();
+        //     }
+        // });
+        // this.layer.basemap.addListeners(this.listener);
     }
 
     revealArea(callback) {
@@ -113,35 +120,15 @@ class Hunter extends Enemy {
     constructor(options) {
         super(options);
         this.orientable = false;
-        this.frameScale = 0.9;
+        this.framerate = 150;
+        this.framenumber = 5;
+        this.framescale = 0.9;
 
-        this.states = { idle: { line: 0, length: 5 } };
-        this.state = options.state || 'idle';
-        this.frameRate = 150;
-        this.frameOffset = 0;
+        this.feature.properties.type = 'hunter';
+        this.feature.properties.offset = this.offset;
 
-        this.offset = [
-            this.frameSize * this.framePosition,
-            this.frameOffset + this.frameSize * this.states[this.state].line
-        ]
-        this.feature.set('offset', this.offset);
-
+        this.layer.addCharacter(this);
         this.animateFrame();
-
-        // this.sprite = new Sprite({
-        //     type: 'dynamic',
-        //     layer: this.layer,
-        //     src: './sprites/hunter.png',
-        //     width: 64,
-        //     height: 64,
-        //     scale: 0.9,
-        //     anchor: [0.5, 0.8],
-        //     framerate: 150,
-        //     coordinates: this.coordinates,
-        //     states: this.states
-        // }, () => {
-        //     this.sprite.animate();
-        // });
     }
 }
 
@@ -149,42 +136,15 @@ class Snake extends Enemy {
     constructor(options) {
         super(options);
         this.orientable = true;
-        this.frameScale = 0.8;
-        this.frameOffset = 128;
+        this.framerate = 200;
+        this.framenumber = 3;
+        this.framescale = 0.8;
 
-        this.states = {
-            idle: {
-                north: { line: 0, length: 3 },
-                east: { line: 1, length: 3 },
-                south: { line: 2, length: 3 },
-                west: { line: 3, length: 3 },
-            }
-        }
-        this.state = options.state || 'idle';
-        this.frameRate = 200;
+        this.feature.properties.type = 'snake';
+        this.feature.properties.offset = this.offset;
 
-        this.offset = [
-            this.frameSize * this.framePosition,
-            this.frameOffset + this.frameSize * this.states[this.state].south.line
-        ]
-        this.feature.set('offset', this.offset);
-
+        this.layer.addCharacter(this);
         this.animateFrame();
-
-        // this.sprite = new Sprite({
-        //     type: 'dynamic',
-        //     layer: this.layer,
-        //     src: './sprites/snake.png',
-        //     width: 64,
-        //     height: 64,
-        //     scale: 0.85,
-        //     anchor: [0.5, 0.6],
-        //     framerate: 200,
-        //     coordinates: this.coordinates,
-        //     states: this.states
-        // }, () => {
-        //     this.sprite.animate();
-        // });
     }
 }
 
@@ -192,34 +152,15 @@ class Bird extends Enemy {
     constructor(options) {
         super(options);
         this.orientable = false;
-        this.states = { idle: { line: 0, length: 3 } };
-        this.state = options.state || 'idle';
-        this.frameRate = 200;
-        this.frameScale = 1;
-        this.frameOffset = 64;
+        this.framerate = 200;
+        this.framenumber = 3;
+        this.framescale = 1;
 
-        this.offset = [
-            this.frameSize * this.framePosition,
-            this.frameOffset + this.frameSize * this.states[this.state].line
-        ]
-        this.feature.set('offset', this.offset);
+        this.feature.properties.type = 'bird';
+        this.feature.properties.offset = this.offset;
 
+        this.layer.addCharacter(this);
         this.animateFrame();
-
-        // this.sprite = new Sprite({
-        //     type: 'dynamic',
-        //     layer: this.layer,
-        //     src: './sprites/bird.png',
-        //     width: 64,
-        //     height: 64,
-        //     scale: 1,
-        //     anchor: [0.5, 0.5],
-        //     framerate: 200,
-        //     coordinates: this.coordinates,
-        //     states: this.states
-        // }, () => {
-        //     this.sprite.animate();
-        // });
     }
 }
 

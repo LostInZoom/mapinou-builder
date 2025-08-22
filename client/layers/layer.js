@@ -10,8 +10,8 @@ class Layer {
         this.options = options || {};
 
         this.basemap = this.options.basemap;
+        this.name = this.options.name;
         this.params = this.basemap.options.app.options;
-        this.index = 0;
 
         this.zIndex = this.options.zIndex || 1;
         this.minZoom = this.options.minZoom || null;
@@ -28,7 +28,24 @@ class Layer {
                 features: this.features
             }
         };
-        this.layer = { type: 'symbol' };
+
+        this.basemap.map.addSource(this.name, this.source);
+
+        this.layer = {
+            id: this.name,
+            type: 'symbol',
+            source: this.name,
+            layout: {
+                'icon-size': ['get', 'scale'],
+                'icon-offset': ['get', 'offset'],
+                'icon-allow-overlap': true,
+                'icon-ignore-placement': true,
+            }
+        };
+    }
+
+    getName() {
+        return this.name;
     }
 
     getNumber() {
@@ -75,7 +92,7 @@ class Layer {
     }
 
     updateSource() {
-        const source = this.basemap.map.getSource(this.index);
+        const source = this.basemap.map.getSource(this.name);
         if (source) {
             source.setData({
                 type: 'FeatureCollection',

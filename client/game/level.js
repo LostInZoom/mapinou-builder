@@ -137,12 +137,12 @@ class Level extends Page {
             this.basemap.fit(this.dataExtent, {
                 duration: 500,
                 easing: inAndOut,
-                padding: [100, 50, 50, 50]
+                padding: { top: 100, bottom: 50, left: 50, right: 50 }
             }, () => {
                 this.basemap.target.spawn(() => {
                     this.basemap.enemies.spawn(1000, () => {
                         this.listening = true;
-                        this.basemap.setInteractions(true);
+                        this.basemap.enableInteractions();
 
                         // this.basemap.activateMovement(win => {
                         //     // Here, the level has been won

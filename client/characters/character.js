@@ -30,12 +30,15 @@ class Character {
         this.active = true;
         this.destroyed = false;
         this.animate = false;
+        this.moving = false;
 
         this.frame = this.options.frame || 0;
         this.framerate = this.options.framerate || 200;
         this.framescale = this.options.scale || 1;
+        this.framenumber = this.options.framenumber || 1;
         // Set the scale to zero because the character need to be spawned
         this.scale = 0;
+        this.offset = [0, 0];
 
         this.feature = {
             type: 'Feature',
@@ -69,13 +72,13 @@ class Character {
         return this.feature;
     }
 
-    getColor() {
-        return this.color;
+    getState() {
+        return this.state;
     }
 
-    setColor(color) {
-        this.color = color;
-        this.feature.properties.color = color;
+    setState(state) {
+        this.state = state;
+        this.feature.properties.state = state;
         this.layer.updateSource();
     }
 
@@ -96,19 +99,15 @@ class Character {
         else { this.setOrientation('east'); }
     }
 
+    setOrientationFromCoordinates(coordinates) {
+        if (this.orientable) {
+            this.setOrientationFromAngle(angle(this.coordinates, coordinates));
+        }
+    }
+
     setRandomOrientation() {
         let o = this.orientations[this.orientations.length * Math.random() | 0];
         this.setOrientation(o);
-    }
-
-    getState() {
-        return this.state;
-    }
-
-    setState(state) {
-        this.state = state;
-        this.feature.properties.state = state;
-        this.layer.updateSource();
     }
 
     getFrame() {
@@ -144,7 +143,7 @@ class Character {
     animateFrame() {
         if (this.active) {
             wait(this.framerate, () => {
-                this.setFrame((this.frame + 1) % 4);
+                this.setFrame((this.frame + 1) % this.framenumber);
                 requestAnimationFrame(() => {
                     this.animateFrame();
                 });

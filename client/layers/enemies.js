@@ -1,4 +1,4 @@
-import { distance } from "ol/coordinate.js";
+import * as turf from "@turf/turf";
 
 import { wait } from "../utils/dom.js";
 import { weightedRandom } from "../utils/math.js";
@@ -8,17 +8,15 @@ import { Bird, Hunter, Snake } from "../characters/enemy.js";
 class Enemies extends Layer {
     constructor(options) {
         super(options);
-
-        this.options = options || {};
-        this.params = this.options.basemap.params;
-
-        this.layer.setStyle({
-            'icon-src': './sprites/enemies.png',
-            'icon-offset': ['get', 'offset'],
-            'icon-size': [64, 64],
-            'icon-scale': ['get', 'scale'],
-            'z-index': 1
-        });
+        this.layer.layout['icon-image'] = [
+            'concat',
+            'enemies:',
+            ['get', 'type'], '_',
+            ['get', 'state'], '_',
+            ['get', 'orientation'], '_',
+            ['get', 'frame']
+        ]
+        this.basemap.addLayer(this);
 
         this.weights = [1, 1, 1];
         this.statespool = ['hunter', 'snake', 'bird'];
@@ -29,21 +27,21 @@ class Enemies extends Layer {
                 o.coordinates = coords;
                 o.layer = this;
                 let choice = weightedRandom(this.statespool, this.weights.slice());
-                if (choice === 'hunter') {
-                    new Hunter(o);
-                }
-                else if (choice === 'snake') {
-                    new Snake(o);
-                }
-                else if (choice === 'bird') {
-                    new Bird(o);
-                }
+                if (choice === 'hunter') { new Hunter(o); }
+                else if (choice === 'snake') { new Snake(o); }
+                else if (choice === 'bird') { new Bird(o); }
             });
         }
     }
 
-    setOrientation(coordinates) {
-        this.characters.forEach((enemy) => { enemy.setOrientation(coordinates); })
+    setOrientationFromCoordinates(coordinates) {
+        this.characters.forEach((enemy) => { enemy.setOrientationFromCoordinates(coordinates); })
+    }
+
+    orderByDistance(coordinates) {
+        this.characters = this.characters.sort((a, b) => {
+            return turf.distance(a.getCoordinates(), coordinates) - turf.distance(b.getCoordinates(), coordinates);
+        });
     }
 
     spawn(duration, callback) {
@@ -73,15 +71,9 @@ class Enemies extends Layer {
         });
     }
 
-    roam() {
-        this.characters.forEach((enemy) => { enemy.roam(enemy.getCoordinates(), this.params.game.tolerance.enemies); })
-    }
-
-    distanceOrder(coordinates) {
-        this.characters = this.characters.sort((a, b) => {
-            return distance(a.getCoordinates(), coordinates) - distance(b.getCoordinates(), coordinates);
-        });
-    }
+    // roam() {
+    //     this.characters.forEach((enemy) => { enemy.roam(enemy.getCoordinates(), this.params.game.tolerance.enemies); })
+    // }
 }
 
 export default Enemies;

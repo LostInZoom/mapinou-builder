@@ -76,6 +76,7 @@ class Application {
                 });
 
                 this.rabbits = new Rabbits({
+                    name: 'menu-rabbits',
                     basemap: this.basemap
                 });
                 this.allowed = true;

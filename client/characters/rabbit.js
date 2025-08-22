@@ -1,13 +1,12 @@
 import { generateRandomInteger } from "../utils/math.js";
-import Sprite from "../cartography/sprite.js";
 import Character from "./character.js";
-import { wait } from "../utils/dom.js";
 
 class Rabbit extends Character {
     constructor(options) {
         super(options);
 
         this.speed = options.speed || 20;
+        this.framenumber = 4;
         this.colors = options.colors || ['white', 'sand', 'brown', 'grey'];
         this.color = options.color || 'white';
 
@@ -20,6 +19,7 @@ class Rabbit extends Character {
         this.statespool = ['move', 'graze', 'idle'];
 
         this.size = 52;
+        this.offset = [0, -10];
 
         this.state = options.state || 'idle';
         this.orientable = true;
@@ -30,9 +30,20 @@ class Rabbit extends Character {
         this.feature.properties.orientation = this.orientation;
         this.feature.properties.frame = this.frame;
         this.feature.properties.scale = this.scale;
+        this.feature.properties.offset = this.offset;
 
         this.layer.addCharacter(this);
         this.animateFrame();
+    }
+
+    getColor() {
+        return this.color;
+    }
+
+    setColor(color) {
+        this.color = color;
+        this.feature.properties.color = color;
+        this.layer.updateSource();
     }
 }
 
