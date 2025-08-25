@@ -45,7 +45,7 @@ class Levels extends Page {
             this.tiercontainer.append(this.tierprevious, this.tiercurrent, this.tierfollowing);
             this.container.append(this.tiercontainer);
 
-            let delay = 500;
+            let delay = 0;
 
             if (this.initState === 'slide') {
                 this.tiercontainer.offsetHeight;

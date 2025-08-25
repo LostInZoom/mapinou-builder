@@ -16,6 +16,7 @@ class Character {
         this.options = options || {};
 
         this.layer = this.options.layer;
+        this.app = this.layer.basemap.app;
         this.params = this.layer.params;
         this.orientations = ['north', 'south', 'east', 'west'];
 
@@ -151,6 +152,22 @@ class Character {
         }
     }
 
+    breathe() {
+        if (this.active) {
+            // Sinusoidal function to animate the scale
+            const base = 0.95;
+            const amplitude = 0.15;
+            const period = 1000;
+            const animate = (time) => {
+                const t = (time % period) / period;
+                const scale = base + amplitude * Math.sin(t * Math.PI * 2);
+                this.setScale(scale);
+                requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+        }
+    }
+
     spawn(callback) {
         callback = callback || function () { };
         this.animateScale({
@@ -213,12 +230,13 @@ class Character {
                     }
                 }
 
-                this.setScale(scale);
+                const interpolated = origin + (value - origin) * scale;
+                this.setScale(interpolated);
 
                 if (t < 1) {
                     requestAnimationFrame(animation);
                 } else {
-                    this.setScale(value);
+                    // this.setScale(value);
                     callback();
                 }
             };

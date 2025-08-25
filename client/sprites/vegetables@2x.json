@@ -1,0 +1,12 @@
+{
+    "leek": { "x": 0, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "cabbage": { "x": 64, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "chard": { "x": 128, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "broccoli": { "x": 192, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "radish": { "x": 256, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "turnip": { "x": 320, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "zucchini": { "x": 384, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "beet": { "x": 0, "y": 448, "width": 64, "height": 64, "pixelRatio": 1 },
+    "squash": { "x": 0, "y": 512, "width": 64, "height": 64, "pixelRatio": 1 },
+    "butternut": { "x": 0, "y": 576, "width": 64, "height": 64, "pixelRatio": 1 }
+}

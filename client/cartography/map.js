@@ -11,7 +11,7 @@ import { unByKey } from 'ol/Observable.js';
 import Enemies from '../layers/enemies.js';
 import Player from '../characters/player.js';
 import Target from '../characters/target.js';
-import { Helpers } from '../layers/helpers.js';
+import Helpers from '../layers/helpers.js';
 import Position from '../game/position.js';
 import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
 import Rabbits from '../layers/rabbits.js';
@@ -24,7 +24,7 @@ class Basemap {
         this.options = options || {};
         this.params = options.app.options;
 
-        this.spritesheets = ['rabbits', 'enemies'];
+        this.spritesheets = ['rabbits', 'enemies', 'vegetables'];
 
         this.layers = [];
         this.parent = this.options.parent;
@@ -241,48 +241,43 @@ class Basemap {
     }
 
     createCharacters(level, options) {
+        this.enemies = new Enemies({
+            name: 'level-enemies',
+            basemap: this,
+            level: level,
+            coordinates: options.enemies
+        });
+        this.enemies.setOrientationFromCoordinates(options.player);
+        this.enemies.orderByDistance(options.player);
+
+        this.helpers = new Helpers({
+            name: 'level-helpers',
+            basemap: this,
+            level: level,
+            coordinates: options.helpers,
+            minZoom: this.params.game.routing
+        });
+
         this.rabbits = new Rabbits({
             name: 'level-rabbits',
             basemap: this
         });
-
-        this.player = new Player({
-            level: level,
-            layer: this.rabbits,
-            color: 'white',
-            coordinates: options.player,
-            zIndex: 50
-        });
-        this.player.setOrientationFromCoordinates(options.target);
 
         this.target = new Target({
             level: level,
             layer: this.rabbits,
             colors: ['brown', 'sand', 'grey'],
             color: 'random',
-            coordinates: options.target,
-            zIndex: 40
+            coordinates: options.target
         });
 
-        // // this.helpers = new Helpers({
-        // //     name: 'level-helpers',
-        // //     basemap: this,
-        // //     level: level,
-        // //     coordinates: options.helpers,
-        // //     minZoom: this.params.game.routing,
-        // //     zIndex: 30,
-        // // });
-
-        this.enemies = new Enemies({
-            name: 'level-enemies',
-            basemap: this,
+        this.player = new Player({
             level: level,
-            coordinates: options.enemies,
-            zIndex: 20,
+            layer: this.rabbits,
+            color: 'white',
+            coordinates: options.player
         });
-
-        this.enemies.setOrientationFromCoordinates(options.player);
-        this.enemies.orderByDistance(options.player);
+        this.player.setOrientationFromCoordinates(options.target);
     }
 
     getExtentForData() {
