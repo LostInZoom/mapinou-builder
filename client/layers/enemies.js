@@ -136,10 +136,6 @@ class Enemies extends Layer {
             });
         });
     }
-
-    // roam() {
-    //     this.characters.forEach((enemy) => { enemy.roam(enemy.getCoordinates(), this.params.game.tolerance.enemies); })
-    // }
 }
 
 export default Enemies;

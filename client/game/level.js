@@ -143,14 +143,12 @@ class Level extends Page {
                     this.basemap.enemies.spawn(1000, () => {
                         this.listening = true;
                         this.basemap.enableInteractions();
-
-                        // this.basemap.activateMovement(win => {
-                        //     // Here, the level has been won
-                        //     if (win) {
-                        //         this.basemap.setInteractions(false);
-                        //         this.clear(callback);
-                        //     }
-                        // });
+                        this.basemap.enableMovement(win => {
+                            if (win) {
+                                this.basemap.disableInteractions();
+                                this.clear(callback);
+                            }
+                        });
                     });
                 });
             })

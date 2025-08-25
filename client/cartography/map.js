@@ -97,7 +97,7 @@ class Basemap {
         });
 
         this.listeners = [];
-        this.routable = true;
+        this.routable = false;
 
         this.maskcontainer = makeDiv(null, 'map-mask-container');
         this.east = makeDiv(null, 'map-mask meridian east');
@@ -306,6 +306,55 @@ class Basemap {
         return [minX, minY, maxX, maxY];
     }
 
+    enableMovement(callback) {
+        callback = callback || function () { };
+
+        const movement = (e) => {
+            if (this.routable) {
+                let destination = e.lngLat.toArray();
+                this.player.travel(destination, callback);
+            }
+        }
+        this.addListener('click', movement);
+
+        this.position = new Position({
+            basemap: this,
+            player: this.player
+        });
+
+        const routing = () => {
+            if (this.getZoom() >= this.params.game.routing && !this.routable) {
+                this.makeRoutable();
+            }
+            else if (this.getZoom() < this.params.game.routing && this.routable) {
+                this.makeUnroutable();
+            }
+            this.position.update();
+        }
+        this.addListener('render', routing);
+    }
+
+    makeRoutable(callback) {
+        callback = callback || function () { };
+        if (this.routable) { callback(); }
+        else {
+            this.routable = true;
+            addClass(this.maskcontainer, 'routable');
+            wait(500, callback);
+        }
+    }
+
+    makeUnroutable(callback) {
+        callback = callback || function () { };
+        if (!this.routable) { callback(); }
+        else {
+            this.routable = false;
+            removeClass(this.maskcontainer, 'routable');
+            wait(500, callback);
+        }
+    }
+
+
 
 
 
@@ -331,56 +380,6 @@ class Basemap {
     }
 
 
-
-    activateMovement(callback) {
-        callback = callback || function () { };
-
-        let movement = this.map.on('click', () => {
-            if (this.routable) {
-                let destination = this.map.getEventCoordinate(event);
-                this.player.travel(destination, callback);
-            }
-        });
-
-        this.position = new Position({
-            basemap: this,
-            player: this.player
-        });
-        let routing = this.map.on('postrender', () => {
-            // Handle the routability of the map
-            if (this.view.getZoom() >= this.params.game.routing && !this.routable) {
-                this.makeRoutable();
-            }
-            else if (this.view.getZoom() < this.params.game.routing && this.routable) {
-                this.makeUnroutable();
-            }
-            this.position.update();
-        });
-
-        this.addListeners(movement, routing);
-    }
-
-
-
-    makeRoutable(callback) {
-        callback = callback || function () { };
-        if (this.routable) { callback(); }
-        else {
-            this.routable = true;
-            addClass(this.maskcontainer, 'routable');
-            wait(500, callback);
-        }
-    }
-
-    makeUnroutable(callback) {
-        callback = callback || function () { };
-        if (!this.routable) { callback(); }
-        else {
-            this.routable = false;
-            removeClass(this.maskcontainer, 'routable');
-            wait(500, callback);
-        }
-    }
 
     clear(callback) {
         callback = callback || function () { };
