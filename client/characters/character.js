@@ -30,7 +30,8 @@ class Character {
 
         this.active = true;
         this.destroyed = false;
-        this.animate = false;
+        this.scaleAnimation = false;
+        this.frameAnimation = false;
         this.moving = false;
 
         this.frame = this.options.frame || 0;
@@ -58,6 +59,18 @@ class Character {
         do { id = crypto.randomUUID(); }
         while (this.layer.getFeatures().some(c => c.properties.id === id));
         return id;
+    }
+
+    activate() {
+        this.active = true;
+    }
+
+    deactivate() {
+        this.active = false;
+    }
+
+    isActive() {
+        return this.active;
     }
 
     destroy() {
@@ -94,10 +107,16 @@ class Character {
     }
 
     setOrientationFromAngle(angle) {
-        if (angle >= Math.PI / 4 && angle <= 3 * Math.PI / 4) { this.setOrientation('north'); }
-        else if (angle > 3 * Math.PI / 4 && angle < 5 * Math.PI / 4) { this.setOrientation('west'); }
-        else if (angle >= 5 * Math.PI / 4 && angle <= 7 * Math.PI / 4) { this.setOrientation('south'); }
-        else { this.setOrientation('east'); }
+        angle = (angle + 2 * Math.PI) % (2 * Math.PI);
+        if (angle >= Math.PI / 4 && angle < 3 * Math.PI / 4) {
+            this.setOrientation('north');
+        } else if (angle >= 3 * Math.PI / 4 && angle < 5 * Math.PI / 4) {
+            this.setOrientation('west');
+        } else if (angle >= 5 * Math.PI / 4 && angle < 7 * Math.PI / 4) {
+            this.setOrientation('south');
+        } else {
+            this.setOrientation('east');
+        }
     }
 
     setOrientationFromCoordinates(coordinates) {
@@ -141,13 +160,24 @@ class Character {
         this.layer.updateSource();
     }
 
-    animateFrame() {
+    stopFrameAnimation() {
+        this.frameAnimation = false;
+    }
+
+    animateFrame(callback) {
+        this.frameAnimation = true;
         if (this.active) {
             wait(this.framerate, () => {
-                this.setFrame((this.frame + 1) % this.framenumber);
-                requestAnimationFrame(() => {
-                    this.animateFrame();
-                });
+                if (this.frameAnimation) {
+                    this.setFrame((this.frame + 1) % this.framenumber);
+                    requestAnimationFrame(() => {
+                        if (this.getFrame() === (this.framenumber - 1) && typeof callback === 'function') {
+                            callback();
+                        } else {
+                            this.animateFrame(callback);
+                        }
+                    });
+                }
             });
         }
     }
@@ -190,8 +220,13 @@ class Character {
         return this.spawnDuration;
     }
 
+    stopScaleAnimation() {
+        this.scaleAnimation = false;
+    }
+
     animateScale(options, callback) {
         callback = callback || function () { };
+        this.scaleAnimation = true;
 
         if (this.active) {
             const origin = this.scale;
@@ -204,48 +239,49 @@ class Character {
 
             const start = performance.now();
             const animation = (time) => {
-                const elapsed = time - start;
-                const t = Math.min(Math.max(elapsed / duration, 0), 1);
-                let scale;
-                const hasOvershoot = Math.abs(overshoot - 1) > 0.0001;
-                if (origin < value) {
-                    if (!hasOvershoot) {
-                        scale = easing(t);
-                    } else if (t < overshootRatio) {
-                        const t1 = t / overshootRatio;
-                        scale = easing(t1) * overshoot;
+                if (this.scaleAnimation) {
+                    const elapsed = time - start;
+                    const t = Math.min(Math.max(elapsed / duration, 0), 1);
+                    let scale;
+                    const hasOvershoot = Math.abs(overshoot - 1) > 0.0001;
+                    if (origin < value) {
+                        if (!hasOvershoot) {
+                            scale = easing(t);
+                        } else if (t < overshootRatio) {
+                            const t1 = t / overshootRatio;
+                            scale = easing(t1) * overshoot;
+                        } else {
+                            const t2 = (t - overshootRatio) / (1 - overshootRatio);
+                            scale = overshoot - easing(t2) * (overshoot - 1);
+                        }
                     } else {
-                        const t2 = (t - overshootRatio) / (1 - overshootRatio);
-                        scale = overshoot - easing(t2) * (overshoot - 1);
+                        if (!hasOvershoot) {
+                            scale = 1 - easing(t);
+                        } else if (t < (1 - overshootRatio)) {
+                            const t1 = t / (1 - overshootRatio);
+                            scale = 1 + easing(t1) * (overshoot - 1);
+                        } else {
+                            const t2 = (t - (1 - overshootRatio)) / overshootRatio;
+                            scale = overshoot * (1 - easing(t2));
+                        }
                     }
-                } else {
-                    if (!hasOvershoot) {
-                        scale = 1 - easing(t);
-                    } else if (t < (1 - overshootRatio)) {
-                        const t1 = t / (1 - overshootRatio);
-                        scale = 1 + easing(t1) * (overshoot - 1);
+
+                    const interpolated = origin + (value - origin) * scale;
+                    this.setScale(interpolated);
+
+                    if (t < 1) {
+                        requestAnimationFrame(animation);
                     } else {
-                        const t2 = (t - (1 - overshootRatio)) / overshootRatio;
-                        scale = overshoot * (1 - easing(t2));
+                        this.setScale(value);
+                        this.scaleAnimation = false;
+                        callback();
                     }
-                }
-
-                const interpolated = origin + (value - origin) * scale;
-                this.setScale(interpolated);
-
-                if (t < 1) {
-                    requestAnimationFrame(animation);
-                } else {
-                    // this.setScale(value);
-                    callback();
                 }
             };
 
             requestAnimationFrame(animation);
         }
     }
-
-
 
 
 

@@ -17,6 +17,7 @@ import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
 import Rabbits from '../layers/rabbits.js';
 import { flatten, project, toLongLat } from './analysis.js';
 import { easeInOutCubic } from '../utils/math.js';
+import Flowers from '../layers/flowers.js';
 
 class Basemap {
     constructor(options, callback) {
@@ -24,7 +25,7 @@ class Basemap {
         this.options = options || {};
         this.params = options.app.options;
 
-        this.spritesheets = ['rabbits', 'enemies', 'vegetables'];
+        this.spritesheets = ['rabbits', 'enemies', 'vegetables', 'flower'];
 
         this.layers = [];
         this.parent = this.options.parent;
@@ -278,6 +279,11 @@ class Basemap {
             coordinates: options.player
         });
         this.player.setOrientationFromCoordinates(options.target);
+
+        this.flowers = new Flowers({
+            name: 'level-flowers',
+            basemap: this
+        });
     }
 
     getExtentForData() {
@@ -312,7 +318,9 @@ class Basemap {
         const movement = (e) => {
             if (this.routable) {
                 let destination = e.lngLat.toArray();
-                this.player.travel(destination, callback);
+                if (this.isVisible(this.player.getCoordinates(), 0)) {
+                    this.player.travel(destination, callback);
+                }
             }
         }
         this.addListener('click', movement);

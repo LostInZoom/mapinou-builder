@@ -4,38 +4,36 @@ import Character from "./character";
 class Flower extends Character {
     constructor(options) {
         super(options);
+
         this.level = options.level;
         this.orientable = false;
 
-        this.states = {
-            idle: { south: { line: 1, length: 1 } },
-            grow: { south: { line: 0, length: 6 } },
-            decay: { south: { line: 2, length: 4 } }
-        }
+        this.framerate = 50;
+        this.framenumber = 5;
+        this.state = 'grow';
+        this.scale = 1;
 
-        this.sprite = new Sprite({
-            type: 'dynamic',
-            layer: this.layer,
-            src: './sprites/flower.png',
-            width: 32,
-            height: 32,
-            scale: 1,
-            anchor: [0.5, 0.9],
-            loop: false,
-            framerate: 50,
-            coordinates: this.coordinates,
-            states: this.states,
-            state: 'grow'
-        }, () => {
-            this.sprite.animate();
+        this.size = 32;
+        this.offset = [0, -10];
+
+        this.feature.properties.state = this.state;
+        this.feature.properties.frame = this.frame;
+        this.feature.properties.scale = this.scale;
+        this.feature.properties.offset = this.offset;
+
+        this.layer.addCharacter(this);
+        this.animateFrame(() => {
+            this.setFrame(0);
+            this.setState('live');
+            this.framenumber = 1;
         });
-        this.sprite.setOpacity(1);
     }
 
     decay() {
-        this.sprite.freeze();
-        this.sprite.setState('decay');
-        this.sprite.animate(() => {
+        this.stopFrameAnimation();
+        this.setState('decay');
+        this.framenumber = 4;
+        this.animateFrame(() => {
             this.destroy();
         });
     }

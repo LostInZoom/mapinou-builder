@@ -58,7 +58,7 @@ class Levels extends Page {
                 });
             }
 
-            delay += 500;
+            delay += 200;
 
             let animation = this.initState === 'slide' ? false : true;
 

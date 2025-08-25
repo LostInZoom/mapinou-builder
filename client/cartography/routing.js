@@ -20,8 +20,8 @@ class Router {
             + 'resource=bdtopo-osrm'
             + '&profile=pedestrian'
             + '&optimization=shortest'
-            + `&start=${this.position[0]}, ${this.position[1]}`
-            + `&end=${target[0]}, ${target[1]}`
+            + `&start=${this.position[0]},${this.position[1]}`
+            + `&end=${target[0]},${target[1]}`
             + '&geometryFormat=geojson'
 
         ajaxGet(url, (route) => {

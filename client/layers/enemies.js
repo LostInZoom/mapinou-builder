@@ -136,6 +136,37 @@ class Enemies extends Layer {
             });
         });
     }
+
+    handle(position) {
+        for (let i = 0; i < this.characters.length; i++) {
+            let enemy = this.characters[i];
+            enemy.setOrientationFromCoordinates(position);
+        }
+
+        // // Retrieve the enemies oustide and inside the visibible range
+        // [inside, outside] = this.getWithin(this.layer.basemap.enemies.getEnemies(), this.params.game.tolerance.enemies);
+        // // Treating enemies within range
+        // inside.forEach(enemy => {
+        //     // Check if the enemy has not already striked
+        //     if (!this.closeEnemies.includes(enemy)) {
+        //         this.closeEnemies.push(enemy);
+        //         if (!this.isInvulnerable()) {
+        //             this.level.score.addModifier('enemies');
+        //             this.makeInvulnerable(this.params.game.invulnerability);
+        //         }
+        //     }
+        // });
+        // // Treating enemies outside range
+        // outside.forEach(enemy => {
+        //     // If it was in close enemies
+        //     if (this.closeEnemies.includes(enemy)) {
+        //         // Remove it from the list
+        //         let i = this.closeEnemies.indexOf(enemy);
+        //         if (i > -1) { this.closeEnemies.splice(i, 1); }
+        //     }
+        // });
+
+    }
 }
 
 export default Enemies;

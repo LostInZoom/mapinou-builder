@@ -1,3 +1,4 @@
+import { within } from "../cartography/analysis";
 import Helper from "../characters/helper";
 import Layer from "./layer";
 
@@ -41,16 +42,25 @@ class Helpers extends Layer {
         });
     }
 
-    getHelpers() {
-        return this.helpers;
-    }
-
-    getActiveHelpers() {
-        let a = [];
-        this.helpers.forEach((helper) => {
-            if (helper.isActive()) { a.push(helper); }
-        });
-        return a;
+    handle(position) {
+        for (let i = 0; i < this.characters.length; i++) {
+            let helper = this.characters[i];
+            if (within(position, helper.getCoordinates(), this.params.game.visibility.helpers)) {
+                if (helper.isVisible()) { helper.hide(); }
+            }
+            else {
+                if (!helper.isVisible()) {
+                    helper.reveal(() => {
+                        helper.breathe();
+                    });
+                }
+                // Consume them if within consuming range
+                if (within(position, helper.getCoordinates(), this.params.game.tolerance.helpers)) {
+                    helper.consume();
+                    this.level.score.addModifier('helpers');
+                }
+            }
+        }
     }
 }
 

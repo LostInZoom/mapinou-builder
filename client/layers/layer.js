@@ -60,6 +60,14 @@ class Layer {
         }
     }
 
+    getActiveCharacters() {
+        let actives = [];
+        this.characters.forEach(c => {
+            if (c.isActive()) { actives.push(c); }
+        });
+        return actives;
+    }
+
     addCharacter(character) {
         this.characters.push(character);
         this.addFeature(character.getFeature());

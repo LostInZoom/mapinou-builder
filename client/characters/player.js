@@ -1,3 +1,5 @@
+import * as turf from "@turf/turf";
+
 import { LineString } from "ol/geom.js";
 
 import { angle, project, within } from "../cartography/analysis.js";
@@ -39,34 +41,22 @@ class Player extends Rabbit {
         });
     }
 
-    // stop() {
-    //     // Remove the listener
-    //     if (this.listener) { unByKey(this.listener); }
+    stop() {
+        if (this.flowers.length > 0) {
+            this.flowers.shift().decay();
+        }
+        // Increment the traveled distance
+        this.travelled += this.distance;
 
-    //     if (this.flowers.length > 0) {
-    //         this.flowers.shift().decay();
-    //     }
+        // Set router position
+        this.router.setPosition(this.getCoordinates());
+        this.setState('idle');
 
-    //     // Redraw the clone to avoid a missing frame
-    //     this.context.setStyle(this.sprite.style);
-    //     this.context.drawGeometry(this.clone);
-    //     // Set the sprite coordinates to the destination
-    //     this.sprite.setCoordinates(this.position);
+        this.level.deactivateMovementButton();
+        this.level.score.setState('default');
 
-    //     // Increment the traveled distance
-    //     this.travelled += this.distance;
-
-    //     // Set router position
-    //     this.router.setPosition(this.clone.getCoordinates());
-
-    //     this.sprite.resetGeometry();
-    //     this.sprite.setState('idle');
-
-    //     this.level.deactivateMovementButton();
-    //     this.level.score.setState('default');
-
-    //     this.traveling = false;
-    // }
+        this.traveling = false;
+    }
 
     move(route, callback) {
         callback = callback || function () { };
@@ -78,17 +68,18 @@ class Player extends Rabbit {
 
         // Retrieve the vertexes composing the calculated route
         let vertexes = route.geometry.coordinates;
+        const destination = vertexes[vertexes.length - 1];
 
         let flower = new Flower({
-            basemap: this.basemap,
             level: this.level,
-            coordinates: vertexes[vertexes.length - 1]
+            layer: this.layer.basemap.flowers,
+            coordinates: destination
         });
         this.flowers.push(flower);
 
         // Create the path line and calculate its length
-        const line = new LineString(vertexes);
-        const length = line.getLength();
+        const line = turf.lineString(vertexes);
+        const length = turf.length(line, { units: 'meters' });
 
         // Retrieve the time
         let lastTime = performance.now();
@@ -96,8 +87,24 @@ class Player extends Rabbit {
         // Get the speed in meters/second
         const speed = this.params.game.speed.travel / 3.6;
 
+        // Change the direction of the sprite according to its current movement
+        let a = angle(vertexes[0], vertexes[1]);
+        this.setOrientationFromAngle(a);
+
         // Start the distance counter
         this.distance = 0;
+
+        // index du segment courant
+        let segmentIndex = 0;
+        let segmentStart = vertexes[0];
+        let segmentEnd = vertexes[1];
+
+        // longueur de ce segment
+        let segmentLine = turf.lineString([segmentStart, segmentEnd]);
+        let segmentLength = turf.length(segmentLine, { units: 'meters' });
+
+        // orientation fixe pour ce segment
+        this.setOrientationFromAngle(angle(segmentStart, segmentEnd));
 
         const animation = (time) => {
             // Calculate the elapsed time in seconds
@@ -108,174 +115,45 @@ class Player extends Rabbit {
             lastTime = time;
 
             // If the travelled distance is below the length of the route, continue the animation
-            if (distance < length) {
-                // Calculate the position of the point along the route line
-                this.position = line.getCoordinateAt(this.distance / length);
+            if (this.distance <= length) {
+                if (this.distance > 0) {
+                    // Calculate the position of the point along the route line
+                    this.position = turf.along(line, this.distance, { units: 'meters' }).geometry.coordinates;
 
-                // Change the direction of the sprite according to its current movement
-                let a = angle(this.getCoordinates(), this.position);
-                this.setDirectionFromAngle(a);
+                    // distance parcourue dans le segment actuel
+                    const segmentTraveled = turf.distance(segmentStart, this.position, { units: 'meters' });
 
-                // Retrieve the helpers oustide and inside the visibible range
-                let [inside, outside] = this.getWithin(this.layer.basemap.helpers.getActiveHelpers(), this.params.game.visibility.helpers);
-                // Treating helpers outside the visible rande
-                outside.forEach((helper) => {
-                    // If they are visible, hide them
-                    if (helper.isVisible()) { helper.hide(); }
-                });
-                // Treating helpers inside the visible range
-                inside.forEach((helper) => {
-                    // Reveal them if they are hidden
-                    if (!helper.isVisible()) {
-                        helper.reveal(() => { helper.breathe(); });
+                    // si on a dépassé la fin du segment -> passer au suivant
+                    if (segmentTraveled >= segmentLength && segmentIndex < vertexes.length - 2) {
+                        segmentIndex++;
+                        segmentStart = vertexes[segmentIndex];
+                        segmentEnd = vertexes[segmentIndex + 1];
+                        segmentLine = turf.lineString([segmentStart, segmentEnd]);
+                        segmentLength = turf.length(segmentLine, { units: 'meters' });
+                        this.setOrientationFromAngle(angle(segmentStart, segmentEnd));
                     }
-                    // Consume them if within consuming range
-                    if (within(this.getCoordinates(), helper.getCoordinates(), this.params.game.tolerance.helpers)) {
-                        helper.consume();
-                        this.level.score.addModifier('helpers');
+
+                    // this.setOrientationFromAngle(angle(this.getCoordinates(), this.position));
+
+                    // this.layer.basemap.helpers.handle(this.getCoordinates());
+                    // this.layer.basemap.enemies.handle(this.getCoordinates());
+
+                    this.setCoordinates(this.position);
+                    // If target is in range, win the level
+                    if (within(this.position, this.layer.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
+                        this.stop();
+                        callback(true);
                     }
-                });
-
-                // Retrieve the enemies oustide and inside the visibible range
-                [inside, outside] = this.getWithin(this.layer.basemap.enemies.getEnemies(), this.params.game.tolerance.enemies);
-                // Treating enemies within range
-                inside.forEach(enemy => {
-                    // Check if the enemy has not already striked
-                    if (!this.closeEnemies.includes(enemy)) {
-                        this.closeEnemies.push(enemy);
-                        if (!this.isInvulnerable()) {
-                            this.level.score.addModifier('enemies');
-                            this.makeInvulnerable(this.params.game.invulnerability);
-                        }
-                    }
-                });
-                // Treating enemies outside range
-                outside.forEach(enemy => {
-                    // If it was in close enemies
-                    if (this.closeEnemies.includes(enemy)) {
-                        // Remove it from the list
-                        let i = this.closeEnemies.indexOf(enemy);
-                        if (i > -1) { this.closeEnemies.splice(i, 1); }
-                    }
-                });
-
-                this.setCoordinates(this.position);
-
-                // If enemies are present, orient them towards the player
-                if (this.layer.basemap.enemies) {
-                    this.layer.basemap.enemies.setOrientation(this.position);
-                }
-
-                // If target is in range, win the level
-                if (within(this.position, this.layer.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
-                    this.stop();
-                    callback(true);
                 }
                 requestAnimationFrame(animation);
             }
             else {
-                this.setCoordinates(destination);
+                this.setCoordinates(vertexes[vertexes.length - 1]);
+                this.stop();
                 callback();
             }
         };
         requestAnimationFrame(animation);
-
-        // // This listener is executed at each layer rendering
-        // this.listener = this.layer.on('postrender', (event) => {
-        //     // Get the time of the current frame
-        //     const time = event.frameState.time;
-        //     this.context = getVectorContext(event);
-
-        //     // Calculate the elapsed time in seconds
-        //     const elapsed = (time - lastTime) / 1000;
-        //     // Calculate the distance traveled depending on the elapsed time and the speed
-        //     this.distance = this.distance + (elapsed * speed);
-        //     // Set the previous time as the current one
-        //     lastTime = time;
-
-        //     // If the travelled distance is below the length of the route, continue the animation
-        //     if (this.distance < length) {
-        //         // Calculate the position of the point along the route line
-        //         this.position = line.getCoordinateAt(this.distance / length);
-
-        //         // Change the direction of the sprite according to its current movement
-        //         let a = angle(this.clone.getCoordinates(), this.position);
-        //         this.sprite.setDirectionFromAngle(a);
-
-        //         // Update the sprite coordinates
-        //         this.sprite.setCoordinates(this.position);
-
-        //         // Retrieve the helpers oustide and inside the visibible range
-        //         let [inside, outside] = this.getWithin(this.basemap.helpers.getActiveHelpers(), this.params.game.visibility.helpers);
-        //         // Treating helpers outside the visible rande
-        //         outside.forEach((helper) => {
-        //             // If they are visible, hide them
-        //             if (helper.isVisible()) { helper.hide(); }
-        //         });
-        //         // Treating helpers inside the visible range
-        //         inside.forEach((helper) => {
-        //             // Reveal them if they are hidden
-        //             if (!helper.isVisible()) {
-        //                 helper.reveal(() => { helper.breathe(); });
-        //             }
-        //             // Consume them if within consuming range
-        //             if (within(this.getCoordinates(), helper.getCoordinates(), this.params.game.tolerance.helpers)) {
-        //                 helper.consume();
-        //                 this.level.score.addModifier('helpers');
-        //             }
-        //         });
-
-        //         // Retrieve the enemies oustide and inside the visibible range
-        //         [inside, outside] = this.getWithin(this.basemap.enemies.getEnemies(), this.params.game.tolerance.enemies);
-        //         // Treating enemies within range
-        //         inside.forEach(enemy => {
-        //             // Check if the enemy has not already striked
-        //             if (!this.closeEnemies.includes(enemy)) {
-        //                 this.closeEnemies.push(enemy);
-        //                 if (!this.isInvulnerable()) {
-        //                     this.level.score.addModifier('enemies');
-        //                     this.makeInvulnerable(this.params.game.invulnerability);
-        //                 }
-        //             }
-        //         });
-        //         // Treating enemies outside range
-        //         outside.forEach(enemy => {
-        //             // If it was in close enemies
-        //             if (this.closeEnemies.includes(enemy)) {
-        //                 // Remove it from the list
-        //                 let i = this.closeEnemies.indexOf(enemy);
-        //                 if (i > -1) { this.closeEnemies.splice(i, 1); }
-        //             }
-        //         });
-
-        //         // Set the new coordinates to the clone
-        //         this.clone.setCoordinates(this.position);
-        //         // Apply the style to the clone for orientation
-        //         this.context.setStyle(this.sprite.style);
-        //         // Redraw the clone
-        //         this.context.drawGeometry(this.clone);
-
-        //         // If enemies are present, orient them towards the player
-        //         if (this.basemap.enemies) {
-        //             this.basemap.enemies.setOrientation(this.position);
-        //         }
-
-        //         // If target is in range, win the level
-        //         if (within(this.position, this.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
-        //             this.stop();
-        //             callback(true);
-        //         }
-
-        //         // Render the map to trigger the listener
-        //         this.basemap.map.render();
-        //     }
-        //     // Here, destination reached
-        //     else {
-        //         // Stop the animation
-        //         this.stop();
-        //         callback(false);
-        //     }
-        // });
     }
 
     travel(destination, callback) {

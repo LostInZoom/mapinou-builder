@@ -1,0 +1,13 @@
+{
+    "grow_0": { "x": 0, "y": 0, "width": 32, "height": 32, "pixelRatio": 1 },
+    "grow_1": { "x": 32, "y": 0, "width": 32, "height": 32, "pixelRatio": 1 },
+    "grow_2": { "x": 64, "y": 0, "width": 32, "height": 32, "pixelRatio": 1 },
+    "grow_3": { "x": 96, "y": 0, "width": 32, "height": 32, "pixelRatio": 1 },
+    "grow_4": { "x": 128, "y": 0, "width": 32, "height": 32, "pixelRatio": 1 },
+    "grow_5": { "x": 160, "y": 0, "width": 32, "height": 32, "pixelRatio": 1 },
+    "live_0": { "x": 0, "y": 32, "width": 32, "height": 32, "pixelRatio": 1 },
+    "decay_0": { "x": 0, "y": 64, "width": 32, "height": 32, "pixelRatio": 1 },
+    "decay_1": { "x": 32, "y": 64, "width": 32, "height": 32, "pixelRatio": 1 },
+    "decay_2": { "x": 64, "y": 64, "width": 32, "height": 32, "pixelRatio": 1 },
+    "decay_3": { "x": 96, "y": 64, "width": 32, "height": 32, "pixelRatio": 1 }
+}

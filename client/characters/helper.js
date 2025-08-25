@@ -16,7 +16,8 @@ class Helper extends Character {
         super(options);
 
         this.size = 64;
-        this.active = false;
+        this.visible = false;
+
         this.types = [
             'leek', 'cabbage', 'chard', 'broccoli', 'radish',
             'turnip', 'zucchini', 'beet', 'squash', 'butternut'
@@ -28,35 +29,22 @@ class Helper extends Character {
         this.layer.addCharacter(this);
     }
 
-
-
     reveal(callback) {
         callback = callback || function () { };
-        this.cancelScaleAnimation();
+        this.stopScaleAnimation();
         this.visible = true;
-        let goal = this.scale;
-        this.sprite.animateScale(goal * 1.2, easeOutSine, this.sprite.spawnIncrement, this.sprite.spawnFramerate, () => {
-            this.sprite.animateScale(goal, easeInSine, this.sprite.spawnIncrement, this.sprite.spawnFramerate, () => {
-                callback();
-            });
-        });
+        this.spawn(callback);
     }
 
     hide(callback) {
         callback = callback || function () { };
-        this.cancelScaleAnimation();
+        this.stopScaleAnimation();
         this.visible = false;
-        this.sprite.animateScale(0, easeOutSine, this.sprite.spawnIncrement, this.sprite.spawnFramerate, () => {
-            callback();
-        });
+        this.despawn(callback);
     }
 
     isVisible() {
         return this.visible;
-    }
-
-    cancelScaleAnimation() {
-        this.sprite.cancelScaleAnimation();
     }
 
     consume() {
