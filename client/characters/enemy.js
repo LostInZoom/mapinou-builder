@@ -23,95 +23,95 @@ class Enemy extends Character {
 
         let colors = getColorsByClassNames('enemies-map', 'enemies-map-transparent');
 
-        // let sizeArea = this.params.game.tolerance.enemies;
-        // this.width1 = 50;
-        // this.width2 = 10;
+        let sizeArea = this.params.game.tolerance.enemies;
+        this.width1 = 40;
+        this.width2 = 10;
 
-        // let b1 = buffer(this.coordinates, sizeArea - this.width1);
-        // let coords1 = b1.getLinearRings()[0].getCoordinates();
-        // this.border1 = new Feature({ geometry: bufferAroundPolygon(coords1, this.width1) });
-        // this.style1 = new Style({
-        //     fill: new Fill({ color: colors['enemies-map-transparent'] })
-        // });
-        // this.border1.setStyle(this.style1);
+        let b1 = buffer(this.coordinates, sizeArea - this.width1);
+        this.border1 = b1.geometry.coordinates;
+        this.border2 = bufferAroundPolygon(b1, this.width2).geometry.coordinates;
 
-        // let b2 = buffer(this.coordinates, sizeArea - this.width2);
-        // let coords2 = b2.getLinearRings()[0].getCoordinates();
-        // this.border2 = new Feature({ geometry: bufferAroundPolygon(coords2, this.width2) });
-        // this.style2 = new Style({
-        //     fill: new Fill({ color: colors['enemies-map'] })
-        // });
-        // this.border2.setStyle(this.style2);
+        this.areaOpacity = 0;
+        this.areaOpacityStart = 0;
+        this.area1 = {
+            type: 'Feature',
+            properties: {
+                color: colors['enemies-map-transparent'],
+                opacity: this.areaOpacity
+            },
+            geometry: {
+                type: 'Polygon',
+                coordinates: this.border1
+            }
+        };
 
-        // this.area = new VectorLayer({
-        //     source: new VectorSource({
-        //         features: [this.border1, this.border2],
-        //     }),
-        //     zIndex: this.zIndex - 1,
-        //     updateWhileAnimating: true,
-        //     updateWhileInteracting: true,
-        //     opacity: 0,
-        // });
+        this.area2 = {
+            type: 'Feature',
+            properties: {
+                color: colors['enemies-map'],
+                opacity: this.areaOpacity
+            },
+            geometry: {
+                type: 'Polygon',
+                coordinates: this.border2
+            }
+        };
 
-        // this.areaVisible = false;
-
-        // this.layer.basemap.map.addLayer(this.area);
-        // this.layer.basemap.layers.push(this.area);
-
-        // this.listener = this.layer.basemap.map.on('postrender', () => {
-        //     let threshold = this.params.game.routing;
-        //     let zoom = this.layer.basemap.view.getZoom();
-        //     if (zoom >= threshold && !this.areaVisible) {
-        //         this.areaVisible = true;
-        //         this.revealArea();
-        //     }
-        //     else if (zoom < threshold && this.areaVisible) {
-        //         this.areaVisible = false;
-        //         this.hideArea();
-        //     }
-        // });
-        // this.layer.basemap.addListeners(this.listener);
+        this.layer.addArea(this);
     }
 
     revealArea(callback) {
-        this.stopAnimation();
-        this.animateOpacity(1, callback);
+        this.areaOpacityStart = performance.now();
+        this.animateAreaOpacity({
+            value: 1,
+            start: this.areaOpacityStart
+        }, callback);
     }
 
     hideArea(callback) {
-        this.stopAnimation();
-        this.animateOpacity(0, callback);
+        this.areaOpacityStart = performance.now();
+        this.animateAreaOpacity({
+            value: 0,
+            start: this.areaOpacityStart
+        }, callback);
     }
 
-    stopAnimation() {
-        if (this.animation) { unByKey(this.animation); }
+    setAreaOpacity(opacity) {
+        this.areaOpacity = opacity;
+        this.area1.properties.opacity = opacity;
+        this.area2.properties.opacity = opacity;
+        this.layer.updateSourceArea();
     }
 
-    animateOpacity(value, callback) {
+    animateAreaOpacity(options, callback) {
         callback = callback || function () { };
-        let opacity = this.area.getOpacity();
-        const difference = value - opacity;
-        const increment = difference > 0 ? 0.08 : -0.08;
 
-        if (difference === 0) {
-            callback();
-        } else {
-            this.animation = this.area.on('postrender', () => {
-                opacity += increment;
-                this.area.setOpacity(opacity);
-                let stop = false;
-                if (difference > 0 && opacity >= value) { stop = true; }
-                else if (difference < 0 && opacity <= value) { stop = true; }
+        if (this.active) {
+            const value = options.value;
+            const start = options.start;
 
-                if (stop) {
-                    this.stopAnimation();
-                    unByKey(this.animation);
-                    callback();
+            const origin = this.areaOpacity;
+            const duration = options.duration || 300;
+            const easing = options.easing || (x => x);
+
+            const animation = (time) => {
+                if (this.areaOpacityStart === start) {
+                    const elapsed = time - start;
+                    const t = Math.min(Math.max(elapsed / duration, 0), 1);
+                    const eased = easing(t);
+                    const opacity = origin + (value - origin) * eased;
+                    this.setAreaOpacity(opacity);
+                    if (t < 1) {
+                        requestAnimationFrame(animation);
+                    } else {
+                        this.setAreaOpacity(value);
+                        callback();
+                    }
                 } else {
-                    // Render the map to trigger the listener
-                    this.layer.basemap.map.render();
+                    callback();
                 }
-            });
+            };
+            requestAnimationFrame(animation);
         }
     }
 }
@@ -123,6 +123,7 @@ class Hunter extends Enemy {
         this.framerate = 150;
         this.framenumber = 5;
         this.framescale = 0.9;
+        this.offset = [0, -15];
 
         this.feature.properties.type = 'hunter';
         this.feature.properties.offset = this.offset;

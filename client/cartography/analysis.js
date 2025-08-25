@@ -11,18 +11,8 @@ import proj4 from "proj4";
  * @return {Polygon}          OpenLayers Polygon geometry.
  */
 function buffer(coordinates, size) {
-    // Project provided coordinates
-    let c = project('3857', '4326', coordinates)
-
     // Calculate the buffer around the coordinates
-    let b = turf.buffer(turf.point(c), size, { units: "meters", steps: 12 })
-
-    // Project the resulting coordinates
-    let v = []
-    for (let i = 0; i < b.geometry.coordinates[0].length; i++) { v.push(project('4326', '3857', b.geometry.coordinates[0][i])); }
-
-    // Return an openlayer polygon from the list of vertexes
-    return new Polygon([v]);
+    return turf.buffer(turf.point(coordinates), size, { units: "meters", steps: 12 });
 }
 
 /**
@@ -31,25 +21,10 @@ function buffer(coordinates, size) {
  * @param {integer} size      The size of the buffer in meters.
  * @return {Polygon}          OpenLayers Polygon geometry.
  */
-function bufferAroundPolygon(coordinates, size) {
-    let projected = [];
-    coordinates.forEach(c => { projected.push(project('3857', '4326', c)) });
-
-    // Calculate the buffer around the coordinates
-    let polygon = turf.polygon([projected]);
+function bufferAroundPolygon(polygon, size) {
     let b = turf.buffer(polygon, size, { units: "meters", steps: 4 });
     let d = turf.difference(turf.featureCollection([b, polygon]));
-
-    // Project the resulting coordinates
-    let v = []
-    d.geometry.coordinates.forEach(linear => {
-        let l = []
-        linear.forEach(c => { l.push(project('4326', '3857', c)); });
-        v.push(l);
-    });
-
-    // Return an openlayer polygon from the list of vertexes
-    return new Polygon(v);
+    return d;
 }
 
 /**

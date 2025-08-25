@@ -181,7 +181,7 @@ class Character {
             const value = options.value;
             const duration = options.duration || 200;
             const overshoot = options.overshoot || 1.1;
-            const easing = options.easing || linear;
+            const easing = options.easing || (x => x);
             let overshootRatio = options.overshootRatio || 0.7;
             overshootRatio = Math.max(0.01, Math.min(0.99, overshootRatio));
 

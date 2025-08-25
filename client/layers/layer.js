@@ -112,6 +112,11 @@ class Layer {
         wait(delay, callback);
     }
 
+    hasLayerArea() {
+        if (this.layerArea !== undefined) { return true; }
+        else { return false; }
+    }
+
     clear() {
         this.characters.forEach(character => { this.removeCharacter(character) });
         this.characters = [];

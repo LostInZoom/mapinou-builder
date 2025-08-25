@@ -164,6 +164,10 @@ class Basemap {
     }
 
     addLayer(layer) {
+        if (layer.hasLayerArea()) {
+            this.map.addLayer(layer.layerArea);
+        }
+
         this.layers.push(layer);
         this.map.addLayer(layer.layer);
     }
