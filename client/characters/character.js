@@ -231,7 +231,7 @@ class Character {
         if (this.active) {
             const origin = this.scale;
             const value = options.value;
-            const duration = options.duration || 200;
+            const duration = options.duration || this.spawnDuration;
             const overshoot = options.overshoot || 1.1;
             const easing = options.easing || (x => x);
             let overshootRatio = options.overshootRatio || 0.7;
@@ -266,8 +266,8 @@ class Character {
                         }
                     }
 
-                    const interpolated = origin + (value - origin) * scale;
-                    this.setScale(interpolated);
+                    if (!hasOvershoot) { scale = origin + (value - origin) * scale; }
+                    this.setScale(scale);
 
                     if (t < 1) {
                         requestAnimationFrame(animation);
