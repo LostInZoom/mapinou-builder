@@ -1,6 +1,6 @@
-import Layer from './layer.js';
+import Characters from './characters.js';
 
-class Rabbits extends Layer {
+class Rabbits extends Characters {
     constructor(options) {
         super(options);
         this.layer.layout['icon-image'] = [

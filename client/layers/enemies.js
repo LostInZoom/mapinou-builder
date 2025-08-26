@@ -2,10 +2,10 @@ import * as turf from "@turf/turf";
 
 import { wait } from "../utils/dom.js";
 import { weightedRandom } from "../utils/math.js";
-import Layer from "./layer.js";
 import { Bird, Hunter, Snake } from "../characters/enemy.js";
+import Characters from "./characters.js";
 
-class Enemies extends Layer {
+class Enemies extends Characters {
     constructor(options) {
         super(options);
         this.layer.layout['icon-image'] = [
@@ -40,6 +40,7 @@ class Enemies extends Layer {
         }
 
         this.basemap.addLayer(this);
+        this.basemap.addAreaLayer(this.layerArea);
 
         this.weights = [1, 1, 1];
         this.statespool = ['hunter', 'snake', 'bird'];

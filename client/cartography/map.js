@@ -165,12 +165,12 @@ class Basemap {
     }
 
     addLayer(layer) {
-        if (layer.hasLayerArea()) {
-            this.map.addLayer(layer.layerArea);
-        }
-
         this.layers.push(layer);
         this.map.addLayer(layer.layer);
+    }
+
+    addAreaLayer(areaLayer) {
+        this.map.addLayer(areaLayer);
     }
 
     animate(options, callback) {
@@ -275,7 +275,7 @@ class Basemap {
         this.player = new Player({
             level: level,
             layer: this.rabbits,
-            color: 'white',
+            color: 'brown',
             coordinates: options.player
         });
         this.player.setOrientationFromCoordinates(options.target);

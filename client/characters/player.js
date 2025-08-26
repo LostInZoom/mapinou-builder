@@ -1,11 +1,7 @@
 import * as turf from "@turf/turf";
 
-import { LineString } from "ol/geom.js";
-
-import { angle, project, within } from "../cartography/analysis.js";
-import { getVectorContext } from "ol/render.js";
+import { angle, within } from "../cartography/analysis.js";
 import Rabbit from "./rabbit.js";
-import { unByKey } from "ol/Observable.js";
 import Router from "../cartography/routing.js";
 import Flower from "./flower.js";
 import { wait } from "../utils/dom.js";
@@ -16,13 +12,18 @@ class Player extends Rabbit {
         this.level = options.level;
 
         // Routing infos
-        this.router = new Router({ position: this.coordinates });
+        this.router = new Router({
+            basemap: this.layer.basemap,
+            player: this,
+            position: this.coordinates
+        });
 
         this.destination = undefined;
         this.traveling = false;
 
         this.distance = 0;
         this.position = this.coordinates;
+        this.start = 0;
 
         this.closeEnemies = [];
         this.flowers = [];
@@ -42,6 +43,8 @@ class Player extends Rabbit {
     }
 
     stop() {
+        this.start = 0;
+
         if (this.flowers.length > 0) {
             this.flowers.shift().decay();
         }
@@ -54,17 +57,19 @@ class Player extends Rabbit {
 
         this.level.deactivateMovementButton();
         this.level.score.setState('default');
+        this.router.fadeJourney();
 
         this.traveling = false;
     }
 
-    move(route, callback) {
+    move(route, start, callback) {
         callback = callback || function () { };
 
         // Set routing button to moving mode
         this.level.moving();
         // Set the sprite to moving state
         this.setState('move');
+        this.router.stopFadeJourney();
 
         // Retrieve the vertexes composing the calculated route
         let vertexes = route.geometry.coordinates;
@@ -79,6 +84,8 @@ class Player extends Rabbit {
 
         // Create the path line and calculate its length
         const line = turf.lineString(vertexes);
+        const simplified = turf.simplify(line, { tolerance: 0.0002 });
+        const svertexes = simplified.geometry.coordinates;
         const length = turf.length(line, { units: 'meters' });
 
         // Retrieve the time
@@ -87,70 +94,58 @@ class Player extends Rabbit {
         // Get the speed in meters/second
         const speed = this.params.game.speed.travel / 3.6;
 
-        // Change the direction of the sprite according to its current movement
-        let a = angle(vertexes[0], vertexes[1]);
-        this.setOrientationFromAngle(a);
-
         // Start the distance counter
         this.distance = 0;
 
-        // index du segment courant
-        let segmentIndex = 0;
-        let segmentStart = vertexes[0];
-        let segmentEnd = vertexes[1];
-
-        // longueur de ce segment
-        let segmentLine = turf.lineString([segmentStart, segmentEnd]);
-        let segmentLength = turf.length(segmentLine, { units: 'meters' });
-
         // orientation fixe pour ce segment
-        this.setOrientationFromAngle(angle(segmentStart, segmentEnd));
+        this.setOrientationFromAngle(angle(svertexes[0], svertexes[1]));
+        let journey = [svertexes[0]];
 
         const animation = (time) => {
-            // Calculate the elapsed time in seconds
-            const elapsed = (time - lastTime) / 1000;
-            // Calculate the distance traveled depending on the elapsed time and the speed
-            this.distance = this.distance + (elapsed * speed);
-            // Set the previous time as the current one
-            lastTime = time;
+            if (this.start === start) {
+                // Calculate the elapsed time in seconds
+                const elapsed = (time - lastTime) / 1000;
+                // Calculate the distance traveled depending on the elapsed time and the speed
+                this.distance = this.distance + (elapsed * speed);
+                // Set the previous time as the current one
+                lastTime = time;
 
-            // If the travelled distance is below the length of the route, continue the animation
-            if (this.distance <= length) {
-                if (this.distance > 0) {
-                    // Calculate the position of the point along the route line
-                    this.position = turf.along(line, this.distance, { units: 'meters' }).geometry.coordinates;
+                // If the travelled distance is below the length of the route, continue the animation
+                if (this.distance <= length) {
+                    if (this.distance > 0) {
+                        // Calculate the position of the point along the route line
+                        let along = turf.along(line, this.distance, { units: 'meters' });
+                        this.position = along.geometry.coordinates;
 
-                    // distance parcourue dans le segment actuel
-                    const segmentTraveled = turf.distance(segmentStart, this.position, { units: 'meters' });
+                        let projected = turf.nearestPointOnLine(simplified, along);
+                        let i = projected.properties.index;
+                        const before = svertexes[i];
+                        const after = svertexes[i + 1];
 
-                    // si on a dépassé la fin du segment -> passer au suivant
-                    if (segmentTraveled >= segmentLength && segmentIndex < vertexes.length - 2) {
-                        segmentIndex++;
-                        segmentStart = vertexes[segmentIndex];
-                        segmentEnd = vertexes[segmentIndex + 1];
-                        segmentLine = turf.lineString([segmentStart, segmentEnd]);
-                        segmentLength = turf.length(segmentLine, { units: 'meters' });
-                        this.setOrientationFromAngle(angle(segmentStart, segmentEnd));
+                        if (!journey.includes(before)) {
+                            this.setOrientationFromAngle(angle(before, after));
+                            journey.push(before);
+                        }
+
+                        this.router.updateJourney(this.position);
+
+                        // this.layer.basemap.helpers.handle(this.getCoordinates());
+                        // this.layer.basemap.enemies.handle(this.getCoordinates());
+
+                        this.setCoordinates(this.position);
+                        // If target is in range, win the level
+                        if (within(this.position, this.layer.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
+                            this.stop();
+                            callback(true);
+                        }
                     }
-
-                    // this.setOrientationFromAngle(angle(this.getCoordinates(), this.position));
-
-                    // this.layer.basemap.helpers.handle(this.getCoordinates());
-                    // this.layer.basemap.enemies.handle(this.getCoordinates());
-
-                    this.setCoordinates(this.position);
-                    // If target is in range, win the level
-                    if (within(this.position, this.layer.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
-                        this.stop();
-                        callback(true);
-                    }
+                    requestAnimationFrame(animation);
                 }
-                requestAnimationFrame(animation);
-            }
-            else {
-                this.setCoordinates(vertexes[vertexes.length - 1]);
-                this.stop();
-                callback();
+                else {
+                    this.setCoordinates(vertexes[vertexes.length - 1]);
+                    this.stop();
+                    callback();
+                }
             }
         };
         requestAnimationFrame(animation);
@@ -161,6 +156,9 @@ class Player extends Rabbit {
 
         if (this.traveling) { this.stop(); }
         this.traveling = true;
+
+        this.start = performance.now();
+        let start = this.start;
         this.destination = destination;
 
         // Show the routing button and set it to routing mode
@@ -173,7 +171,7 @@ class Player extends Rabbit {
             if (destination === this.destination) {
                 // Change the score increment
                 this.level.score.setState('movement');
-                this.move(route, callback);
+                this.move(route, start, callback);
             }
         });
     }

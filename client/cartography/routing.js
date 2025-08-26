@@ -3,11 +3,24 @@
  * Classes and functions related to the routing fonctionalities within the game.
  */
 
+import Journeys from "../layers/journeys.js";
 import { ajaxGet } from "../utils/ajax.js";
 
 class Router {
     constructor(options) {
-        this.position = options.position;
+        this.options = options || {};
+        this.basemap = this.options.basemap;
+        this.player = this.options.player;
+        this.params = this.basemap.options.app.options;
+
+        this.position = this.options.position;
+        this.journeys = new Journeys({
+            name: 'level-journeys',
+            basemap: this.basemap,
+            behind: 'level-enemies',
+            color: this.player.getColor(),
+            maxlength: 3000
+        });
     }
 
     setPosition(position) {
@@ -27,6 +40,18 @@ class Router {
         ajaxGet(url, (route) => {
             callback(route);
         });
+    }
+
+    stopFadeJourney() {
+        this.journeys.stopFade();
+    }
+
+    fadeJourney() {
+        this.journeys.fade();
+    }
+
+    updateJourney(coordinates) {
+        this.journeys.update(coordinates);
     }
 }
 

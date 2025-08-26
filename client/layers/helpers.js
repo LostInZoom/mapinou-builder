@@ -1,8 +1,8 @@
 import { within } from "../cartography/analysis";
 import Helper from "../characters/helper";
-import Layer from "./layer";
+import Characters from "./characters";
 
-class Helpers extends Layer {
+class Helpers extends Characters {
     constructor(options) {
         super(options);
         this.layer.layout['icon-image'] = [
