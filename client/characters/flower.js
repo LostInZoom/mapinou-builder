@@ -30,7 +30,6 @@ class Flower extends Character {
     }
 
     decay() {
-        this.stopFrameAnimation();
         this.setState('decay');
         this.framenumber = 4;
         this.animateFrame(() => {

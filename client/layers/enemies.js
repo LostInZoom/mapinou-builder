@@ -4,6 +4,7 @@ import { wait } from "../utils/dom.js";
 import { weightedRandom } from "../utils/math.js";
 import { Bird, Hunter, Snake } from "../characters/enemy.js";
 import Characters from "./characters.js";
+import { within } from "../cartography/analysis.js";
 
 class Enemies extends Characters {
     constructor(options) {
@@ -18,7 +19,6 @@ class Enemies extends Characters {
         ]
 
         this.areas = [];
-
         this.featuresArea = [];
         this.sourceArea = {
             type: 'geojson',
@@ -42,6 +42,8 @@ class Enemies extends Characters {
         this.basemap.addLayer(this);
         this.basemap.addAreaLayer(this.layerArea);
 
+        // This stores enemies that already stroke
+        this.stroke = [];
         this.weights = [1, 1, 1];
         this.statespool = ['hunter', 'snake', 'bird'];
 
@@ -138,10 +140,29 @@ class Enemies extends Characters {
         });
     }
 
-    handle(position) {
+    handle(player) {
+        const position = player.getCoordinates();
         for (let i = 0; i < this.characters.length; i++) {
             let enemy = this.characters[i];
             enemy.setOrientationFromCoordinates(position);
+
+            if (within(position, enemy.getCoordinates(), this.params.game.tolerance.enemies)) {
+                // Check if the enemy has not already striked
+                if (!this.stroke.includes(enemy)) {
+                    this.stroke.push(enemy);
+                    if (!player.isInvulnerable()) {
+                        this.level.score.addModifier('enemies');
+                        player.makeInvulnerable(this.params.game.invulnerability, 300);
+                    }
+                }
+            } else {
+                // If it was in close enemies
+                if (this.stroke.includes(enemy)) {
+                    // Remove it from the list
+                    let i = this.stroke.indexOf(enemy);
+                    if (i > -1) { this.stroke.splice(i, 1); }
+                }
+            }
         }
 
         // // Retrieve the enemies oustide and inside the visibible range
@@ -149,8 +170,8 @@ class Enemies extends Characters {
         // // Treating enemies within range
         // inside.forEach(enemy => {
         //     // Check if the enemy has not already striked
-        //     if (!this.closeEnemies.includes(enemy)) {
-        //         this.closeEnemies.push(enemy);
+        //     if (!this.stroke.includes(enemy)) {
+        //         this.stroke.push(enemy);
         //         if (!this.isInvulnerable()) {
         //             this.level.score.addModifier('enemies');
         //             this.makeInvulnerable(this.params.game.invulnerability);
@@ -160,10 +181,10 @@ class Enemies extends Characters {
         // // Treating enemies outside range
         // outside.forEach(enemy => {
         //     // If it was in close enemies
-        //     if (this.closeEnemies.includes(enemy)) {
+        //     if (this.stroke.includes(enemy)) {
         //         // Remove it from the list
-        //         let i = this.closeEnemies.indexOf(enemy);
-        //         if (i > -1) { this.closeEnemies.splice(i, 1); }
+        //         let i = this.stroke.indexOf(enemy);
+        //         if (i > -1) { this.stroke.splice(i, 1); }
         //     }
         // });
 

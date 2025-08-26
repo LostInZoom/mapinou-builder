@@ -42,22 +42,25 @@ class Helpers extends Characters {
         });
     }
 
-    handle(position) {
+    handle(player) {
+        const position = player.getCoordinates();
         for (let i = 0; i < this.characters.length; i++) {
             let helper = this.characters[i];
-            if (within(position, helper.getCoordinates(), this.params.game.visibility.helpers)) {
-                if (helper.isVisible()) { helper.hide(); }
-            }
-            else {
-                if (!helper.isVisible()) {
-                    helper.reveal(() => {
-                        helper.breathe();
-                    });
+            if (helper.isActive()) {
+                if (within(position, helper.getCoordinates(), this.params.game.visibility.helpers)) {
+                    if (!helper.isVisible()) {
+                        helper.reveal();
+                    }
+                    // Consume them if within consuming range
+                    if (within(position, helper.getCoordinates(), this.params.game.tolerance.helpers)) {
+                        helper.consume();
+                        this.level.score.addModifier('helpers');
+                    }
                 }
-                // Consume them if within consuming range
-                if (within(position, helper.getCoordinates(), this.params.game.tolerance.helpers)) {
-                    helper.consume();
-                    this.level.score.addModifier('helpers');
+                else {
+                    if (helper.isVisible()) {
+                        helper.hide();
+                    }
                 }
             }
         }

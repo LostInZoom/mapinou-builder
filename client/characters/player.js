@@ -25,21 +25,49 @@ class Player extends Rabbit {
         this.position = this.coordinates;
         this.start = 0;
 
-        this.closeEnemies = [];
         this.flowers = [];
 
         this.invulnerable = false;
+        this.originColor = this.getColor();
     }
 
     isInvulnerable() {
         return this.invulnerable;
     }
 
-    makeInvulnerable(duration) {
+    makeVulnerable() {
+        this.invulnerable = false;
+        this.setColor(this.originColor);
+    }
+
+    makeInvulnerable(duration, blink, callback) {
+        callback = callback || function () { };
+
         this.invulnerable = true;
-        wait(duration, () => {
-            this.invulnerable = false;
-        });
+        const start = performance.now();
+        let lastBlink = start;
+
+        this.setColor('red');
+        let visible = false;
+
+        const animate = (time) => {
+            if (this.invulnerable) {
+                const elapsed = time - start;
+                if (elapsed >= duration) {
+                    this.invulnerable = false;
+                    this.setColor(this.originColor);
+                    callback();
+                } else {
+                    if (time - lastBlink >= blink) {
+                        visible = !visible;
+                        this.setColor(visible ? this.originColor : 'red');
+                        lastBlink = time;
+                    }
+                    requestAnimationFrame(animate);
+                }
+            }
+        };
+        requestAnimationFrame(animate);
     }
 
     stop() {
@@ -128,11 +156,11 @@ class Player extends Rabbit {
                         }
 
                         this.router.updateJourney(this.position);
-
-                        // this.layer.basemap.helpers.handle(this.getCoordinates());
-                        // this.layer.basemap.enemies.handle(this.getCoordinates());
-
                         this.setCoordinates(this.position);
+
+                        this.layer.basemap.helpers.handle(this);
+                        this.layer.basemap.enemies.handle(this);
+
                         // If target is in range, win the level
                         if (within(this.position, this.layer.basemap.target.getCoordinates(), this.params.game.tolerance.target)) {
                             this.stop();

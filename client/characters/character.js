@@ -30,8 +30,8 @@ class Character {
 
         this.active = true;
         this.destroyed = false;
-        this.scaleAnimation = false;
-        this.frameAnimation = false;
+        this.startFrameAnimation = 0;
+        this.startScaleAnimation = 0;
         this.moving = false;
 
         this.frame = this.options.frame || 0;
@@ -161,40 +161,23 @@ class Character {
     }
 
     stopFrameAnimation() {
-        this.frameAnimation = false;
+        this.startFrameAnimation = 0;
     }
 
     animateFrame(callback) {
-        this.frameAnimation = true;
-        if (this.active) {
+        this.startFrameAnimation = performance.now();
+        let start = this.startFrameAnimation;
+        if (start === this.startFrameAnimation) {
             wait(this.framerate, () => {
-                if (this.frameAnimation) {
-                    this.setFrame((this.frame + 1) % this.framenumber);
-                    requestAnimationFrame(() => {
-                        if (this.getFrame() === (this.framenumber - 1) && typeof callback === 'function') {
-                            callback();
-                        } else {
-                            this.animateFrame(callback);
-                        }
-                    });
-                }
+                this.setFrame((this.frame + 1) % this.framenumber);
+                requestAnimationFrame(() => {
+                    if (this.getFrame() === (this.framenumber - 1) && typeof callback === 'function') {
+                        callback();
+                    } else {
+                        this.animateFrame(callback);
+                    }
+                });
             });
-        }
-    }
-
-    breathe() {
-        if (this.active) {
-            // Sinusoidal function to animate the scale
-            const base = 0.95;
-            const amplitude = 0.15;
-            const period = 1000;
-            const animate = (time) => {
-                const t = (time % period) / period;
-                const scale = base + amplitude * Math.sin(t * Math.PI * 2);
-                this.setScale(scale);
-                requestAnimationFrame(animate);
-            };
-            requestAnimationFrame(animate);
         }
     }
 
@@ -202,8 +185,7 @@ class Character {
         callback = callback || function () { };
         this.animateScale({
             value: this.framescale,
-            duration: this.spawnDuration,
-            easing: easeOutCubic
+            overshoot: 1.1
         }, callback);
     }
 
@@ -211,8 +193,7 @@ class Character {
         callback = callback || function () { };
         this.animateScale({
             value: 0,
-            duration: this.spawnDuration,
-            easing: easeInCubic,
+            overshoot: 1.1
         }, callback);
     }
 
@@ -221,68 +202,82 @@ class Character {
     }
 
     stopScaleAnimation() {
-        this.scaleAnimation = false;
+        this.startScaleAnimation = 0;
+    }
+
+    breathe() {
+        this.startScaleAnimation = performance.now();
+        let start = this.startScaleAnimation;
+
+        // Sinusoidal function to animate the scale
+        const base = 0.95;
+        const amplitude = 0.15;
+        const period = 1000;
+        const animate = (time) => {
+            if (start === this.startScaleAnimation) {
+                const t = (time % period) / period;
+                const scale = base + amplitude * Math.sin(t * Math.PI * 2);
+                this.setScale(scale);
+                requestAnimationFrame(animate);
+            }
+        };
+        requestAnimationFrame(animate);
     }
 
     animateScale(options, callback) {
         callback = callback || function () { };
-        this.scaleAnimation = true;
+        this.startScaleAnimation = performance.now();
+        let start = this.startScaleAnimation;
 
-        if (this.active) {
-            const origin = this.scale;
-            const value = options.value;
-            const duration = options.duration || this.spawnDuration;
-            const overshoot = options.overshoot || 1.1;
-            const easing = options.easing || (x => x);
-            let overshootRatio = options.overshootRatio || 0.7;
-            overshootRatio = Math.max(0.01, Math.min(0.99, overshootRatio));
+        const origin = this.scale;
+        const value = options.value;
+        const duration = options.duration || this.spawnDuration;
+        const overshoot = options.overshoot || 1;
+        const easing = options.easing || (x => x);
 
-            const start = performance.now();
-            const animation = (time) => {
-                if (this.scaleAnimation) {
-                    const elapsed = time - start;
-                    const t = Math.min(Math.max(elapsed / duration, 0), 1);
-                    let scale;
-                    const hasOvershoot = Math.abs(overshoot - 1) > 0.0001;
+        const s = performance.now();
+        const animation = (time) => {
+            if (start === this.startScaleAnimation) {
+                const elapsed = time - s;
+                const t = Math.min(Math.max(elapsed / duration, 0), 1);
+                let scale;
+                const hasOvershoot = Math.abs(overshoot - 1) > 0.0001;
+
+                if (!hasOvershoot) {
+                    // Simple interpolation
+                    scale = origin + (value - origin) * easing(t);
+                } else {
+                    // Overshoot
                     if (origin < value) {
-                        if (!hasOvershoot) {
-                            scale = easing(t);
-                        } else if (t < overshootRatio) {
-                            const t1 = t / overshootRatio;
-                            scale = easing(t1) * overshoot;
+                        if (t < 0.5) {
+                            const t1 = t / 0.5;
+                            scale = origin + (value - origin) * (easing(t1) * overshoot);
                         } else {
-                            const t2 = (t - overshootRatio) / (1 - overshootRatio);
-                            scale = overshoot - easing(t2) * (overshoot - 1);
+                            const t2 = (t - 0.5) / 0.5;
+                            scale = origin + (value - origin) * (overshoot - easing(t2) * (overshoot - 1));
                         }
                     } else {
-                        if (!hasOvershoot) {
-                            scale = 1 - easing(t);
-                        } else if (t < (1 - overshootRatio)) {
-                            const t1 = t / (1 - overshootRatio);
-                            scale = 1 + easing(t1) * (overshoot - 1);
+                        if (t < 0.5) {
+                            const t1 = t / 0.5;
+                            scale = origin - (origin - value) * (easing(t1) * (overshoot - 1));
                         } else {
-                            const t2 = (t - (1 - overshootRatio)) / overshootRatio;
-                            scale = overshoot * (1 - easing(t2));
+                            const t2 = (t - 0.5) / 0.5;
+                            scale = value + (origin - value) * (overshoot * (1 - easing(t2)));
                         }
-                    }
-
-                    if (!hasOvershoot) { scale = origin + (value - origin) * scale; }
-                    this.setScale(scale);
-
-                    if (t < 1) {
-                        requestAnimationFrame(animation);
-                    } else {
-                        this.setScale(value);
-                        this.scaleAnimation = false;
-                        callback();
                     }
                 }
-            };
 
-            requestAnimationFrame(animation);
-        }
+                this.setScale(scale);
+                if (t < 1) {
+                    requestAnimationFrame(animation);
+                } else {
+                    this.setScale(value);
+                    callback();
+                }
+            }
+        };
+        requestAnimationFrame(animation);
     }
-
 
 
 

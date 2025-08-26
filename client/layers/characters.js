@@ -4,6 +4,7 @@ import Layer from "./layer";
 class Characters extends Layer {
     constructor(options) {
         super(options);
+        this.level = this.options.level;
 
         this.characters = [];
         this.features = [];

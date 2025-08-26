@@ -23,7 +23,8 @@ class Basemap {
     constructor(options, callback) {
         callback = callback || function () { };
         this.options = options || {};
-        this.params = options.app.options;
+        this.app = this.options.app;
+        this.params = this.app.options;
 
         this.spritesheets = ['rabbits', 'enemies', 'vegetables', 'flower'];
 
@@ -244,7 +245,8 @@ class Basemap {
     createCharacters(level, options) {
         this.flowers = new Flowers({
             name: 'level-flowers',
-            basemap: this
+            basemap: this,
+            level: level
         });
 
         this.enemies = new Enemies({
@@ -266,7 +268,8 @@ class Basemap {
 
         this.rabbits = new Rabbits({
             name: 'level-rabbits',
-            basemap: this
+            basemap: this,
+            level: level
         });
 
         this.target = new Target({
@@ -284,6 +287,7 @@ class Basemap {
             coordinates: options.player
         });
         this.player.setOrientationFromCoordinates(options.target);
+        this.helpers.handle(this.player);
     }
 
     getExtentForData() {
