@@ -242,6 +242,11 @@ class Basemap {
     }
 
     createCharacters(level, options) {
+        this.flowers = new Flowers({
+            name: 'level-flowers',
+            basemap: this
+        });
+
         this.enemies = new Enemies({
             name: 'level-enemies',
             basemap: this,
@@ -279,11 +284,6 @@ class Basemap {
             coordinates: options.player
         });
         this.player.setOrientationFromCoordinates(options.target);
-
-        this.flowers = new Flowers({
-            name: 'level-flowers',
-            basemap: this
-        });
     }
 
     getExtentForData() {
