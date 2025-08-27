@@ -31,6 +31,10 @@ class Player extends Rabbit {
         this.originColor = this.getColor();
     }
 
+    despawnRouter() {
+        this.router.despawnJourney();
+    }
+
     isInvulnerable() {
         return this.invulnerable;
     }

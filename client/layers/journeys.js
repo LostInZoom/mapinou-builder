@@ -6,9 +6,11 @@ import { getColorsByClassNames } from "../utils/parse";
 class Journeys extends Layer {
     constructor(options) {
         super(options);
+        this.router = this.options.router;
         this.color = this.options.color || 'white';
         this.maxlength = this.options.maxlength || 3000;
         this.faderate = this.options.faderate || 2;
+        this.width = this.options.width || 6;
         this.fading = false;
 
         this.coordinates = [];
@@ -54,6 +56,23 @@ class Journeys extends Layer {
             }
         }
         this.updateSource();
+    }
+
+    despawn(callback) {
+        const start = performance.now();
+        const animation = (time) => {
+            const t = Math.min((time - start) / this.router.player.getSpawnDuration(), 1);
+            const eased = 1 - (1 - t) * (1 - t);
+            const width = this.width * (1 - eased);
+            this.basemap.map.setPaintProperty(this.id, "line-width", width);
+            if (t < 1) {
+                requestAnimationFrame(animation);
+            } else {
+                this.basemap.map.setPaintProperty(this.id, "line-width", 0);
+                if (callback) callback();
+            }
+        }
+        requestAnimationFrame(animation);
     }
 
     fade() {

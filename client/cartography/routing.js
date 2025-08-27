@@ -16,6 +16,7 @@ class Router {
         this.position = this.options.position;
         this.journeys = new Journeys({
             id: 'level-journeys',
+            router: this,
             basemap: this.basemap,
             behind: 'level-enemies',
             color: this.player.getColor(),
@@ -40,6 +41,10 @@ class Router {
         ajaxGet(url, (route) => {
             callback(route);
         });
+    }
+
+    despawnJourney() {
+        this.journeys.despawn();
     }
 
     stopFadeJourney() {

@@ -105,6 +105,9 @@ class Characters extends Layer {
             if (d > delay) { delay = d; }
             if (character.getScale() > 0) {
                 character.despawn();
+                if (character.router) {
+                    character.despawnRouter();
+                }
             }
         });
         wait(delay, callback);
