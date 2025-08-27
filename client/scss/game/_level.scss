@@ -61,12 +61,12 @@
     transform: scale(0);
     transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
-    &.routing > svg {
-        animation: scale-breathing .5s linear ease-in-out;
+    &.routing>svg {
+        animation: scale-breathing .5s linear infinite;
         transition: transform .2s linear;
     }
 
-    &.moving > svg {
+    &.moving>svg {
         animation: rotationcw 2s linear infinite .3s;
         transition: transform .2s linear;
     }
@@ -76,7 +76,7 @@
         transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    & > svg {
+    &>svg {
         color: colors.$main-color-light;
         height: inherit;
         width: inherit;
