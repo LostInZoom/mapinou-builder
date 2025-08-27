@@ -69,7 +69,11 @@ class Journeys extends Layer {
                 requestAnimationFrame(animation);
             } else {
                 this.basemap.map.setPaintProperty(this.id, "line-width", 0);
-                if (callback) callback();
+                if (callback) {
+                    this.stopFade();
+                    this.clear();
+                    callback();
+                };
             }
         }
         requestAnimationFrame(animation);
