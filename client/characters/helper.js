@@ -1,5 +1,6 @@
 import { easeInQuint, easeOutQuint, generateRandomInteger } from "../utils/math.js";
 import Character from "../characters/character.js";
+import { wait } from "../utils/dom.js";
 
 class Helper extends Character {
     constructor(options) {
@@ -55,16 +56,18 @@ class Helper extends Character {
 
         this.animateScale({
             value: 1.5,
-            duration: this.spawnDuration,
+            duration: 100,
             easing: easeOutQuint
         }, () => {
-            this.animateScale({
-                value: 0,
-                duration: this.spawnDuration,
-                easing: easeInQuint
-            }, () => {
-                this.destroy();
-            });
+            wait(200, () => {
+                this.animateScale({
+                    value: 0,
+                    duration: 300,
+                    easing: easeInQuint
+                }, () => {
+                    this.destroy();
+                });
+            })
         })
     }
 }

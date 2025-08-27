@@ -12,8 +12,14 @@ class Roamer extends Rabbit {
     }
 
     roam() {
-        this.setFrame(0);
-        if (this.active) {
+        this.start = performance.now();
+        let start = this.start;
+        this.choose(start);
+    }
+
+    choose(start) {
+        if (start === this.start) {
+            this.setFrame(0);
             if (generateRandomInteger(0, 4) === 4) { this.setRandomOrientation(); }
             let choice = weightedRandom(this.statespool, this.weights.slice());
 
@@ -28,53 +34,42 @@ class Roamer extends Rabbit {
                     destination = this.layer.basemap.getCoordinatesAtPixel([x, y]);
                 }
 
-                this.travel(destination, () => {
-                    this.setCoordinates(destination);
-                    this.roam();
-                });
+                this.setState('move');
+                this.setOrientationFromAngle(angle(this.coordinates, destination));
+
+                const line = turf.lineString([this.coordinates, destination]);
+                const length = turf.length(line, { units: 'meters' });
+
+                let distance = 0;
+                let lastTime = performance.now();
+
+                const animation = (time) => {
+                    if (start === this.start) {
+                        let elapsed = (time - lastTime) / 1000;
+                        if (elapsed < 0) { elapsed = 0; }
+                        distance += this.speed * elapsed * this.layer.basemap.getResolution();
+
+                        lastTime = time;
+                        if (distance < length) {
+                            if (distance > 0) {
+                                let coords = turf.along(line, distance, { units: 'meters' }).geometry.coordinates;
+                                this.setCoordinates(coords);
+                            }
+                            requestAnimationFrame(animation);
+                        }
+                        else {
+                            this.setCoordinates(destination);
+                            this.choose(start);
+                        }
+                    }
+                };
+                requestAnimationFrame(animation);
             } else {
                 this.setState(choice);
                 wait(4 * this.framerate, () => {
-                    this.roam();
+                    this.choose(start);
                 });
             }
-        }
-    }
-
-    travel(destination, callback) {
-        callback = callback || function () { };
-
-        if (this.active) {
-            this.setState('move');
-            this.setOrientationFromAngle(angle(this.coordinates, destination));
-
-            const line = turf.lineString([this.coordinates, destination]);
-            const length = turf.length(line, { units: 'meters' });
-
-            let distance = 0;
-            let lastTime = performance.now();
-
-            const animation = (time) => {
-                if (this.active) {
-                    let elapsed = (time - lastTime) / 1000;
-                    if (elapsed < 0) { elapsed = 0; }
-                    distance += this.speed * elapsed * this.layer.basemap.getResolution();
-
-                    lastTime = time;
-                    if (distance < length) {
-                        if (distance > 0) {
-                            let coords = turf.along(line, distance, { units: 'meters' }).geometry.coordinates;
-                            this.setCoordinates(coords);
-                        }
-                        requestAnimationFrame(animation);
-                    }
-                    else {
-                        this.setCoordinates(destination);
-                        callback();
-                    }
-                }
-            };
-            requestAnimationFrame(animation);
         }
     }
 }

@@ -116,4 +116,20 @@ function flatten(coordinates) {
     return coords;
 }
 
-export { buffer, flatten, bufferAroundPolygon, middle, within, project, angle, randomPointInCircle, toLongLat }
+function mergeExtents(extents) {
+    if (!extents || extents.length === 0) {
+        return null;
+    }
+    let minX = Infinity, minY = Infinity;
+    let maxX = -Infinity, maxY = -Infinity;
+    extents.forEach(extent => {
+        const [[x1, y1], [x2, y2]] = extent;
+        if (x1 < minX) minX = x1;
+        if (y1 < minY) minY = y1;
+        if (x2 > maxX) maxX = x2;
+        if (y2 > maxY) maxY = y2;
+    });
+    return [[minX, minY], [maxX, maxY]];
+}
+
+export { buffer, flatten, bufferAroundPolygon, middle, within, project, angle, randomPointInCircle, toLongLat, mergeExtents }

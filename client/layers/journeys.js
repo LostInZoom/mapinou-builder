@@ -12,43 +12,37 @@ class Journeys extends Layer {
         this.fading = false;
 
         this.coordinates = [];
-        this.source = {
-            type: "geojson",
-            data: {
-                type: "Feature",
-                geometry: {
-                    type: "LineString",
-                    coordinates: this.coordinates
-                }
-            },
-            lineMetrics: true
-        }
-        this.basemap.map.addSource(this.name, this.source);
-
-        let colors = getColorsByClassNames('routing-' + this.color);
-        this.layer = {
-            id: this.name,
-            type: "line",
-            source: this.name,
-            paint: {
-                "line-width": 6,
-                "line-gradient": [
-                    "interpolate",
-                    ["linear"],
-                    ["line-progress"],
-                    0, "rgba(255, 255, 255, 0)",
-                    1, colors['routing-' + this.color]
-                ]
-            },
-            layout: {
-                "line-cap": "round",
-                "line-join": "round"
+        this.source.type = "geojson";
+        this.source.lineMetrics = true;
+        this.source.data = {
+            type: "Feature",
+            geometry: {
+                type: "LineString",
+                coordinates: this.coordinates
             }
         };
-        this.basemap.map.addLayer(this.layer);
+
+        let colors = getColorsByClassNames('routing-' + this.color);
+        this.layer.type = 'line';
+        this.layer.source = this.id;
+        this.layer.paint = {
+            "line-width": 6,
+            "line-gradient": [
+                "interpolate",
+                ["linear"],
+                ["line-progress"],
+                0, "rgba(255, 255, 255, 0)",
+                1, colors['routing-' + this.color]
+            ]
+        };
+        this.layer.layout = {
+            "line-cap": "round",
+            "line-join": "round"
+        };
+        this.basemap.addLayer(this);
 
         if (this.behind) {
-            this.basemap.map.moveLayer(this.name, this.behind);
+            this.basemap.map.moveLayer(this.id, this.behind);
         }
     }
 
@@ -81,7 +75,7 @@ class Journeys extends Layer {
     }
 
     updateSource() {
-        const source = this.basemap.map.getSource(this.name);
+        const source = this.basemap.map.getSource(this.id);
         if (source) {
             source.setData({
                 type: "Feature",
@@ -91,6 +85,11 @@ class Journeys extends Layer {
                 }
             });
         }
+    }
+
+    clear() {
+        this.coordinates = [];
+        this.updateSource();
     }
 }
 

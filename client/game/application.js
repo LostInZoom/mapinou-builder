@@ -62,6 +62,7 @@ class Application {
         }, () => {
             this.basemap.loadSprites().then(() => {
                 this.loaded();
+                this.allowed = true;
 
                 // Create the current page
                 this.page = new Levels({
@@ -76,10 +77,10 @@ class Application {
                 });
 
                 this.rabbits = new Rabbits({
-                    name: 'menu-rabbits',
-                    basemap: this.basemap
+                    id: 'menu-rabbits',
+                    basemap: this.basemap,
+                    protected: true
                 });
-                this.allowed = true;
 
                 this.basemap.map.on('click', (e) => {
                     if (this.allowed) {
@@ -149,7 +150,7 @@ class Application {
 
     killRabbits() {
         this.rabbits.despawnCharacters(() => {
-            this.rabbits.clear();
+            this.rabbits.destroy();
         });
     }
 

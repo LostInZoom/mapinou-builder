@@ -9,26 +9,18 @@ class Characters extends Layer {
         this.characters = [];
         this.features = [];
 
-        this.source = {
-            type: 'geojson',
-            data: {
-                type: 'FeatureCollection',
-                features: this.features
-            }
-        };
+        this.source.type = 'geojson';
+        this.source.data = {
+            type: 'FeatureCollection',
+            features: this.features
+        }
 
-        this.basemap.map.addSource(this.name, this.source);
-
-        this.layer = {
-            id: this.name,
-            type: 'symbol',
-            source: this.name,
-            layout: {
-                'icon-size': ['get', 'scale'],
-                'icon-offset': ['get', 'offset'],
-                'icon-allow-overlap': true,
-                'icon-ignore-placement': true,
-            }
+        this.layer.type = 'symbol';
+        this.layer.layout = {
+            'icon-size': ['get', 'scale'],
+            'icon-offset': ['get', 'offset'],
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
         };
     }
 
@@ -36,8 +28,20 @@ class Characters extends Layer {
         return this.characters.length;
     }
 
-    getFeatures() {
-        return this.features;
+    getLayerExtent() {
+        if (!this.features || this.features.length === 0) {
+            return null;
+        }
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+        this.features.forEach(f => {
+            let [x, y] = f.geometry.coordinates;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+        });
+        return [[minX, minY], [maxX, maxY]];
     }
 
     addFeature(feature) {
@@ -69,13 +73,13 @@ class Characters extends Layer {
     removeCharacter(character) {
         let id = character.getId();
         for (let i = 0; i < this.characters.length; i++) {
-            if (this.characters[i] == character) {
+            if (id === this.characters[i].getId()) {
                 this.characters.splice(i, 1);
                 break;
             }
         }
         for (let i = 0; i < this.features.length; i++) {
-            if (this.features[i].properties.id == id) {
+            if (this.features[i].properties.id === id) {
                 this.features.splice(i, 1);
                 break;
             }
@@ -84,7 +88,7 @@ class Characters extends Layer {
     }
 
     updateSource() {
-        const source = this.basemap.map.getSource(this.name);
+        const source = this.basemap.map.getSource(this.id);
         if (source) {
             source.setData({
                 type: 'FeatureCollection',
@@ -99,20 +103,18 @@ class Characters extends Layer {
         this.characters.forEach(character => {
             let d = character.getSpawnDuration();
             if (d > delay) { delay = d; }
-            character.despawn();
+            if (character.getScale() > 0) {
+                character.despawn();
+            }
         });
         wait(delay, callback);
     }
 
-    clear() {
-        this.characters.forEach(character => { this.removeCharacter(character) });
-        this.characters = [];
-    }
-
     destroy() {
-        this.clear();
-        this.layer.dispose();
-        this.basemap.map.removeLayer(this.layer);
+        this.characters.forEach(c => { c.stopAnimations(); });
+        this.characters = [];
+        this.features = [];
+        this.updateSource();
     }
 }
 

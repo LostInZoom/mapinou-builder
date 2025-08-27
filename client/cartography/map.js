@@ -1,13 +1,5 @@
 import { Map } from 'maplibre-gl';
 
-import { extend } from 'ol/extent.js';
-
-import MouseWheelZoom from 'ol/interaction/MouseWheelZoom.js';
-import DragPan from 'ol/interaction/DragPan.js';
-import PinchZoom from 'ol/interaction/PinchZoom.js';
-import PointerInteraction from 'ol/interaction/Pointer.js';
-import { unByKey } from 'ol/Observable.js';
-
 import Enemies from '../layers/enemies.js';
 import Player from '../characters/player.js';
 import Target from '../characters/target.js';
@@ -15,7 +7,7 @@ import Helpers from '../layers/helpers.js';
 import Position from '../game/position.js';
 import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
 import Rabbits from '../layers/rabbits.js';
-import { flatten, project, toLongLat } from './analysis.js';
+import { flatten, mergeExtents, project } from './analysis.js';
 import { easeInOutCubic } from '../utils/math.js';
 import Flowers from '../layers/flowers.js';
 
@@ -27,8 +19,8 @@ class Basemap {
         this.params = this.app.options;
 
         this.spritesheets = ['rabbits', 'enemies', 'vegetables', 'flower'];
+        this.protectedLayers = ['basemap'];
 
-        this.layers = [];
         this.parent = this.options.parent;
 
         this.container = makeDiv(null, 'map');
@@ -88,12 +80,14 @@ class Basemap {
             this.map.boxZoom.disable();
             this.map.dragRotate.disable();
             this.map.keyboard.disable();
-            this.map.touchZoomRotate.disable();
             this.map.doubleClickZoom.disable();
+            this.map.touchPitch.disable();
 
             if (!this.options.interactive) {
                 this.map.scrollZoom.disable();
                 this.map.dragPan.disable();
+                this.map.touchZoomRotate.disable();
+                this.map.touchZoomRotate.disableRotation();
             }
             callback();
         });
@@ -165,13 +159,38 @@ class Basemap {
         return this.getContainer().offsetHeight;
     }
 
-    addLayer(layer) {
-        this.layers.push(layer);
-        this.map.addLayer(layer.layer);
+    hasLayer(id) {
+        return !!this.map.getLayer(id);
     }
 
-    addAreaLayer(areaLayer) {
-        this.map.addLayer(areaLayer);
+    addLayer(layer) {
+        if (!this.hasLayer(layer.getId())) {
+            this.map.addSource(layer.getId(), layer.getSource());
+            this.map.addLayer(layer.getLayer());
+            if (layer.isProtected()) { this.protectedLayers.push(layer.getId()); }
+        }
+    }
+
+    addAreaLayer(layer) {
+        if (!this.hasLayer(layer.getId() + '-area')) {
+            this.map.addSource(layer.getId() + '-area', layer.getAreaSource());
+            this.map.addLayer(layer.getAreaLayer());
+        }
+    }
+
+    removeLayer(layer) {
+        this.map.removeLayer(layer.getId());
+        this.map.removeSource(layer.getId());
+    }
+
+    removeLayers() {
+        const indexes = this.map.getStyle().layers
+            .filter(layer => !this.protectedLayers.includes(layer.id))
+            .map(layer => layer.id);
+        indexes.forEach(i => {
+            this.map.removeLayer(i);
+            this.map.removeSource(i);
+        });
     }
 
     animate(options, callback) {
@@ -181,11 +200,12 @@ class Basemap {
     }
 
     fit(extent, options, callback) {
-        const padding = options.padding || 0;
-        const o = this.map.cameraForBounds(extent, { padding: padding });
-        options.center = o.center;
-        options.zoom = o.zoom;
-        this.animate(options, callback);
+        this.map.fitBounds(extent, {
+            padding: options.padding || 0,
+            duration: options.duration || 1000,
+            easing: options.easing
+        });
+        this.map.once('moveend', callback);
     }
 
     slide(direction, callback) {
@@ -208,11 +228,14 @@ class Basemap {
     enableInteractions() {
         this.map.scrollZoom.enable();
         this.map.dragPan.enable();
+        this.map.touchZoomRotate.enable();
+        this.map.touchZoomRotate.disableRotation();
     }
 
     disableInteractions() {
         this.map.scrollZoom.disable();
         this.map.dragPan.disable();
+        this.map.touchZoomRotate.disable();
     }
 
     addListener(type, listener) {
@@ -244,13 +267,13 @@ class Basemap {
 
     createCharacters(level, options) {
         this.flowers = new Flowers({
-            name: 'level-flowers',
+            id: 'level-flowers',
             basemap: this,
             level: level
         });
 
         this.enemies = new Enemies({
-            name: 'level-enemies',
+            id: 'level-enemies',
             basemap: this,
             level: level,
             coordinates: options.enemies
@@ -259,7 +282,7 @@ class Basemap {
         this.enemies.orderByDistance(options.player);
 
         this.helpers = new Helpers({
-            name: 'level-helpers',
+            id: 'level-helpers',
             basemap: this,
             level: level,
             coordinates: options.helpers,
@@ -267,7 +290,7 @@ class Basemap {
         });
 
         this.rabbits = new Rabbits({
-            name: 'level-rabbits',
+            id: 'level-rabbits',
             basemap: this,
             level: level
         });
@@ -291,29 +314,20 @@ class Basemap {
     }
 
     getExtentForData() {
-        let minX = Infinity, minY = Infinity;
-        let maxX = -Infinity, maxY = -Infinity;
-
-        this.layers.forEach(layer => {
-            const sourceId = this.map.getLayer(layer.getName()).source;
-            const source = this.map.getSource(sourceId);
-
-            if (source && source.type === 'geojson') {
-                const data = source._data;
-                if (!data) return;
-
-                data.features.forEach(f => {
-                    let coordinates = flatten(f.geometry.coordinates);
-                    coordinates.forEach(([lng, lat]) => {
-                        if (lng < minX) minX = lng;
-                        if (lat < minY) minY = lat;
-                        if (lng > maxX) maxX = lng;
-                        if (lat > maxY) maxY = lat;
-                    });
-                });
-            }
-        });
-        return [minX, minY, maxX, maxY];
+        let extents = [];
+        if (this.rabbits) {
+            let re = this.rabbits.getLayerExtent();
+            if (re != null) extents.push(re);
+        }
+        if (this.enemies) {
+            let ee = this.enemies.getLayerExtent();
+            if (ee != null) extents.push(ee);
+        }
+        if (this.helpers) {
+            let he = this.helpers.getLayerExtent();
+            if (he != null) extents.push(he);
+        }
+        return mergeExtents(extents);
     }
 
     enableMovement(callback) {
@@ -366,77 +380,37 @@ class Basemap {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-    removeLayer(layer) {
-        for (let i = 0; i < this.layers.length; i++) {
-            if (this.layers[i] === layer) {
-                this.map.removeLayer(layer);
-                this.layers.splice(i, 1);
-                break;
-            }
-        }
-    }
-
-    removeLayers() {
-        this.layers.forEach(layer => { this.map.removeLayer(layer); })
-        this.layers = [];
-    }
-
-
-
     clear(callback) {
         callback = callback || function () { };
         let cleared = 0;
-        const clearing = 5;
+        const clearing = 4;
 
-        if (this.player) {
-            if (this.player.traveling) { this.player.stop(); }
-            this.player.despawn(() => {
-                if (++cleared === clearing) { callback(); }
-            });
-        } else { ++cleared }
-        if (this.target) {
-            this.target.despawn(() => {
-                if (++cleared === clearing) { callback(); }
-            });
-        } else { ++cleared }
-        if (this.enemies) {
-            this.enemies.despawn(() => {
-                if (++cleared === clearing) { callback(); }
-            });
-        } else { ++cleared }
-        if (this.helpers) {
-            this.helpers.despawn(() => {
-                if (++cleared === clearing) { callback(); }
-            });
-        } else { ++cleared }
-        if (this.position) {
-            this.position.destroy(() => {
-                if (++cleared === clearing) { callback(); }
-            });
-        } else { ++cleared }
-        if (cleared === clearing) { callback(); }
+        const checkDone = () => {
+            if (++cleared === clearing) {
+                wait(300, () => {
+                    this.rabbits.destroy();
+                    this.helpers.destroy();
+                    this.enemies.destroy();
+                    this.removeLayers();
+                    callback();
+                });
+            };
+        };
+
+        if (this.player) { if (this.player.traveling) { this.player.stop(); } }
+
+        const tasks = [
+            this.rabbits ? (cb) => this.rabbits.despawnCharacters(cb) : null,
+            this.enemies ? (cb) => {
+                this.enemies.hideAreas();
+                this.enemies.despawnCharacters(cb);
+            } : null,
+            this.helpers ? (cb) => this.helpers.despawnCharacters(cb) : null,
+            this.position ? (cb) => this.position.destroy(cb) : null
+        ];
+
+        tasks.forEach(task => task ? task(checkDone) : checkDone());
     }
-
-
-
-
-
-
-
-
-
-
-
 
     async addSprites(sprites) {
         for (let name in sprites) {

@@ -27,12 +27,11 @@ class Enemies extends Characters {
                 features: this.featuresArea
             }
         }
-        this.basemap.map.addSource(this.name + '-area', this.sourceArea);
 
         this.layerArea = {
-            id: this.name + '-area',
+            id: this.id + '-area',
             type: 'fill',
-            source: this.name + '-area',
+            source: this.id + '-area',
             paint: {
                 'fill-color': ['get', 'color'],
                 'fill-opacity': ['get', 'opacity']
@@ -40,7 +39,7 @@ class Enemies extends Characters {
         }
 
         this.basemap.addLayer(this);
-        this.basemap.addAreaLayer(this.layerArea);
+        this.basemap.addAreaLayer(this);
 
         // This stores enemies that already stroke
         this.stroke = [];
@@ -74,6 +73,21 @@ class Enemies extends Characters {
         });
     }
 
+    remove() {
+        this.basemap.map.removeLayer(this.id);
+        this.basemap.map.removeLayer(this.id + '-area');
+        this.basemap.map.removeSource(this.id);
+        this.basemap.map.removeSource(this.id + '-area');
+    }
+
+    getAreaLayer() {
+        return this.layerArea;
+    }
+
+    getAreaSource() {
+        return this.sourceArea;
+    }
+
     revealAreas() {
         this.areas.forEach(area => { area.revealArea(); });
     }
@@ -104,7 +118,7 @@ class Enemies extends Characters {
     }
 
     updateSourceArea() {
-        const source = this.basemap.map.getSource(this.name + '-area');
+        const source = this.basemap.map.getSource(this.id + '-area');
         if (source) {
             source.setData({
                 type: 'FeatureCollection',
@@ -122,22 +136,6 @@ class Enemies extends Characters {
             delay += increment;
         });
         wait(delay + 300, callback);
-    }
-
-    despawn(callback) {
-        callback = callback || function () { };
-        let amount = this.characters.length;
-        let done = 0;
-        this.characters.forEach((enemy) => {
-            const clearing = 2;
-            let cleared = 0;
-            enemy.despawn(() => {
-                if (++cleared === clearing) { if (++done === amount) { enemy.destroy(); callback(); } }
-            });
-            enemy.hideArea(() => {
-                if (++cleared === clearing) { if (++done === amount) { enemy.destroy(); callback(); } }
-            });
-        });
     }
 
     handle(player) {
@@ -164,30 +162,6 @@ class Enemies extends Characters {
                 }
             }
         }
-
-        // // Retrieve the enemies oustide and inside the visibible range
-        // [inside, outside] = this.getWithin(this.layer.basemap.enemies.getEnemies(), this.params.game.tolerance.enemies);
-        // // Treating enemies within range
-        // inside.forEach(enemy => {
-        //     // Check if the enemy has not already striked
-        //     if (!this.stroke.includes(enemy)) {
-        //         this.stroke.push(enemy);
-        //         if (!this.isInvulnerable()) {
-        //             this.level.score.addModifier('enemies');
-        //             this.makeInvulnerable(this.params.game.invulnerability);
-        //         }
-        //     }
-        // });
-        // // Treating enemies outside range
-        // outside.forEach(enemy => {
-        //     // If it was in close enemies
-        //     if (this.stroke.includes(enemy)) {
-        //         // Remove it from the list
-        //         let i = this.stroke.indexOf(enemy);
-        //         if (i > -1) { this.stroke.splice(i, 1); }
-        //     }
-        // });
-
     }
 }
 

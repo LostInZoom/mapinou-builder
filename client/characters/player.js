@@ -91,6 +91,8 @@ class Player extends Rabbit {
     }
 
     move(route, start, callback) {
+        // TODO: OPTIMIZE THE MOVEMENT -> PRECALCULATE THE POSITIONS AND REDUCE THE FPS
+
         callback = callback || function () { };
 
         // Set routing button to moving mode

@@ -30,18 +30,6 @@ class Helpers extends Characters {
         this.helpers.forEach((helper) => { helper.hide(); });
     }
 
-    despawn(callback) {
-        callback = callback || function () { };
-        let amount = this.getActiveHelpers().length;
-        let done = 0;
-        this.helpers.forEach((helper) => {
-            helper.despawn(() => {
-                helper.destroy();
-                if (++done === amount) { callback(); }
-            });
-        });
-    }
-
     handle(player) {
         const position = player.getCoordinates();
         for (let i = 0; i < this.characters.length; i++) {

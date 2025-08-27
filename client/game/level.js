@@ -137,7 +137,6 @@ class Level extends Page {
 
         this.basemap.player.spawn(() => {
             this.dataExtent = this.basemap.getExtentForData();
-
             this.basemap.fit(this.dataExtent, {
                 duration: 500,
                 easing: inAndOut,
@@ -327,27 +326,28 @@ class Level extends Page {
         callback = callback || function () { };
 
         removeClass(this.back, 'pop');
-        if (this.hint) { removeClass(this.hint, 'pop'); }
+        if (this.hint) removeClass(this.hint, 'pop');
+
         this.basemap.disableInteractions();
         this.basemap.removeListeners();
 
-        const clearing = 4;
         let cleared = 0;
+        const clearing = 4;
+        const checkDone = () => {
+            if (++cleared === clearing) {
+                this.back.remove();
+                callback();
+            };
+        };
 
-        wait(300, () => {
-            this.back.remove();
-            if (++cleared === clearing) { callback(); }
-        });
-        this.basemap.clear(() => {
-            this.basemap.removeLayers();
-            if (++cleared === clearing) { callback(); }
-        });
-        this.score.destroy(() => {
-            if (++cleared === clearing) { callback(); }
-        });
-        this.basemap.makeUnroutable(() => {
-            if (++cleared === clearing) { callback(); }
-        });
+        const tasks = [
+            (cb) => wait(500, cb),
+            (cb) => this.basemap.clear(cb),
+            (cb) => this.score.destroy(cb),
+            (cb) => this.basemap.makeUnroutable(cb)
+        ];
+
+        tasks.forEach(task => task(checkDone));
     }
 
     toLevels() {

@@ -15,7 +15,7 @@ class Router {
 
         this.position = this.options.position;
         this.journeys = new Journeys({
-            name: 'level-journeys',
+            id: 'level-journeys',
             basemap: this.basemap,
             behind: 'level-enemies',
             color: this.player.getColor(),
