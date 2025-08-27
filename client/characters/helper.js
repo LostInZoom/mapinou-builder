@@ -63,6 +63,7 @@ class Helper extends Character {
                 this.animateScale({
                     value: 0,
                     duration: 300,
+                    overshoot: 1.1,
                     easing: easeInQuint
                 }, () => {
                     this.destroy();

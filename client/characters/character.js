@@ -238,9 +238,9 @@ class Character {
     }
 
     animateScale(options, callback) {
-        callback = typeof callback === 'function' ? callback : () => { };
+        callback = callback || function () { };
         this.startScaleAnimation = performance.now();
-        const anim = this.startScaleAnimation;
+        const start = this.startScaleAnimation;
 
         const origin = this.scale;
         const value = options.value;
@@ -250,50 +250,50 @@ class Character {
         const minScale = (options.minScale != null) ? options.minScale : 0;
         const maxScale = (options.maxScale != null) ? options.maxScale : Infinity;
 
-        const start = performance.now();
-
+        const st = performance.now();
         const lerp = (a, b, u) => a + (b - a) * u;
 
         const animation = (time) => {
-            if (anim !== this.startScaleAnimation) return;
-            const t = Math.min(Math.max((time - start) / duration, 0), 1);
-            let s;
-            if (k <= 1 || origin === value) {
-                // No overshoot
-                s = lerp(origin, value, easing(t));
-            } else {
-                // Get the overshoot target
-                let overshootTarget;
-                if (origin < value) {
-                    // spawn, overshoot based on final value
-                    overshootTarget = value * k;
+            if (start === this.startScaleAnimation) {
+                const t = Math.min(Math.max((time - st) / duration, 0), 1);
+                let s;
+                if (k <= 1 || origin === value) {
+                    // No overshoot
+                    s = lerp(origin, value, easing(t));
                 } else {
-                    // despawn, overshoot based on origin value
-                    overshootTarget = origin * k;
+                    // Get the overshoot target
+                    let overshootTarget;
+                    if (origin < value) {
+                        // spawn, overshoot based on final value
+                        overshootTarget = value * k;
+                    } else {
+                        // despawn, overshoot based on origin value
+                        overshootTarget = origin * k;
+                    }
+
+                    // phase 1 : origin -> overshootTarget (t in [0,0.5])
+                    // phase 2 : overshootTarget -> value (t in (0.5,1])
+                    if (t < 0.5) {
+                        const u = easing(t / 0.5);
+                        s = lerp(origin, overshootTarget, u);
+                    } else {
+                        const u = easing((t - 0.5) / 0.5);
+                        s = lerp(overshootTarget, value, u);
+                    }
                 }
 
-                // phase 1 : origin -> overshootTarget (t in [0,0.5])
-                // phase 2 : overshootTarget -> value (t in (0.5,1])
-                if (t < 0.5) {
-                    const u = easing(t / 0.5);
-                    s = lerp(origin, overshootTarget, u);
+                // clamp to avoid negative value
+                s = Math.max(minScale, Math.min(maxScale, s));
+
+                this.setScale(s);
+
+                if (t < 1) {
+                    requestAnimationFrame(animation);
                 } else {
-                    const u = easing((t - 0.5) / 0.5);
-                    s = lerp(overshootTarget, value, u);
+                    this.setScale(Math.max(minScale, Math.min(maxScale, value)));
+                    callback();
                 }
-            }
-
-            // clamp to avoid negative value
-            s = Math.max(minScale, Math.min(maxScale, s));
-
-            this.setScale(s);
-
-            if (t < 1) {
-                requestAnimationFrame(animation);
-            } else {
-                this.setScale(Math.max(minScale, Math.min(maxScale, value)));
-                callback();
-            }
+            };
         };
         requestAnimationFrame(animation);
     }
