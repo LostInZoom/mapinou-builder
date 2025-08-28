@@ -67,6 +67,7 @@ class Levels extends Page {
             this.minimaps = [];
 
             const observer = new ResizeObserver(() => {
+                this.basemap.fit(this.params.interface.map.levels, { duration: 0 });
                 this.svg.resize(this.getWidth(), this.getHeight());
                 for (let i = 0; i < this.minimapscontainer.length; i++) {
                     let minimap = this.minimapscontainer[i];
@@ -74,7 +75,6 @@ class Levels extends Page {
                     let px = this.app.basemap.getPixelAtCoordinates(position);
                     minimap.style.left = px[0] + 'px';
                     minimap.style.top = px[1] + 'px';
-
                     if (i < this.minimapscontainer.length - 1) { this.svg.moveLineStart(i, px[0], px[1]); }
                     if (i > 0) { this.svg.moveLineEnd(i - 1, px[0], px[1]); }
                 }

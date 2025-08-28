@@ -145,6 +145,8 @@ class Level extends Page {
                 easing: inAndOut,
                 padding: { top: 100, bottom: 50, left: 50, right: 50 }
             }, () => {
+                this.basemap.setMinZoom(this.basemap.getZoom());
+
                 this.basemap.target.spawn(() => {
                     this.basemap.enemies.spawn(1000, () => {
                         this.listening = true;
@@ -175,18 +177,20 @@ class Level extends Page {
 
         const clearing = 2;
         let cleared = 0;
+        const toLeaderBoard = () => {
+            if (++cleared === clearing) { this.leaderboard(); }
+        };
+
         ajaxPost('results', results, hs => {
             this.highscores = hs.highscores;
-            if (++cleared === clearing) { this.leaderboard(); }
+            toLeaderBoard();
         });
 
         this.basemap.fit(this.dataExtent, {
             duration: 500,
             easing: inAndOut,
-            padding: [100, 50, 50, 50]
-        }, () => {
-            if (++cleared === clearing) { this.leaderboard(); }
-        });
+            padding: { top: 100, bottom: 50, left: 50, right: 50 }
+        }, toLeaderBoard);
     }
 
     leaderboard() {
@@ -351,6 +355,7 @@ class Level extends Page {
     }
 
     toLevels() {
+        this.basemap.unsetMinZoom();
         this.destroy();
         this.app.page = new Levels({
             app: this.app,

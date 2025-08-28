@@ -7,7 +7,7 @@ import Helpers from '../layers/helpers.js';
 import Position from '../game/position.js';
 import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
 import Rabbits from '../layers/rabbits.js';
-import { flatten, mergeExtents, project } from './analysis.js';
+import { mergeExtents, project } from './analysis.js';
 import { easeInOutCubic } from '../utils/math.js';
 import Flowers from '../layers/flowers.js';
 
@@ -17,6 +17,9 @@ class Basemap {
         this.options = options || {};
         this.app = this.options.app;
         this.params = this.app.options;
+
+        this.animationCurve = 2;
+        this.animationSpeed = 5;
 
         this.spritesheets = ['rabbits', 'enemies', 'vegetables', 'flower'];
         this.protectedLayers = ['basemap'];
@@ -88,6 +91,8 @@ class Basemap {
             });
         }
 
+        this.setMaxZoom(17);
+
         this.map.on('load', () => {
             this.map.boxZoom.disable();
             this.map.dragRotate.disable();
@@ -154,6 +159,30 @@ class Basemap {
         return this.map.getZoom();
     }
 
+    getMaxZoom() {
+        return this.map.getMaxZoom();
+    }
+
+    setMaxZoom(zoom) {
+        this.map.setMaxZoom(zoom);
+    }
+
+    unsetMaxZoom() {
+        this.map.setMaxZoom(22);
+    }
+
+    getMinZoom() {
+        return this.map.getMinZoom();
+    }
+
+    setMinZoom(zoom) {
+        this.map.setMinZoom(zoom);
+    }
+
+    unsetMinZoom() {
+        this.map.setMinZoom(0);
+    }
+
     getResolution() {
         const R = 6378137;
         const tileSize = 256;
@@ -217,15 +246,19 @@ class Basemap {
 
     animate(options, callback) {
         callback = callback || function () { };
-        this.map.easeTo(options);
+        options.curve = options.curve ?? this.animationCurve;
+        options.speed = options.curve ?? this.animationSpeed;
+        this.map.flyTo(options);
         this.map.once('moveend', callback);
     }
 
     fit(extent, options, callback) {
         this.map.fitBounds(extent, {
-            padding: options.padding || 0,
-            duration: options.duration || 1000,
-            easing: options.easing
+            padding: options.padding ?? 0,
+            duration: options.duration ?? 1000,
+            easing: options.easing ?? (x => x),
+            curve: options.curve ?? this.animationCurve,
+            speed: options.speed ?? this.animationSpeed
         });
         this.map.once('moveend', callback);
     }
