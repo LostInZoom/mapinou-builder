@@ -5,8 +5,13 @@
     height: 100%;
     background-color: colors.$main-color-light;
 
-    &.active { pointer-events: all; }
-    &.wrong { animation: wrong-double-click .3s linear; }
+    &.active {
+        pointer-events: all;
+    }
+
+    &.wrong {
+        animation: wrong-double-click .3s linear;
+    }
 }
 
 .basemap {
@@ -14,6 +19,30 @@
     top: 0;
     left: 0;
     z-index: 5;
+}
+
+.minimap-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 100;
+
+    background-color: colors.$main-color-light;
+    opacity: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: all;
+
+    transition: opacity .2s;
+
+    &.loaded {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 .map-mask-container {
@@ -25,10 +54,16 @@
     height: 100%;
     width: 100%;
 
-    &.routable > .map-mask {
+    &.routable>.map-mask {
         transition: all .5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        &.meridian { width: .5rem; }
-        &.parallel { height: .5rem; }
+
+        &.meridian {
+            width: .5rem;
+        }
+
+        &.parallel {
+            height: .5rem;
+        }
     }
 }
 
@@ -40,14 +75,27 @@
     &.meridian {
         width: 0;
         height: 100%;
-        &.east { right: 0; }
-        &.west { left: 0; }
+
+        &.east {
+            right: 0;
+        }
+
+        &.west {
+            left: 0;
+        }
     }
+
     &.parallel {
         width: 100%;
         height: 0;
-        &.north { top: 0; }
-        &.south { bottom: 0; }
+
+        &.north {
+            top: 0;
+        }
+
+        &.south {
+            bottom: 0;
+        }
     }
 }
 

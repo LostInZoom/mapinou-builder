@@ -1,6 +1,6 @@
 import { unByKey } from 'ol/Observable.js';
 
-import { randomPointInCircle, within } from "../cartography/analysis";
+import { pointExtent, randomPointInCircle, within } from "../cartography/analysis";
 import Score from "../cartography/score";
 import Page from "../pages/page";
 import { addClass, easingIncrement, makeDiv, removeClass, wait } from "../utils/dom";
@@ -10,6 +10,7 @@ import Levels from '../pages/levels';
 import { ajaxPost } from '../utils/ajax';
 import Basemap from '../cartography/map';
 import { easeOutExpo } from '../utils/math';
+import Rabbits from '../layers/rabbits';
 
 class Level extends Page {
     constructor(options, callback) {
@@ -50,7 +51,9 @@ class Level extends Page {
         // });
 
         this.phase2(() => {
-            this.ending();
+            wait(300, () => {
+                this.ending();
+            });
         });
     }
 
@@ -208,90 +211,87 @@ class Level extends Page {
         let hsmap = new Basemap({
             app: this.app,
             parent: this.highscoreMap,
-            center: this.level.target,
-            extent: [c[0] - r * 2, c[1] - r * 2, c[0] + r * 2, c[1] + r * 2]
+            class: 'minimap',
+            interactive: false,
+            extent: pointExtent(c, r * 2)
         }, () => {
-            this.hsTarget = new Target({
-                basemap: hsmap,
-                level: this,
-                color: 'brown',
-                coordinates: randomPointInCircle(c, r),
-                orientable: true,
-                zIndex: 40
-            });
-            this.hsPlayer = new Target({
-                basemap: hsmap,
-                level: this,
-                color: 'white',
-                coordinates: randomPointInCircle(c, r),
-                orientable: true,
-                zIndex: 50
-            });
-            this.hsTarget.spawn();
-            this.hsPlayer.spawn();
-        });
+            hsmap.loadSprites().then(() => {
+                let hsRabbits = new Rabbits({
+                    id: 'leaderboard-rabbits',
+                    basemap: hsmap,
+                    level: this
+                });
+                let hsTarget = new Target({
+                    layer: hsRabbits,
+                    colors: ['brown', 'sand', 'grey'],
+                    color: 'random',
+                    coordinates: randomPointInCircle(c, r)
+                });
+                let hsPlayer = new Target({
+                    layer: hsRabbits,
+                    colors: ['brown', 'sand', 'grey'],
+                    color: 'random',
+                    coordinates: randomPointInCircle(c, r)
+                });
 
-        let delay = 300;
-        delay += 200;
+                let delay = 300;
+                wait(delay, () => {
+                    hsTarget.spawn();
+                    hsPlayer.spawn();
+                });
 
-        wait(delay, () => {
-            addClass(this.highscoreScore, 'pop');
-            addClass(this.continue, 'pop');
-        });
-        delay += 500;
+                delay += 200;
+                wait(delay, () => {
+                    addClass(this.highscoreScore, 'pop');
+                    addClass(this.continue, 'pop');
+                });
 
-        wait(delay, () => {
-            addClass(this.highscoreScore, 'incrementing');
-            easingIncrement({
-                element: this.highscoreScore,
-                maximum: this.endScore,
-                duration: 2000,
-                easing: easeOutExpo
-            }, () => {
-                removeClass(this.highscoreScore, 'incrementing');
-                addClass(this.highscoreScore, 'stop');
-                this.continue.addEventListener('click', () => {
-                    const clearing = 2;
-                    let cleared = 0;
-                    removeClass(this.highscoreContainer, 'pop');
-                    this.hsPlayer.despawn(() => {
-                        if (++cleared === clearing) {
-                            hsmap.dispose();
-                            this.toLevels();
-                        }
+                delay += 500;
+                wait(delay, () => {
+                    addClass(this.highscoreScore, 'incrementing');
+                    easingIncrement({
+                        element: this.highscoreScore,
+                        maximum: this.endScore,
+                        duration: 1000,
+                        easing: easeOutExpo
+                    }, () => {
+                        removeClass(this.highscoreScore, 'incrementing');
+                        addClass(this.highscoreScore, 'stop');
+                        this.continue.addEventListener('click', () => {
+                            removeClass(this.highscoreContainer, 'pop');
+                            hsRabbits.despawnCharacters(() => {
+                                hsRabbits.destroy();
+                                hsmap.remove();
+                                this.toLevels();
+                            });
+                        }, { once: true })
                     });
-                    this.hsTarget.despawn(() => {
-                        if (++cleared === clearing) {
-                            hsmap.dispose();
-                            this.toLevels();
-                        }
-                    });
-                }, { once: true })
+                })
+
+                this.highscores.sort((a, b) => a.score - b.score);
+                let personal;
+                for (let e = 1; e < this.highscores.length; e++) {
+                    let entry = this.highscores[e];
+                    let boardEntry = makeDiv(null, 'highscore-leaderboard-entry');
+                    let html = `${e}.`;
+                    if (this.params.session.index === entry.session) {
+                        html += ' Vous';
+                        addClass(boardEntry, 'active');
+                        personal = boardEntry;
+                    }
+                    let boardPlace = makeDiv(null, 'highscore-leaderboard-place', html);
+                    let boardScore = makeDiv(null, 'highscore-leaderboard-score', entry.score);
+                    boardEntry.append(boardPlace, boardScore);
+                    this.highscoreLeaderboard.append(boardEntry);
+                }
+
+                // Scroll to the user result
+                if (personal) {
+                    let topScroll = personal.offsetTop;
+                    this.highscoreLeaderboard.scrollTop = topScroll - this.highscoreLeaderboard.offsetHeight / 2;
+                }
             });
-        })
-
-        this.highscores.sort((a, b) => a.score - b.score);
-        let personal;
-        for (let e = 1; e < this.highscores.length; e++) {
-            let entry = this.highscores[e];
-            let boardEntry = makeDiv(null, 'highscore-leaderboard-entry');
-            let html = `${e}.`;
-            if (this.params.session.index === entry.session) {
-                html += ' Vous';
-                addClass(boardEntry, 'active');
-                personal = boardEntry;
-            }
-            let boardPlace = makeDiv(null, 'highscore-leaderboard-place', html);
-            let boardScore = makeDiv(null, 'highscore-leaderboard-score', entry.score);
-            boardEntry.append(boardPlace, boardScore);
-            this.highscoreLeaderboard.append(boardEntry);
-        }
-
-        // Scroll to the user result
-        if (personal) {
-            let topScroll = personal.offsetTop;
-            this.highscoreLeaderboard.scrollTop = topScroll - this.highscoreLeaderboard.offsetHeight / 2;
-        }
+        });
     }
 
     routing() {

@@ -23,13 +23,14 @@
     z-index: 100;
 
     opacity: 1;
-    
+
     display: flex;
     justify-content: center;
     align-items: center;
     pointer-events: all;
 
     transition: opacity .2s;
+
     &.loaded {
         opacity: 0;
         pointer-events: none;
@@ -42,6 +43,6 @@
     overflow: hidden;
     object-fit: cover;
     object-position: 50% 50%;
-    
+
     transition: all .1s linear;
 }

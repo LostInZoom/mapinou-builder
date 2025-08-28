@@ -132,4 +132,23 @@ function mergeExtents(extents) {
     return [[minX, minY], [maxX, maxY]];
 }
 
-export { buffer, flatten, bufferAroundPolygon, middle, within, project, angle, randomPointInCircle, toLongLat, mergeExtents }
+function pointExtent(coordinates, radius) {
+    const options = { units: 'meters' };
+    const point = turf.point(coordinates);
+    const north = turf.destination(point, radius, 0, options).geometry.coordinates;
+    const east = turf.destination(point, radius, 90, options).geometry.coordinates;
+    const south = turf.destination(point, radius, 180, options).geometry.coordinates;
+    const west = turf.destination(point, radius, -90, options).geometry.coordinates;
+    const minX = west[0];
+    const maxX = east[0];
+    const minY = south[1];
+    const maxY = north[1];
+    return [minX, minY, maxX, maxY];
+}
+
+export {
+    buffer, flatten, bufferAroundPolygon,
+    middle, within, project, angle,
+    randomPointInCircle, toLongLat, mergeExtents,
+    pointExtent
+}

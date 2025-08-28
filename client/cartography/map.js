@@ -23,58 +23,70 @@ class Basemap {
 
         this.parent = this.options.parent;
 
+        this.mask = makeDiv(null, 'minimap-mask');
+        this.parent.append(this.mask);
+
         this.container = makeDiv(null, 'map');
         if (options.class) { addClass(this.container, options.class); }
         this.parent.append(this.container);
 
         let center = this.options.center || [0, 0];
         let zoom = this.options.zoom || 1;
+        let extent = this.options.extent;
+        let padding = this.options.padding;
 
-        if (this.options.extent) {
-            const o = this.map.cameraForBounds(this.options.extent);
-            zoom = o.zoom;
-            center = o.center;
-        }
-
-        this.map = new Map({
-            container: this.container,
-            center: center,
-            zoom: zoom,
-            interactive: true,
-            canvasContextAttributes: { antialias: true },
-            style: {
-                'version': 8,
-                'sources': {
-                    'PLANIGN': {
-                        'type': 'raster',
-                        'tiles': [
-                            "https://data.geopf.fr/wmts?" +
-                            "layer=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2" +
-                            "&style=normal" +
-                            "&tilematrixset=PM" +
-                            "&Service=WMTS" +
-                            "&Request=GetTile" +
-                            "&Version=1.0.0" +
-                            "&Format=image/png" +
-                            "&TileCol={x}" +
-                            "&TileRow={y}" +
-                            "&TileMatrix={z}"
-                        ],
-                        'tileSize': 256,
-                    }
-                },
-                'layers': [
-                    {
-                        'id': 'basemap',
-                        'type': 'raster',
-                        'source': 'PLANIGN',
-                        'minzoom': 0,
-                        'maxzoom': 22
-                    }
-                ],
-                "fadeDuration": 0
+        let style = {
+            'version': 8,
+            'sources': {
+                'PLANIGN': {
+                    'type': 'raster',
+                    'tiles': [
+                        "https://data.geopf.fr/wmts?" +
+                        "layer=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2" +
+                        "&style=normal" +
+                        "&tilematrixset=PM" +
+                        "&Service=WMTS" +
+                        "&Request=GetTile" +
+                        "&Version=1.0.0" +
+                        "&Format=image/png" +
+                        "&TileCol={x}" +
+                        "&TileRow={y}" +
+                        "&TileMatrix={z}"
+                    ],
+                    'tileSize': 256,
+                }
             },
-        });
+            'layers': [
+                {
+                    'id': 'basemap',
+                    'type': 'raster',
+                    'source': 'PLANIGN',
+                    'minzoom': 0,
+                    'maxzoom': 22
+                }
+            ],
+            "fadeDuration": 0
+        };
+
+        if (extent) {
+            this.map = new Map({
+                container: this.container,
+                interactive: true,
+                bounds: extent,
+                fitBoundsOptions: { padding: padding || 0 },
+                canvasContextAttributes: { antialias: true },
+                style: style,
+            });
+        } else {
+            this.map = new Map({
+                container: this.container,
+                interactive: true,
+                center: center,
+                zoom: zoom,
+                canvasContextAttributes: { antialias: true },
+                style: style,
+            });
+        }
 
         this.map.on('load', () => {
             this.map.boxZoom.disable();
@@ -89,6 +101,8 @@ class Basemap {
                 this.map.touchZoomRotate.disable();
                 this.map.touchZoomRotate.disableRotation();
             }
+
+            this.loaded();
             callback();
         });
 
@@ -102,6 +116,14 @@ class Basemap {
         this.south = makeDiv(null, 'map-mask parallel south');
         this.maskcontainer.append(this.east, this.west, this.north, this.south);
         this.container.append(this.maskcontainer);
+    }
+
+    loading() {
+        removeClass(this.mask, 'loaded');
+    }
+
+    loaded() {
+        addClass(this.mask, 'loaded');
     }
 
     render() {
@@ -296,7 +318,6 @@ class Basemap {
         });
 
         this.target = new Target({
-            level: level,
             layer: this.rabbits,
             colors: ['brown', 'sand', 'grey'],
             color: 'random',
@@ -334,11 +355,10 @@ class Basemap {
         callback = callback || function () { };
 
         const movement = (e) => {
-            if (this.routable) {
+            // RESTORE ROUTABILITY HERE
+            if (true) {
                 let destination = e.lngLat.toArray();
-                if (this.isVisible(this.player.getCoordinates(), 0)) {
-                    this.player.travel(destination, callback);
-                }
+                this.player.travel(destination, callback);
             }
         }
         this.addListener('click', movement);
@@ -349,15 +369,21 @@ class Basemap {
         });
 
         const routing = () => {
-            if (this.getZoom() >= this.params.game.routing && !this.routable) {
+            const isClose = this.getZoom() >= this.params.game.routing;
+            const isVisible = this.isVisible(this.player.getCoordinates(), 0);
+            if (isClose && isVisible) {
                 this.makeRoutable();
             }
-            else if (this.getZoom() < this.params.game.routing && this.routable) {
+            else {
                 this.makeUnroutable();
             }
             this.position.update();
         }
         this.addListener('render', routing);
+    }
+
+    isRoutable() {
+        return this.routable;
     }
 
     makeRoutable(callback) {

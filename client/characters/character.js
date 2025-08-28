@@ -180,16 +180,16 @@ class Character {
         this.startFrameAnimation = performance.now();
         let start = this.startFrameAnimation;
         const animation = () => {
-            if (start === this.startFrameAnimation) {
-                wait(this.framerate, () => {
+            wait(this.framerate, () => {
+                if (start === this.startFrameAnimation) {
                     this.setFrame((this.frame + 1) % this.framenumber);
                     if (this.getFrame() === (this.framenumber - 1) && typeof callback === 'function') {
                         callback();
                     } else {
                         requestAnimationFrame(animation);
                     }
-                });
-            }
+                }
+            });
         };
         requestAnimationFrame(animation);
     }
