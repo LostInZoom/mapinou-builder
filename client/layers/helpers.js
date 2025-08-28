@@ -10,6 +10,7 @@ class Helpers extends Characters {
             'vegetables:',
             ['get', 'type']
         ]
+
         this.basemap.addLayer(this);
 
         if (this.options.coordinates) {
@@ -22,12 +23,14 @@ class Helpers extends Characters {
         }
     }
 
-    display() {
-        this.helpers.forEach((helper) => { helper.display(); })
+    reveal() {
+        this.visible = true;
+        this.characters.forEach(c => { c.reveal(); });
     }
 
     hide() {
-        this.helpers.forEach((helper) => { helper.hide(); });
+        this.visible = false;
+        this.characters.forEach(c => { c.hide(); });
     }
 
     handle(player) {
@@ -37,7 +40,8 @@ class Helpers extends Characters {
             if (helper.isActive()) {
                 if (within(position, helper.getCoordinates(), this.params.game.visibility.helpers)) {
                     if (!helper.isVisible()) {
-                        helper.reveal();
+                        helper.setVisibility(true);
+                        helper.spawn(() => { helper.breathe(); });
                     }
                     // Consume them if within consuming range
                     if (within(position, helper.getCoordinates(), this.params.game.tolerance.helpers)) {
@@ -47,7 +51,8 @@ class Helpers extends Characters {
                 }
                 else {
                     if (helper.isVisible()) {
-                        helper.hide();
+                        helper.setVisibility(false);
+                        helper.despawn();
                     }
                 }
             }

@@ -22,6 +22,10 @@ class Characters extends Layer {
             'icon-allow-overlap': true,
             'icon-ignore-placement': true,
         };
+
+        this.layer.paint = {
+            'icon-opacity': ['get', 'opacity']
+        }
     }
 
     getNumber() {

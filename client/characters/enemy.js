@@ -20,6 +20,7 @@ class Enemy extends Character {
         this.feature.properties.orientation = this.orientation;
         this.feature.properties.frame = this.frame;
         this.feature.properties.scale = this.scale;
+        this.feature.properties.opacity = this.opacity;
 
         let colors = getColorsByClassNames('enemies-map', 'enemies-map-transparent');
 
@@ -32,7 +33,6 @@ class Enemy extends Character {
         this.border2 = bufferAroundPolygon(b1, this.width2).geometry.coordinates;
 
         this.areaOpacity = 0;
-        this.areaOpacityStart = 0;
         this.area1 = {
             type: 'Feature',
             properties: {
@@ -61,18 +61,14 @@ class Enemy extends Character {
     }
 
     revealArea(callback) {
-        this.areaOpacityStart = performance.now();
         this.animateAreaOpacity({
-            value: 1,
-            start: this.areaOpacityStart
+            value: 1
         }, callback);
     }
 
     hideArea(callback) {
-        this.areaOpacityStart = performance.now();
         this.animateAreaOpacity({
-            value: 0,
-            start: this.areaOpacityStart
+            value: 0
         }, callback);
     }
 
@@ -86,33 +82,32 @@ class Enemy extends Character {
     animateAreaOpacity(options, callback) {
         callback = callback || function () { };
 
-        if (this.active) {
-            const value = options.value;
-            const start = options.start;
+        const value = options.value;
+        const start = performance.now();
+        this.startOpacityAnimation = start;
 
-            const origin = this.areaOpacity;
-            const duration = options.duration || 300;
-            const easing = options.easing || (x => x);
+        const origin = this.areaOpacity;
+        const duration = options.duration || 300;
+        const easing = options.easing || (x => x);
 
-            const animation = (time) => {
-                if (this.areaOpacityStart === start) {
-                    const elapsed = time - start;
-                    const t = Math.min(Math.max(elapsed / duration, 0), 1);
-                    const eased = easing(t);
-                    const opacity = origin + (value - origin) * eased;
-                    this.setAreaOpacity(opacity);
-                    if (t < 1) {
-                        requestAnimationFrame(animation);
-                    } else {
-                        this.setAreaOpacity(value);
-                        callback();
-                    }
+        const animation = (time) => {
+            if (this.startOpacityAnimation === start) {
+                const elapsed = time - start;
+                const t = Math.min(Math.max(elapsed / duration, 0), 1);
+                const eased = easing(t);
+                const opacity = origin + (value - origin) * eased;
+                this.setAreaOpacity(opacity);
+                if (t < 1) {
+                    requestAnimationFrame(animation);
                 } else {
+                    this.setAreaOpacity(value);
                     callback();
                 }
-            };
-            requestAnimationFrame(animation);
-        }
+            } else {
+                callback();
+            }
+        };
+        requestAnimationFrame(animation);
     }
 }
 

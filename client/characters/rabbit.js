@@ -31,6 +31,7 @@ class Rabbit extends Character {
         this.feature.properties.frame = this.frame;
         this.feature.properties.scale = this.scale;
         this.feature.properties.offset = this.offset;
+        this.feature.properties.opacity = this.opacity;
 
         this.layer.addCharacter(this);
         this.animateFrame();

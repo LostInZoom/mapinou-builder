@@ -33,12 +33,15 @@ class Character {
         this.start = 0;
         this.startFrameAnimation = 0;
         this.startScaleAnimation = 0;
+        this.startOpacityAnimation = 0;
         this.moving = false;
 
         this.frame = this.options.frame || 0;
         this.framerate = this.options.framerate || 200;
         this.framescale = this.options.scale || 1;
         this.framenumber = this.options.framenumber || 1;
+
+        this.opacity = this.options.opacity || 1;
         // Set the scale to zero because the character need to be spawned
         this.scale = 0;
         this.offset = [0, 0];
@@ -152,6 +155,16 @@ class Character {
         this.layer.updateSource();
     }
 
+    getOpacity() {
+        return this.opacity;
+    }
+
+    setOpacity(opacity) {
+        this.opacity = opacity;
+        this.feature.properties.opacity = opacity;
+        this.layer.updateSource();
+    }
+
     getCoordinates() {
         return this.coordinates;
     }
@@ -166,10 +179,15 @@ class Character {
         this.stop();
         this.stopFrameAnimation();
         this.stopScaleAnimation();
+        this.stopOpacityAnimation();
     }
 
     stop() {
         this.start = 0;
+    }
+
+    stopOpacityAnimation() {
+        this.startOpacityAnimation = 0;
     }
 
     stopFrameAnimation() {

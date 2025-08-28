@@ -57,20 +57,6 @@ class Enemies extends Characters {
                 else if (choice === 'bird') { new Bird(o); }
             });
         }
-
-        this.areasVisible = false;
-        this.basemap.addListener('render', () => {
-            let threshold = this.params.game.routing;
-            let zoom = this.basemap.getZoom();
-            if (zoom >= threshold && !this.areasVisible) {
-                this.areasVisible = true;
-                this.revealAreas();
-            }
-            else if (zoom < threshold && this.areasVisible) {
-                this.areasVisible = false;
-                this.hideAreas();
-            }
-        });
     }
 
     remove() {
@@ -89,10 +75,12 @@ class Enemies extends Characters {
     }
 
     revealAreas() {
+        this.areasVisible = true;
         this.areas.forEach(area => { area.revealArea(); });
     }
 
     hideAreas() {
+        this.areasVisible = false;
         this.areas.forEach(area => { area.hideArea(); });
     }
 

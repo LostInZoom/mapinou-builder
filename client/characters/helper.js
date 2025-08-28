@@ -14,8 +14,11 @@ class Helper extends Character {
             'turnip', 'zucchini', 'beet', 'squash', 'butternut'
         ]
         this.type = this.types[generateRandomInteger(0, 9)];
+        this.opacity = this.layer.basemap.getZoom() < this.params.game.routing ? 0 : 1;
+
         this.feature.properties.type = this.type;
         this.feature.properties.scale = this.scale;
+        this.feature.properties.opacity = this.opacity;
 
         this.layer.addCharacter(this);
     }
@@ -26,19 +29,20 @@ class Helper extends Character {
         this.layer.updateSource();
     }
 
+    setVisibility(visibility) {
+        this.visible = visibility;
+    }
+
     reveal(callback) {
-        callback = callback || function () { };
-        this.visible = true;
-        this.spawn(() => {
-            this.breathe();
-            callback();
-        });
+        this.animateOpacity({
+            value: 1
+        }, callback);
     }
 
     hide(callback) {
-        callback = callback || function () { };
-        this.visible = false;
-        this.despawn(callback);
+        this.animateOpacity({
+            value: 0
+        }, callback);
     }
 
     isVisible() {
@@ -70,6 +74,37 @@ class Helper extends Character {
                 });
             })
         })
+    }
+
+    animateOpacity(options, callback) {
+        callback = callback || function () { };
+
+        const value = options.value;
+        const start = performance.now();
+        this.startOpacityAnimation = start;
+
+        const origin = this.opacity;
+        const duration = options.duration || 300;
+        const easing = options.easing || (x => x);
+
+        const animation = (time) => {
+            if (this.startOpacityAnimation === start) {
+                const elapsed = time - start;
+                const t = Math.min(Math.max(elapsed / duration, 0), 1);
+                const eased = easing(t);
+                const opacity = origin + (value - origin) * eased;
+                this.setOpacity(opacity);
+                if (t < 1) {
+                    requestAnimationFrame(animation);
+                } else {
+                    this.setOpacity(value);
+                    callback();
+                }
+            } else {
+                callback();
+            }
+        };
+        requestAnimationFrame(animation);
     }
 }
 

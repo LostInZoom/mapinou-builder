@@ -138,6 +138,22 @@ class Level extends Page {
             if (this.basemap.player.traveling) { this.basemap.player.stop(); }
         });
 
+        let visible = false;
+        this.basemap.addListener('render', () => {
+            let threshold = this.params.game.routing;
+            let zoom = this.basemap.getZoom();
+            if (zoom >= threshold && !visible) {
+                visible = true;
+                this.basemap.helpers.reveal();
+                this.basemap.enemies.revealAreas();
+            }
+            else if (zoom < threshold && visible) {
+                visible = false;
+                this.basemap.helpers.hide();
+                this.basemap.enemies.hideAreas();
+            }
+        });
+
         this.basemap.player.spawn(() => {
             this.dataExtent = this.basemap.getExtentForData();
             this.basemap.fit(this.dataExtent, {
