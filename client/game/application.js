@@ -15,6 +15,7 @@ import Rabbits from '../layers/rabbits.js';
 class Application {
     constructor(options) {
         this.options = options;
+        this.progression = options.progression;
 
         // Create the DOM Element
         this.container = makeDiv('application', null);
