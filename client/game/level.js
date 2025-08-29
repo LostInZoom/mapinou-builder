@@ -9,7 +9,7 @@ import Target from '../characters/target';
 import Levels from '../pages/levels';
 import { ajaxPost } from '../utils/ajax';
 import Basemap from '../cartography/map';
-import { easeOutExpo } from '../utils/math';
+import { easeInOutSine, easeOutExpo } from '../utils/math';
 import Rabbits from '../layers/rabbits';
 
 class Level extends Page {
@@ -373,10 +373,16 @@ class Level extends Page {
     toLevels() {
         this.basemap.unsetMinZoom();
         this.destroy();
-        this.app.page = new Levels({
-            app: this.app,
-            position: 'current',
-            init: true
+
+        this.basemap.fit(this.params.interface.map.levels, {
+            duration: 1000,
+            easing: easeInOutSine
+        }, () => {
+            this.app.page = new Levels({
+                app: this.app,
+                position: 'current',
+                init: true
+            });
         });
     }
 }

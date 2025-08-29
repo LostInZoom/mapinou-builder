@@ -249,7 +249,10 @@ class Basemap {
         options.curve = options.curve ?? this.animationCurve;
         options.speed = options.curve ?? this.animationSpeed;
         this.map.flyTo(options);
-        this.map.once('moveend', callback);
+        this.map.once('moveend', () => {
+            this.render();
+            if (callback) callback();
+        });
     }
 
     fit(extent, options, callback) {
@@ -260,7 +263,10 @@ class Basemap {
             curve: options.curve ?? this.animationCurve,
             speed: options.speed ?? this.animationSpeed
         });
-        this.map.once('moveend', callback);
+        this.map.once('moveend', () => {
+            this.render();
+            if (callback) callback();
+        });
     }
 
     slide(direction, callback) {

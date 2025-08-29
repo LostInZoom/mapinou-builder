@@ -56,7 +56,7 @@ game:
   visibility:
     helpers: 2500
   speed:
-    travel: 20000 # in km/h
+    travel: 4000 # in km/h
     roaming: 20 # in px/s
     enemies: 10 # in px/s
   invulnerability: 3000
@@ -178,6 +178,7 @@ tutorial:
 ###########################
 levels:
   - type: tier
+    name: "Phase 1"
     content:
       - start:
           zoom: 5
@@ -217,6 +218,7 @@ levels:
   - type: test
     name: "Expérience 1"
   - type: tier
+    name: "Phase 2"
     content:
       - target: [ 1.2866479982915493,43.885279168322626 ]
       - target: [ 6.089149305028605,45.91959117838756 ]
@@ -277,6 +279,7 @@ levels:
   - type: test
     name: "Expérience 2"
   - type: tier
+    name: "Phase 3"
     content:
       - target: [1.2866479982915493,43.885279168322626]
       - target: [6.089149305028605,45.91959117838756]
@@ -285,6 +288,7 @@ levels:
   - type: test
     name: "Expérience 3"
   - type: tier
+    name: "Phase 4"
     content:
       - target: [1.2866479982915493,43.885279168322626]
       - target: [6.089149305028605,45.91959117838756]

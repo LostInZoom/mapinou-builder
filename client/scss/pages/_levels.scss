@@ -6,6 +6,34 @@
     inherits: false;
 }
 
+.levels-content-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+    transition: transform .5s cubic-bezier(0.65, 0, 0.35, 1);
+
+    &.previous {
+        transform: translateX(-100%);
+    }
+
+    &.current {
+        transform: translateX(0%);
+    }
+
+    &.next {
+        transform: translateX(100%);
+    }
+}
+
 .levels-tier-container {
     margin-top: auto;
     margin-bottom: 2rem;
@@ -13,19 +41,21 @@
     max-width: 25rem;
 
     display: flex;
-    gap: 1rem;
-
 
     &.pop>.levels-tier-entry {
         transform: scale(1);
-        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transition:
+            transform .3s cubic-bezier(0.34, 1.56, 0.64, 1),
+            flex .2s ease-in-out;
     }
 }
 
 .levels-tier-entry {
-    width: 2.5rem;
     height: 2.5rem;
+
     border-radius: .4rem;
+    pointer-events: all;
+    overflow: hidden;
 
     display: flex;
     justify-content: center;
@@ -34,22 +64,40 @@
 
     font-family: 'Vincendo';
     font-size: 1.2rem;
+    white-space: nowrap;
 
     background-color: colors.$main-color-dark;
     color: colors.$main-color-light;
 
     transform: scale(0);
-    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
+    transition:
+        transform .3s cubic-bezier(0.36, 0, 0.66, -0.56),
+        flex .2s ease-in-out;
 
     &>svg {
         margin: 0 .3rem;
         width: 2.5rem;
         height: 2.5rem;
     }
-}
 
-.levels-tier-current {
-    width: 100%;
+    &.previous {
+        flex: 0 0 2.5rem;
+        margin-right: 1rem;
+    }
+
+    &.current {
+        flex: 1;
+    }
+
+    &.next {
+        flex: 0 0 2.5rem;
+        margin-left: 1rem;
+    }
+
+    &.shrink {
+        flex: 0;
+        margin: 0;
+    }
 }
 
 .levels-minimap-container {
@@ -162,120 +210,5 @@
                 stroke-width: 0;
             }
         }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-.levels-text {
-    width: 100%;
-
-    pointer-events: all;
-    border-top-right-radius: .4rem;
-    border-bottom-left-radius: .4rem;
-    border-bottom-right-radius: .4rem;
-    margin-bottom: 2rem;
-
-    background-color: colors.$secondary-color-dark;
-    color: colors.$main-color-light;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    overflow: hidden;
-}
-
-.levels-text-hint {
-    pointer-events: all;
-    padding: 1rem;
-    text-align: center;
-}
-
-.levels-tiers {
-    width: calc(100% - 20vw);
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-}
-
-.levels-tier {
-    display: flex;
-    width: 100%;
-    max-width: 25rem;
-    gap: .5rem;
-}
-
-.levels-button {
-    pointer-events: all;
-    height: 4vh;
-    max-height: 2rem;
-    min-height: 1.2rem;
-    padding: 0 .6rem;
-
-    font-size: .9rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background-color: colors.$main-color-light;
-    color: colors.$main-color-dark;
-
-    transition: background .1s ease-in-out, transform .2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transform: scale(0);
-
-    &.disabled {
-        background-color: colors.$grey-medium;
-        color: colors.$grey-extralight;
-    }
-
-    &.active {
-        background-color: colors.$main-color-light;
-        color: colors.$main-color-dark;
-        outline: solid .3rem colors.$main-color-dark;
-    }
-
-    &.done {
-        background-color: colors.$main-color-dark;
-        color: colors.$main-color-light;
-    }
-
-    &.pop {
-        transform: scale(1);
-    }
-}
-
-.levels-test-button {
-    font-family: 'Vincendo';
-    border-radius: .4rem;
-}
-
-.levels-tier-button {
-    font-family: 'Cabin';
-    font-weight: bold;
-    flex: 1;
-
-    &:first-child {
-        border-bottom-left-radius: .4rem;
-        border-top-left-radius: .4rem;
-    }
-
-    &:last-child {
-        border-bottom-right-radius: .4rem;
-        border-top-right-radius: .4rem;
     }
 }

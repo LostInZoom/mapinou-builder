@@ -25,6 +25,9 @@ class Journeys extends Layer {
         };
 
         let colors = getColorsByClassNames('routing-' + this.color);
+        let color = colors['routing-' + this.color];
+        let transparent = "rgba(255, 255, 255, 0)";
+
         this.layer.type = 'line';
         this.layer.source = this.id;
         this.layer.paint = {
@@ -33,8 +36,8 @@ class Journeys extends Layer {
                 "interpolate",
                 ["linear"],
                 ["line-progress"],
-                0, "rgba(255, 255, 255, 0)",
-                1, colors['routing-' + this.color]
+                0, transparent,
+                1, color,
             ]
         };
         this.layer.layout = {

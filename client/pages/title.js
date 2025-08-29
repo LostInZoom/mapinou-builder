@@ -1,5 +1,5 @@
 import { addClass, addClassList, makeDiv, removeClass, wait } from "../utils/dom";
-import { remap, easeOutCubic } from "../utils/math";
+import { remap, easeOutCubic, easeInOutSine } from "../utils/math";
 import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
 import Form from "./form";
@@ -141,7 +141,18 @@ class Title extends Page {
                 this.listen = false;
                 if (this.options.app.options.session.consent) {
                     if (this.options.app.options.session.form) {
-                        this.levels();
+                        addClassList([this.letters, this.start, this.credits, this.buildinfos], 'unpop');
+                        this.app.killRabbits();
+                        this.app.forbidRabbits();
+                        wait(300, () => {
+                            this.destroy();
+                            this.basemap.fit(this.params.interface.map.levels, {
+                                duration: 500,
+                                easing: easeInOutSine
+                            }, () => {
+                                this.app.page = new Levels({ app: this.app, position: 'current' });
+                            });
+                        });
                     } else {
                         addClass(this.startlabel, 'clicked');
                         this.next = new Form({ app: this.app, position: 'next', question: 0 });
@@ -153,16 +164,6 @@ class Title extends Page {
                     this.slideNext();
                 }
             }
-        });
-    }
-
-    levels() {
-        addClassList([this.letters, this.start, this.credits, this.buildinfos], 'unpop');
-        this.app.killRabbits();
-        this.app.forbidRabbits();
-        wait(300, () => {
-            this.destroy();
-            this.app.page = new Levels({ app: this.app, position: 'current' });
         });
     }
 }

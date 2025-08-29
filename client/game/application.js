@@ -65,11 +65,10 @@ class Application {
                 this.allowed = true;
 
                 // Create the current page
-                this.page = new Levels({
+                this.page = new Title({
                     app: this,
                     basemap: this.basemap,
                     position: 'current',
-                    initState: 'slide',
                     // init: true
                 }, () => {
                     this.music.display(true);
