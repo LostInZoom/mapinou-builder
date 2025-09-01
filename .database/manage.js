@@ -1,4 +1,4 @@
-import { insertLevels } from './tools.js';
+import { insertLevels, populateResults } from './tools.js';
 import { clearDB, createTables } from "./tools.js";
 
 function initialize() {
@@ -18,4 +18,10 @@ function update() {
     })
 }
 
-export { initialize, update }
+function populate() {
+    populateResults().then(() => {
+        process.exit();
+    })
+}
+
+export { initialize, update, populate }

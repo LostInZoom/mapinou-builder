@@ -118,7 +118,6 @@ async function insertLevels() {
         await db.query(insertion);
     }
 
-    let tier = 1;
     for (let t = 0; t < params.levels.length; t++) {
         let entry = params.levels[t];
 
@@ -131,7 +130,7 @@ async function insertLevels() {
                     let insertion = `
                         INSERT INTO data.levels (tier, level, player, target)
                         VALUES (
-                            ${tier},
+                            ${t},
                             ${l},
                             ST_SetSRID(ST_POINT(${level.player[0]}, ${level.player[1]}), 3857),
                             ST_SetSRID(ST_POINT(${level.target[0]}, ${level.target[1]}), 3857)
@@ -168,8 +167,6 @@ async function insertLevels() {
                     }
                 }
             }
-
-            ++tier;
         }
     }
 
@@ -212,4 +209,33 @@ async function insertLevels() {
     await db.query(helpers);
 }
 
-export { clearDB, createTables, insertLevels }
+async function populateResults() {
+    let query = `
+        SELECT *
+		FROM data.levels;
+    `;
+    let result = await db.query(query);
+    if (result.rows.length > 0) {
+        for (let i = 0; i < result.rows.length; i++) {
+            const lid = result.rows[i].id;
+            for (let j = 0; j < 40; j++) {
+                let session = `
+                    INSERT INTO data.sessions(id)
+                    VALUES(default)
+                    RETURNING id;
+                `
+                let s = await db.query(session);
+                let sid = s.rows[0].id;
+                let score = Math.random() * (500 - 20) + 20;
+
+                let insertion = `
+                    INSERT INTO data.games(session, level, score)
+                    VALUES(${sid}, ${lid}, ${score});
+                `
+                await db.query(insertion);
+            }
+        }
+    }
+}
+
+export { clearDB, createTables, insertLevels, populateResults }

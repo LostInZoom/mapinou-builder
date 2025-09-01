@@ -67,7 +67,7 @@ let server = app.listen(port, () => {
 server.keepAliveTimeout = 30000;
 
 async function createSession(options) {
-    let creation = `
+	let creation = `
         INSERT INTO data.sessions (user_agent, device, orientation, os, width, height)
         VALUES (
 			'${options.userAgent}',
