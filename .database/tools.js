@@ -132,7 +132,7 @@ async function insertLevels() {
                         INSERT INTO data.levels (tier, level, player, target)
                         VALUES (
                             ${tier},
-                            ${l + 1},
+                            ${l},
                             ST_SetSRID(ST_POINT(${level.player[0]}, ${level.player[1]}), 3857),
                             ST_SetSRID(ST_POINT(${level.target[0]}, ${level.target[1]}), 3857)
                         )

@@ -350,12 +350,13 @@ class NavigationBar {
             removeClass(element, 'shrink');
         }
 
+        // Add new svg arrow
+        this.current.innerHTML = this.params.svgs[isPrevious ? 'arrowright' : 'arrowleft'];
+
         wait(500, () => {
             if (isPrevious && this.next) { this.next.remove(); }
             if (!isPrevious && this.previous) { this.previous.remove(); }
 
-            // Add new svg arrow
-            this.current.innerHTML = this.params.svgs[isPrevious ? 'arrowright' : 'arrowleft'];
             // Reassign new buttons
             if (isPrevious) {
                 this.next = this.current;

@@ -7,7 +7,7 @@
     height: 80%;
     max-width: 20rem;
     max-height: 30rem;
-    
+
     display: flex;
     flex-direction: column;
 
@@ -61,7 +61,7 @@
     position: relative;
     margin-top: 6rem;
     font-size: 3rem;
-    
+
     color: colors.$main-color-light;
 
     transform: scale(0);
@@ -122,9 +122,10 @@
     left: 50%;
 
     font-family: 'Vincendo';
+    font-weight: normal;
     font-size: .9rem;
     pointer-events: all;
-    
+
     display: flex;
     justify-content: center;
     align-items: center;
