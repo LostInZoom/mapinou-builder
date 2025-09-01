@@ -33,8 +33,6 @@ class TierPanel extends Panel {
         this.tier = this.options.tier;
         this.level = this.options.level;
 
-
-
         this.minimapscontainer = [];
         this.minimaps = [];
 
@@ -156,22 +154,6 @@ class TierPanel extends Panel {
                 this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1], i, i + 1);
             }
 
-            // minimapcontainer.addEventListener('click', () => {
-            //     if (hasClass(minimapcontainer, 'active') && this.listen) {
-            //         this.hideElements(() => {
-            //             this.unobserveSize();
-            //             this.destroy();
-            //             this.back.remove();
-            //             this.page.app.page = new Level({
-            //                 app: this.app,
-            //                 levels: this,
-            //                 position: 'current',
-            //                 params: level
-            //             });
-            //         });
-            //     }
-            // });
-
             if (this.animate && i < this.level) { await waitPromise(300); }
         }
     }
@@ -224,9 +206,23 @@ class ExperiencePanel extends Panel {
     constructor(options, callback) {
         super(options, callback);
         this.type = 'experience';
+        this.number = this.options.number;
+
+        const prognumber = this.page.getProgression().tier;
+
         this.experience = makeDiv(null, 'levels-experience-container');
         if (!this.animate) { addClass(this.experience, 'pop'); }
         this.container.append(this.experience);
+
+        if (this.number === prognumber) { addClass(this.experience, 'active'); }
+        else if (this.number < prognumber) {
+            addClass(this.experience, 'finished');
+            this.experience.innerHTML = this.page.app.options.svgs.check;
+        }
+        else if (this.number > prognumber) {
+            addClass(this.experience, 'remaining');
+            this.experience.innerHTML = this.page.app.options.svgs.lock;
+        }
 
         if (this.animate) {
             this.experience.offsetHeight;

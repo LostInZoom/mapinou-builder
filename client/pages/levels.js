@@ -18,7 +18,7 @@ class Levels extends Page {
 
         this.progression = this.app.progression;
         // DEBUGGING
-        this.progression = { tier: 3, level: 3 };
+        this.progression = { tier: 2, level: 3 };
 
         this.position = this.progression.tier;
         this.level = this.progression.level;
