@@ -9,7 +9,7 @@ import { remap } from './math.js';
  * @param  {DOMElement} parent Parent element to append the div to.
  * @return {DOMElement}        Created element.
  */
-function makeDiv(id=null, c=null, html=null, parent=null) {
+function makeDiv(id = null, c = null, html = null, parent = null) {
     let div = document.createElement('div');
     if (id !== null) { div.setAttribute('id', id); }
     if (c !== null) { div.setAttribute('class', c); }
@@ -141,13 +141,17 @@ function wait(duration, callback) {
     setTimeout(callback, duration);
 };
 
+function waitPromise(duration) {
+    return new Promise(resolve => setTimeout(resolve, duration));
+}
+
 /**
  * Returns true or false whether the provided element overflows
  * @param {DOMElement} element - DOM Element to check
  * @returns {boolean} - Whetther the element overflows
  */
 function isOverflown(element) {
-  return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+    return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
 }
 
 function easingIncrement(options, callback) {
@@ -169,6 +173,6 @@ function easingIncrement(options, callback) {
 export {
     makeDiv, hasClass, addClass, removeClass, addClassList, removeClassList,
     activate, deactivate,
-    clearElement, addSVG, getCSSColors, remove, wait, isOverflown,
+    clearElement, addSVG, getCSSColors, remove, wait, waitPromise, isOverflown,
     easingIncrement
 }

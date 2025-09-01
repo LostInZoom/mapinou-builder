@@ -1,10 +1,7 @@
 import Tutorial from "../game/tutorial";
-import { addClass, makeDiv, hasClass, addClass, removeClass, wait, clearElement } from "../utils/dom";
+import { addClass, makeDiv, addClass, removeClass, wait } from "../utils/dom";
 import Page from "./page";
 import Title from "./title";
-import Basemap from '../cartography/map.js';
-import { LevelEdges } from '../utils/svg.js';
-import Level from '../game/level.js';
 import { easeInOutSine } from '../utils/math.js';
 import { ExperiencePanel, NavigationBar, TierPanel } from "./tiers.js";
 
@@ -21,31 +18,16 @@ class Levels extends Page {
 
         this.progression = this.app.progression;
         // DEBUGGING
-        this.progression = { tier: 1, level: 2 };
+        this.progression = { tier: 3, level: 3 };
 
         this.position = this.progression.tier;
         this.level = this.progression.level;
 
-        this.tier = this.levels[this.position];
-        if (this.tier.type === 'tier') {
-            new TierPanel({
-                page: this,
-                tier: this.position,
-                level: this.level,
-                animate: this.init
-            }, () => { this.listen = true; });
-        }
-        else if (this.tier.type === 'test') {
-            new ExperiencePanel({
-                page: this,
-                number: this.position,
-                animate: this.init
-            }, () => { this.listen = true; });
-        }
-        else if (this.tier.type === 'tutorial') {
-
-        }
-
+        this.current = this.createTier({
+            type: this.getTier().type,
+            position: 'current',
+            animate: this.init
+        }, () => { this.listen = true; });
         this.navigation = new NavigationBar({ page: this });
 
         // Create the back button to get back to the title screen
@@ -56,16 +38,14 @@ class Levels extends Page {
         this.back.addEventListener('click', () => {
             if (this.listen) {
                 this.listen = false;
-                this.hideElements(() => {
-                    this.unobserveSize();
+                this.hide(() => {
+                    this.destroy();
                     this.options.app.basemap.animate({
                         center: this.app.center,
                         zoom: this.params.interface.map.start.zoom,
                         duration: 500,
                         easing: easeInOutSine
                     }, () => {
-                        this.destroy();
-                        this.back.remove();
                         this.app.page = new Title({ app: this.app, position: 'current' });
                     });
                 });
@@ -73,100 +53,91 @@ class Levels extends Page {
         });
     }
 
+    hide(callback) {
+        removeClass(this.back, 'pop');
+        this.navigation.hide();
+        this.current.hide();
+        wait(500, () => {
+            this.back.remove();
+            callback();
+        });
+    }
+
+    listening() {
+        return this.listen;
+    }
+
+    getProgression() {
+        return this.progression;
+    }
+
+    getNumber() {
+        return this.levels.length;
+    }
+
+    getPosition() {
+        return this.position;
+    }
+
     getTier() {
-        return this.tier;
+        return this.levels[this.position];
     }
 
     slide(direction) {
         if (this.listen) {
-            this.minimaptrash = this.minimaps;
-            this.minimaptrash.forEach(minimap => { minimap.loading(); });
-            this.unobserveSize();
-
             // Flag to know direction
             const isPrevious = direction === 'previous';
 
+            // Return if we're at the first or last position (shouldn't be reached as buttons shouldn't be available)
             if (isPrevious && this.position === 0) { return; }
-            else if (isPrevious && this.position >= this.levels.length - 1) { return; }
+            else if (!isPrevious && this.position >= this.levels.length - 1) { return; }
 
-            const oldcontent = this.currentcontent;
-            removeClass(oldcontent, 'current');
-            addClass(oldcontent, isPrevious ? 'next' : 'previous');
+            this.listen = false;
 
-            this.currentcontent = makeDiv(null, `levels-content-container ${isPrevious ? 'previous' : 'next'}`);
-            // Insertion in the dom
-            if (isPrevious) { this.container.insertBefore(this.currentcontent, this.container.firstChild); }
-            else { this.container.append(this.currentcontent); }
-
-            this.currentcontent.offsetWidth;
-            removeClass(this.currentcontent, isPrevious ? 'previous' : 'next');
-            addClass(this.currentcontent, 'current');
+            if (this.current.getType() === 'tier') {
+                this.current.loading();
+                this.current.unobserveSize();
+            }
 
             this.position = isPrevious ? this.position - 1 : this.position + 1;
-            const tier = this.levels[this.position];
-            if (tier.type === 'tier') { this.drawTier(this.init); }
-            else if (tier.type === 'test') { this.drawTest(this.init); }
-            else if (tier.type === 'tutorial') { this.drawTutorial(this.init); }
+            const obj = this.createTier({
+                type: this.getTier().type,
+                position: direction,
+                animate: false
+            });
+            obj.slideIn();
 
-            // Remove old events
-            this.previous.removeEventListener('click', this.previousListener);
-            this.next.removeEventListener('click', this.nextListener);
-            removeClass(this.current, 'current');
-            this.current.innerHTML = '';
-
-            const element = makeDiv(null, `levels-tier-entry ${isPrevious ? 'previous' : 'next'} shrink`, this.params.svgs[isPrevious ? 'arrowleft' : 'arrowright']);
-
-            // Update class conditionally
-            addClass(isPrevious ? this.next : this.previous, 'shrink');
-            addClass(this.current, isPrevious ? 'next' : 'previous');
-            removeClass(isPrevious ? this.previous : this.next, isPrevious ? 'previous' : 'next');
-            addClass(isPrevious ? this.previous : this.next, 'current');
-
-            // Update name
-            (isPrevious ? this.previous : this.next).innerHTML = tier.name;
-            // Insertion in the dom
-            if (isPrevious) { this.tiercontainer.insertBefore(element, this.tiercontainer.firstChild); }
-            else { this.tiercontainer.append(element); }
-            element.offsetHeight;
-            removeClass(element, 'shrink');
-
-            wait(500, () => {
-                this.minimaptrash.forEach(minimap => { minimap.remove(); });
-                oldcontent.remove();
-
-                // Remove hidden button
-                (isPrevious ? this.next : this.previous).remove();
-                // Add new svg arrow
-                this.current.innerHTML = this.params.svgs[isPrevious ? 'arrowright' : 'arrowleft'];
-                // Reassign new buttons
-                if (isPrevious) {
-                    this.next = this.current;
-                    this.current = this.previous;
-                    this.previous = element;
-                } else {
-                    this.previous = this.current;
-                    this.current = this.next;
-                    this.next = element;
-                }
-
-                // Remake new listeners
-                this.previous.addEventListener('click', this.previousListener);
-                this.next.addEventListener('click', this.nextListener);
+            this.navigation.slide(direction);
+            this.current.slideOut(isPrevious ? 'next' : 'previous', () => {
+                this.current.destroy();
+                this.current = obj;
+                this.listen = true;
             });
         }
     }
 
-    hideElements(callback) {
+    createTier(options, callback) {
         callback = callback || function () { };
-        removeClass(this.back, 'pop');
-        removeClass(this.tiercontainer, 'pop');
-        if (this.minimapscontainer) { this.minimapscontainer.forEach((minimap) => { removeClass(minimap, 'pop'); }); }
-        if (this.svg) { this.svg.thinOutLines(); }
+        if (options.type === 'tier') {
+            return new TierPanel({
+                page: this,
+                tier: this.position,
+                level: this.level,
+                animate: options.animate,
+                position: options.position
+            }, callback);
+        }
+        else if (options.type === 'test') {
+            return new ExperiencePanel({
+                page: this,
+                number: this.position,
+                animate: options.animate,
+                position: options.position
+            }, callback);
+        }
+        else if (options.type === 'tutorial') {
 
-        wait(500, () => {
-            this.minimaps.forEach((minimap) => { minimap.remove(); });
-            callback();
-        });
+        }
     }
 }
 
