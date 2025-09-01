@@ -1,5 +1,6 @@
 import { ajaxPost } from "../utils/ajax";
 import { addClass, makeDiv, hasClass, addClass, removeClass, wait } from "../utils/dom";
+import { easeInOutSine } from "../utils/math";
 import Consent from "./consent";
 import Levels from "./levels";
 import Page from "./page";
@@ -116,7 +117,10 @@ class Form extends Page {
         this.options.app.forbidRabbits();
         wait(300, () => {
             this.destroy();
-            wait(200, () => {
+            this.basemap.fit(this.params.interface.map.levels, {
+                duration: 500,
+                easing: easeInOutSine
+            }, () => {
                 this.app.page = new Levels({ app: this.app, position: 'current' });
             });
         });

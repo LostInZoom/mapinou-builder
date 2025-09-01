@@ -17,7 +17,7 @@ class Position {
         this.container.addEventListener('click', () => {
             if (this.listen) {
                 this.listen = false;
-                this.basemap.animate({
+                this.basemap.ease({
                     center: this.player.getCoordinates(),
                     duration: 500,
                     easing: inAndOut,

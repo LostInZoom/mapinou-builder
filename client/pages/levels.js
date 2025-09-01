@@ -40,7 +40,7 @@ class Levels extends Page {
                 this.listen = false;
                 this.hide(() => {
                     this.destroy();
-                    this.options.app.basemap.animate({
+                    this.options.app.basemap.fly({
                         center: this.app.center,
                         zoom: this.params.interface.map.start.zoom,
                         duration: 500,

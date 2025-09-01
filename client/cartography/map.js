@@ -244,7 +244,16 @@ class Basemap {
         });
     }
 
-    animate(options, callback) {
+    ease(options, callback) {
+        callback = callback || function () { };
+        this.map.easeTo(options);
+        this.map.once('moveend', () => {
+            this.render();
+            if (callback) callback();
+        });
+    }
+
+    fly(options, callback) {
         callback = callback || function () { };
         options.curve = options.curve ?? this.animationCurve;
         options.speed = options.curve ?? this.animationSpeed;
@@ -279,7 +288,7 @@ class Basemap {
 
         let newcenter = project('3857', '4326', p);
 
-        this.animate({
+        this.ease({
             center: newcenter,
             duration: 500,
             easing: easeInOutCubic
