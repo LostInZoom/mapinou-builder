@@ -18,13 +18,13 @@ class Levels extends Page {
 
         this.progression = this.app.progression;
         // DEBUGGING
-        this.progression = { tier: 2, level: 3 };
+        this.progression = { tier: 0, level: 0 };
 
         this.position = this.progression.tier;
         this.level = this.progression.level;
 
         this.current = this.createTier({
-            type: this.getTier().type,
+            type: this.getTierContent().type,
             position: 'current',
             animate: this.init
         }, () => { this.listen = true; });
@@ -79,7 +79,7 @@ class Levels extends Page {
         return this.position;
     }
 
-    getTier() {
+    getTierContent() {
         return this.levels[this.position];
     }
 
@@ -101,7 +101,7 @@ class Levels extends Page {
 
             this.position = isPrevious ? this.position - 1 : this.position + 1;
             const obj = this.createTier({
-                type: this.getTier().type,
+                type: this.getTierContent().type,
                 position: direction,
                 animate: false
             });

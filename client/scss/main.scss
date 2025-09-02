@@ -1,8 +1,6 @@
 @use 'fonts';
 @use 'colors';
 @use 'animations';
-@use "../../node_modules/ol/ol.css";
-
 @use 'interface';
 
 body {
@@ -10,24 +8,20 @@ body {
     user-select: none;
 
     overflow: hidden;
-    -webkit-touch-callout:none;
-    -webkit-user-select:none;
-    -khtml-user-select:none;
-    -moz-user-select:none;
-    -ms-user-select:none;
-    user-select:none;
-    -webkit-tap-highlight-color:rgba(0,0,0,0);
-}
-
-.ol-zoom {
-    display: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 .no-scrollbar {
     overflow: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    
+
     &::-webkit-scrollbar {
         display: none;
     }

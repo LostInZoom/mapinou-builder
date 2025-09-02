@@ -12,6 +12,8 @@
 @use 'game/map';
 @use 'game/highscore';
 
+@use 'experiences/sbsod';
+
 #application {
     position: absolute;
     top: 0;

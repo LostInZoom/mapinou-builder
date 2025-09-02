@@ -1,4 +1,4 @@
-import { addClass, addClassList, makeDiv, removeClass, wait } from "../utils/dom";
+import { addClass, addClassList, makeDiv, removeClass, removeClassList, wait, waitPromise } from "../utils/dom";
 import { remap, easeOutCubic, easeInOutSine } from "../utils/math";
 import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
@@ -90,7 +90,9 @@ class Title extends Page {
         this.credits.append(this.creditslabel);
 
         this.buttons.append(this.start, this.credits);
-        this.buildinfos = makeDiv(null, 'title-build', `version alpha - ${new Date().getFullYear()}`);
+        this.buildinfos = makeDiv(null, 'title-build');
+        this.buildinfoslabel = makeDiv(null, 'title-build-label', `version alpha - ${new Date().getFullYear()}`);
+        this.buildinfos.append(this.buildinfoslabel);
 
         this.container.append(this.buttons, this.buildinfos);
 
@@ -141,7 +143,7 @@ class Title extends Page {
                 this.listen = false;
                 if (this.options.app.options.session.consent) {
                     if (this.options.app.options.session.form) {
-                        addClassList([this.letters, this.start, this.credits, this.buildinfos], 'unpop');
+                        removeClassList([this.letters, this.start, this.credits, this.buildinfos], 'pop');
                         this.app.killRabbits();
                         this.app.forbidRabbits();
                         wait(300, () => {

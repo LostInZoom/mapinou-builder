@@ -9,7 +9,9 @@
     transition: transform .5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     transform: scale(1);
 
-    &.slanted { transform: perspective(10rem) rotateX(30deg) rotateZ(-5deg) scaleX(0.8); }
+    &.slanted {
+        transform: perspective(10rem) rotateX(30deg) rotateZ(-5deg) scaleX(0.8);
+    }
 }
 
 .title-letters {
@@ -27,35 +29,34 @@
     background-color: colors.$secondary-color-dark;
     border: solid .3rem colors.$main-color-light;
 
+    overflow: hidden;
+
     transform-origin: center center;
     transform: scale(0);
-    
-    transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: hidden;
+    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
     &.horizontal-bounce {
         transform-origin: center right;
         animation: horizontal-bounce .4s linear;
     }
 
-    &.pop { transform: scale(1); }
-
-    &.unpop {
-        transform-origin: center center;
-        transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
-        transform: scale(0);
+    &.pop {
+        transform: scale(1);
+        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    text-shadow:
-        1px 1px 0 colors.$main-color-medium,
-        1px 2px 0 colors.$main-color-medium,
-        1px 3px 0 colors.$main-color-medium,
-        1px 4px 0 colors.$main-color-medium;
+    text-shadow: 1px 1px 0 colors.$main-color-medium,
+    1px 2px 0 colors.$main-color-medium,
+    1px 3px 0 colors.$main-color-medium,
+    1px 4px 0 colors.$main-color-medium;
 }
 
 .title-letter {
     transition: transform .4s cubic-bezier(0.5, 0, 0.75, 0);
-    &.empty { width: 1rem; }
+
+    &.empty {
+        width: 1rem;
+    }
 }
 
 .title-buttons {
@@ -77,13 +78,11 @@
     align-items: center;
 
     transform: scale(0);
-    transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
-    &.pop { transform: scale(1); }
-
-    &.unpop {
-        transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
-        transform: scale(0);
+    &.pop {
+        transform: scale(1);
+        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 }
 
@@ -98,38 +97,49 @@
     color: colors.$main-color-light;
     background-color: colors.$secondary-color-dark;
 
-    &.clicked { animation: full-bounce .4s ease-in; }
+    &.clicked {
+        animation: full-bounce .4s ease-in;
+    }
 }
 
 .title-build {
-    pointer-events: all;
     position: absolute;
     z-index: 150;
     bottom: 1rem;
 
-    left: 50%;
-    transform: translate(-50%, 0%) scale(0);
+    display: flex;
+    justify-content: center;
 
-    font-family: 'Vincendo';
-    font-size: 3vw;
-    padding: .2rem .4rem;
+    transform: scale(0);
+    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
-    color: colors.$main-color-light;
-    background-color: colors.$secondary-color-dark;
-
-    border-radius: .4rem;
-    transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-    &.pop { transform: translate(-50%, 0%) scale(1); }
-
-    &.unpop {
-        transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
-        transform: translate(-50%, 0%) scale(0);
+    &.pop {
+        transform: scale(1);
+        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 }
 
+.title-build-label {
+    pointer-events: all;
+    font-family: 'Vincendo';
+    font-size: 3vw;
+    padding: .2rem .4rem;
+    border-radius: .4rem;
+
+    color: colors.$main-color-light;
+    background-color: colors.$secondary-color-dark;
+}
+
 @media screen and (min-width: 500px) {
-    .title-letters { font-size: 5rem; }
-    .title-button-label { font-size: 2rem; }
-    .title-build { font-size: .9rem; }
+    .title-letters {
+        font-size: 5rem;
+    }
+
+    .title-button-label {
+        font-size: 2rem;
+    }
+
+    .title-build-label {
+        font-size: .9rem;
+    }
 }

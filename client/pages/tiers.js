@@ -1,4 +1,5 @@
 import Basemap from "../cartography/map";
+import Experience from "../experiences/experience";
 import Level from "../game/level";
 import { addClass, hasClass, makeDiv, removeClass, wait, waitPromise } from "../utils/dom";
 import { LevelEdges } from "../utils/svg";
@@ -64,7 +65,7 @@ class TierPanel extends Panel {
 
     async createTier() {
         // let delay = this.animate ? 200 : 0;
-        const tier = this.page.getTier();
+        const tier = this.page.getTierContent();
 
         // Wait 200 ms if animating
         if (this.animate) { await waitPromise(200); }
@@ -209,6 +210,7 @@ class ExperiencePanel extends Panel {
         this.number = this.options.number;
 
         const prognumber = this.page.getProgression().tier;
+        const content = this.page.getTierContent();
 
         this.experience = makeDiv(null, 'levels-experience-container');
         if (!this.animate) { addClass(this.experience, 'pop'); }
@@ -229,6 +231,21 @@ class ExperiencePanel extends Panel {
             addClass(this.experience, 'pop');
         }
 
+        const startExperience = () => {
+            if (this.page.listening()) {
+                this.experience.removeEventListener('click', startExperience);
+                this.page.listen = false;
+                this.page.hide(() => {
+                    this.page.destroy();
+                    this.page.app.page = new Experience({
+                        app: this.page.app,
+                        position: 'current',
+                        name: content.index
+                    });
+                });
+            }
+        }
+        this.experience.addEventListener('click', startExperience);
         this.callback();
     }
 
@@ -282,7 +299,7 @@ class NavigationBar {
             this.previous.addEventListener('click', this.previousListener);
         }
 
-        this.current = makeDiv(null, 'levels-navigation-entry current', this.page.getTier().name);
+        this.current = makeDiv(null, 'levels-navigation-entry current', this.page.getTierContent().name);
         this.container.append(this.current);
 
         if (pos < nb - 1) {
@@ -332,8 +349,8 @@ class NavigationBar {
         addClass(this.current, isPrevious ? 'next' : 'previous');
 
         // Update name
-        if (isPrevious && this.previous) { this.previous.innerHTML = this.page.getTier().name; }
-        if (!isPrevious && this.next) { this.next.innerHTML = this.page.getTier().name; }
+        if (isPrevious && this.previous) { this.previous.innerHTML = this.page.getTierContent().name; }
+        if (!isPrevious && this.next) { this.next.innerHTML = this.page.getTierContent().name; }
 
         const nb = this.page.getNumber();
         const pos = this.page.getPosition();
