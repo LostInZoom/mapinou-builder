@@ -180,6 +180,8 @@ levels:
   - type: test
     name: "Expérience 1"
     index: "SBSOD"
+    tutorial: 'Merci de répondre le plus honnêtement possible à ce questionnaire,
+      sur une échelle de 1 (pas du tout d''accord) à 7 (tout à fait d''accord).'
     content:
       - "Je suis très doué·e pour indiquer une direction."
       - "J’ai généralement une mauvaise mémoire de l’endroit où je laisse un objet."

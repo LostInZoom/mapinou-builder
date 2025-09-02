@@ -240,7 +240,7 @@ class ExperiencePanel extends Panel {
                     this.page.app.page = new Experience({
                         app: this.page.app,
                         position: 'current',
-                        name: content.index
+                        elements: content
                     });
                 });
             }

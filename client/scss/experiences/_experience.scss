@@ -1,1 +1,12 @@
 @use '../colors';
+
+.experience-container {
+    position: absolute;
+    bottom: 0;
+    height: calc(100% - 4.5rem);
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
