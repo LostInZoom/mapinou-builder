@@ -13,7 +13,7 @@ class Form extends Page {
         addClass(this.container, 'page-form');
         this.options.app.allowRabbits();
 
-        this.content = makeDiv(null, 'page-content');
+        this.content = makeDiv(null, 'page-content pop');
         this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
         this.continue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
 
@@ -112,7 +112,7 @@ class Form extends Page {
     }
 
     levels() {
-        addClass(this.content, 'unpop');
+        removeClass(this.content, 'pop');
         this.options.app.killRabbits();
         this.options.app.forbidRabbits();
         wait(300, () => {

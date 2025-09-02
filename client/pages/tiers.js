@@ -1,5 +1,5 @@
 import Basemap from "../cartography/map";
-import Experience from "../experiences/experience";
+import SantaBarbara from "../experiences/sbsod";
 import Level from "../game/level";
 import { addClass, hasClass, makeDiv, removeClass, wait, waitPromise } from "../utils/dom";
 import { LevelEdges } from "../utils/svg";
@@ -237,11 +237,14 @@ class ExperiencePanel extends Panel {
                 this.page.listen = false;
                 this.page.hide(() => {
                     this.page.destroy();
-                    this.page.app.page = new Experience({
-                        app: this.page.app,
-                        position: 'current',
-                        elements: content
-                    });
+                    if (content.index === 'SBSOD') {
+                        this.page.app.page = new SantaBarbara({
+                            app: this.page.app,
+                            position: 'current',
+                            elements: content,
+                            stage: 'tutorial'
+                        });
+                    }
                 });
             }
         }

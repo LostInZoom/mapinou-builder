@@ -10,7 +10,7 @@ class Consent extends Page {
         addClass(this.container, 'page-consent');
         this.options.app.allowRabbits();
 
-        this.content = makeDiv(null, 'page-content');
+        this.content = makeDiv(null, 'page-content pop');
         this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
         this.continue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
 
@@ -86,7 +86,7 @@ class Consent extends Page {
                     behavior: 'smooth'
                 });
             });
-            
+
             // PREVIOUS PAGE
             this.back.addEventListener('click', () => {
                 if (this.listen) {
