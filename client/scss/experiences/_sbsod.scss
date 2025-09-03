@@ -139,6 +139,26 @@ $point-size: 2rem;
     justify-content: space-between;
     gap: 1rem;
     font-size: .9rem;
+    font-style: italic;
+}
+
+.sbsod-scroll-indicator {
+    width: 100%;
+    height: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    font-size: .9rem;
+    line-height: 1.5rem;
+    text-align: center;
+
+    background-color: colors.$main-color-light;
+    color: colors.$main-color-dark;
+    transition: .2s height ease-in-out;
+
+    &.active {
+        height: 1.5rem;
+    }
 }
 
 @media screen and (min-width: 500px) {

@@ -221,17 +221,6 @@
 }
 
 .levels-experience-container {
-    pointer-events: all;
-
-    max-height: 10rem;
-    width: 50vw;
-    max-width: 10rem;
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    border: solid .4rem colors.$main-color-dark;
-
-    background-color: colors.$main-color-light;
-
     transform: scale(0);
     transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
@@ -240,17 +229,33 @@
         transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
+    &.remaining>.levels-experience {
+        opacity: .7;
+    }
+
+    &.active>.levels-experience {
+        animation: 2s scale-breathing-small ease-in-out infinite .3s;
+    }
+}
+
+.levels-experience {
+    pointer-events: all;
+
+    max-height: 10rem;
+    width: 50vw;
+    max-width: 10rem;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    border: solid .4rem colors.$main-color-dark;
+    overflow: hidden;
+    background-color: colors.$main-color-light;
+
+    box-shadow: 0 0 1rem grey;
+    opacity: .8;
+
     &>svg {
         height: 100%;
         width: 100%;
         color: colors.$main-color-dark;
-    }
-
-    &.remaining {
-        opacity: .7;
-    }
-
-    &.finished {
-        opacity: .8;
     }
 }

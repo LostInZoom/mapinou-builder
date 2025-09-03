@@ -64,7 +64,6 @@ class TierPanel extends Panel {
     }
 
     async createTier() {
-        // let delay = this.animate ? 200 : 0;
         const tier = this.page.getTierContent();
 
         // Wait 200 ms if animating
@@ -201,6 +200,10 @@ class TierPanel extends Panel {
         addClass(this.container, 'current');
         wait(500, callback);
     }
+
+    update(callback) {
+        callback = callback || function () { };
+    }
 }
 
 class ExperiencePanel extends Panel {
@@ -212,23 +215,29 @@ class ExperiencePanel extends Panel {
         const prognumber = this.page.getProgression().tier;
         const content = this.page.getTierContent();
 
-        this.experience = makeDiv(null, 'levels-experience-container');
-        if (!this.animate) { addClass(this.experience, 'pop'); }
-        this.container.append(this.experience);
+        this.expcontainer = makeDiv(null, 'levels-experience-container');
+        this.experience = makeDiv(null, 'levels-experience');
+        this.expcontainer.append(this.experience);
 
-        if (this.number === prognumber) { addClass(this.experience, 'active'); }
+        if (!this.animate) { addClass(this.expcontainer, 'pop'); }
+        this.container.append(this.expcontainer);
+
+        if (this.number === prognumber) {
+            addClass(this.expcontainer, 'active');
+            this.experience.innerHTML = this.page.app.options.svgs.flask;
+        }
         else if (this.number < prognumber) {
-            addClass(this.experience, 'finished');
+            addClass(this.expcontainer, 'finished');
             this.experience.innerHTML = this.page.app.options.svgs.check;
         }
         else if (this.number > prognumber) {
-            addClass(this.experience, 'remaining');
+            addClass(this.expcontainer, 'remaining');
             this.experience.innerHTML = this.page.app.options.svgs.lock;
         }
 
         if (this.animate) {
-            this.experience.offsetHeight;
-            addClass(this.experience, 'pop');
+            this.expcontainer.offsetHeight;
+            addClass(this.expcontainer, 'pop');
         }
 
         const startExperience = () => {
@@ -253,7 +262,7 @@ class ExperiencePanel extends Panel {
     }
 
     hide(callback) {
-        removeClass(this.experience, 'pop');
+        removeClass(this.expcontainer, 'pop');
         wait(500, callback);
     }
 
@@ -272,6 +281,10 @@ class ExperiencePanel extends Panel {
         removeClass(this.container, 'previous');
         addClass(this.container, 'current');
         wait(500, callback);
+    }
+
+    update(callback) {
+        callback = callback || function () { };
     }
 }
 

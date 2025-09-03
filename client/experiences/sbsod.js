@@ -1,6 +1,6 @@
 import Levels from "../pages/levels";
 import Page from "../pages/page";
-import { addClass, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
+import { addClass, isOverflown, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
 import { easeInOutSine, remap } from "../utils/math";
 
 class SantaBarbara extends Page {
@@ -60,7 +60,7 @@ class SantaBarbara extends Page {
                     }, () => {
                         this.app.page = new Levels({ app: this.app, position: 'current' });
                     });
-                })
+                });
             }, { once: true });
 
             this.continue.addEventListener('click', () => {
@@ -76,7 +76,9 @@ class SantaBarbara extends Page {
 
     createForm() {
         let questions = makeDiv(null, 'sbsod-questions no-scrollbar');
-        this.text.append(questions);
+        this.scrollindicator = makeDiv(null, 'sbsod-scroll-indicator', '▼');
+
+        this.text.append(questions, this.scrollindicator);
 
         let content = this.elements.content;
         for (let c = 0; c < content.length; c++) {
@@ -93,7 +95,6 @@ class SantaBarbara extends Page {
             for (let i = 0; i < 7; i++) {
                 let p = makeDiv(null, 'sbsod-point');
                 let n = makeDiv(null, 'sbsod-number', i + 1);
-                p.setAttribute('value', i);
                 points.append(p);
                 numbers.append(n);
                 if (chosen && i === this.answers[c]) {
@@ -106,14 +107,15 @@ class SantaBarbara extends Page {
                     addClass(pointList[i], 'active');
 
                     let perc = remap(i, 0, 6, 0, 100);
-                    choice.style.left = `calc(${perc}% - ${Math.floor(perc * Math.ceil(p.offsetWidth) / 100)}px)`;
+                    const width = answers.getBoundingClientRect().width / 7;
+                    choice.style.left = `calc(${perc}% - ${perc * width / 100}px)`;
 
                     if (!chosen) {
                         chosen = true;
                         addClass(choice, 'pop');
                     }
 
-                    this.answers[c] = parseInt(p.getAttribute('value'));
+                    this.answers[c] = i;
 
                     let end = this.answers.every(v => v !== undefined);
                     if (end) { addClass(this.continue, 'pop'); }
@@ -134,7 +136,8 @@ class SantaBarbara extends Page {
                 wait(this.app.options.interface.transition.page, () => {
                     addClass(choice, 'pop');
                     let perc = remap(this.answers[c], 0, 6, 0, 100);
-                    choice.style.left = `calc(${perc}% - ${perc * Math.ceil(points.childNodes[this.answers[c]].offsetWidth) / 100}px)`;
+                    const width = answers.getBoundingClientRect().width / 7;
+                    choice.style.left = `calc(${perc}% - ${perc * width / 100}px)`;
                 });
             }
         };
@@ -144,14 +147,58 @@ class SantaBarbara extends Page {
             if (end) { addClass(this.continue, 'pop'); }
             addClass(this.back, 'pop');
 
+            this.observer = new ResizeObserver(() => {
+                if (isOverflown(questions)) {
+                    addClass(this.scrollindicator, 'active');
+                } else {
+                    removeClass(this.scrollindicator, 'active');
+                }
+
+                for (let i = 0; i < this.answers.length; i++) {
+                    const a = this.answers[i];
+                    if (a !== undefined) {
+                        let answers = questions.childNodes[i].querySelector('.sbsod-answers');
+                        let choice = answers.querySelector('.sbsod-choice');
+                        let perc = remap(a, 0, 6, 0, 100);
+                        const width = answers.getBoundingClientRect().width / 7;
+                        choice.style.left = `calc(${perc}% - ${perc * width / 100}px)`;
+                    }
+                }
+            }).observe(this.container);
+
+            this.scrollindicator.addEventListener('click', () => {
+                questions.scrollBy({
+                    top: 100,
+                    behavior: 'smooth'
+                });
+            });
+
             this.back.addEventListener('click', () => {
+                if (this.observer) this.observer.unobserve(this.container);
                 let o = this.options;
                 o.stage = 'tutorial';
                 o.position = 'previous';
                 o.answers = this.answers;
                 this.previous = new SantaBarbara(o);
                 this.slidePrevious();
-            }, { once: true })
+            }, { once: true });
+
+            this.continue.addEventListener('click', () => {
+                removeClass(this.content, 'pop');
+                wait(300, () => {
+                    this.destroy();
+                    this.basemap.fit(this.params.interface.map.levels, {
+                        duration: 500,
+                        easing: easeInOutSine
+                    }, () => {
+                        this.app.page = new Levels({
+                            app: this.app,
+                            position: 'current',
+                            update: true
+                        });
+                    });
+                });
+            }, { once: true });
         });
     }
 }

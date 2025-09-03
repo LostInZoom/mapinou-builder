@@ -27,7 +27,14 @@ class Levels extends Page {
             type: this.getTierContent().type,
             position: 'current',
             animate: this.init
-        }, () => { this.listen = true; });
+        }, () => {
+            if (this.update) {
+                this.update(() => { this.listen = true; });
+            } else {
+                this.listen = true;
+            }
+        });
+
         this.navigation = new NavigationBar({ page: this });
 
         // Create the back button to get back to the title screen
@@ -138,6 +145,10 @@ class Levels extends Page {
         else if (options.type === 'tutorial') {
 
         }
+    }
+
+    update(callback) {
+        this.current.update(callback);
     }
 }
 
