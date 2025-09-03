@@ -3,9 +3,9 @@ import device from "current-device";
 import Application from "./game/application.js";
 import { ajaxGet, ajaxPost } from "./utils/ajax.js";
 
-window.addEventListener("DOMContentLoaded", function() {
+window.addEventListener("DOMContentLoaded", function () {
     function register(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
 
         function getInformation() {
             return {
@@ -55,14 +55,18 @@ window.addEventListener("DOMContentLoaded", function() {
     register((sessionId) => {
         ajaxGet('configuration/', (params) => {
             // Retrieve the current session progression
-            let progression = localStorage.getItem('progression');
-            if (!progression) {
-                progression = { tier: 0, level: 0 };
-                localStorage.setItem('progression', progression);
+            let tier = localStorage.getItem('tier');
+            let level = localStorage.getItem('level');
+            if (!tier) {
+                localStorage.setItem('tier', 0);
+                localStorage.setItem('level', 0);
             }
 
             params.session = sessionId;
-            params.progression = progression;
+            params.progression = {
+                tier: parseInt(tier),
+                level: parseInt(level)
+            };
 
             new Application(params);
         });

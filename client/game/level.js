@@ -210,6 +210,7 @@ class Level extends Page {
     }
 
     leaderboard() {
+        this.app.progress();
         this.canceler.remove();
 
         this.highscoreContainer = makeDiv(null, 'highscore-container');
@@ -381,7 +382,7 @@ class Level extends Page {
             this.app.page = new Levels({
                 app: this.app,
                 position: 'current',
-                init: true
+                update: true
             });
         });
     }

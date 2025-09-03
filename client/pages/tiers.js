@@ -33,6 +33,7 @@ class TierPanel extends Panel {
         this.type = 'tier';
         this.tier = this.options.tier;
         this.level = this.options.level;
+        this.update = this.options.update ?? false;
 
         this.minimapscontainer = [];
         this.minimaps = [];
@@ -59,7 +60,7 @@ class TierPanel extends Panel {
 
         this.createTier().then(() => {
             this.observer.observe(this.container);
-            callback();
+            callback(this);
         });
     }
 
@@ -67,7 +68,7 @@ class TierPanel extends Panel {
         const tier = this.page.getTierContent();
 
         // Wait 200 ms if animating
-        if (this.animate) { await waitPromise(200); }
+        if (!this.update && this.animate) { await waitPromise(200); }
 
         for (let i = 0; i < tier.content.length; i++) {
             const level = tier.content[i];
@@ -92,6 +93,16 @@ class TierPanel extends Panel {
                 minimapcontainer.offsetHeight;
                 addClass(minimapcontainer, 'pop');
             }
+
+            this.minimapscontainer.push(minimapcontainer);
+            this.minimaps.push(new Basemap({
+                app: this.page.app,
+                parent: minimap,
+                class: 'minimap',
+                center: level.target,
+                zoom: this.basemap.getZoom() + 1,
+                interactive: false
+            }));
 
             const progtier = this.page.getProgression().tier
 
@@ -134,17 +145,7 @@ class TierPanel extends Panel {
                 state.innerHTML = this.page.app.options.svgs.lock;
             }
 
-            this.minimapscontainer.push(minimapcontainer);
-            this.minimaps.push(new Basemap({
-                app: this.page.app,
-                parent: minimap,
-                class: 'minimap',
-                center: level.target,
-                zoom: this.basemap.getZoom() + 1,
-                interactive: false
-            }));
-
-            if (this.animate && i <= this.level) { await waitPromise(300); }
+            if (!this.update && this.animate && i <= this.level) { await waitPromise(300); }
 
             let drawLine = false;
             if (this.tier === progtier && i < this.level) { drawLine = true; }
@@ -154,7 +155,7 @@ class TierPanel extends Panel {
                 this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1], i, i + 1);
             }
 
-            if (this.animate && i < this.level) { await waitPromise(300); }
+            if (!this.update && this.animate && i < this.level) { await waitPromise(300); }
         }
     }
 
@@ -201,8 +202,41 @@ class TierPanel extends Panel {
         wait(500, callback);
     }
 
-    update(callback) {
+    progress(callback) {
         callback = callback || function () { };
+        const tier = this.page.getTierContent();
+        const level = tier.content[this.level];
+        let minimap = this.minimapscontainer[this.level];
+        let minimaplevel = minimap.querySelector('.levels-minimap');
+        let state = minimaplevel.querySelector('.levels-state');
+        removeClass(minimap, 'active');
+        addClass(minimap, 'hide');
+        wait(300, () => {
+            removeClass(minimap, 'hide');
+            addClass(minimap, 'shrink');
+            state.remove();
+            state = makeDiv(null, 'levels-state');
+            state.innerHTML = this.page.app.options.svgs.check;
+            minimaplevel.append(state);
+            minimaplevel.offsetHeight;
+            addClass(minimap, 'finished');
+            wait(300, () => {
+                removeClass(minimap, 'shrink');
+                wait(300, () => {
+                    let px = this.basemap.getPixelAtCoordinates(level.target);
+                    let nextpx = this.page.app.basemap.getPixelAtCoordinates(tier.content[this.level + 1].target);
+                    this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1], this.level, this.level + 1);
+                    minimap = this.minimapscontainer[this.level + 1];
+                    wait(300, () => {
+                        removeClass(minimap, 'remaining');
+                        addClass(minimap, 'active');
+                        wait(300, () => {
+                            callback();
+                        });
+                    });
+                });
+            });
+        });
     }
 }
 
@@ -210,6 +244,7 @@ class ExperiencePanel extends Panel {
     constructor(options, callback) {
         super(options, callback);
         this.type = 'experience';
+        this.update = this.options.update ?? false;
         this.number = this.options.number;
 
         const prognumber = this.page.getProgression().tier;
@@ -217,6 +252,8 @@ class ExperiencePanel extends Panel {
 
         this.expcontainer = makeDiv(null, 'levels-experience-container');
         this.experience = makeDiv(null, 'levels-experience');
+        this.svg = makeDiv(null, 'levels-experience-svg');
+        this.experience.append(this.svg);
         this.expcontainer.append(this.experience);
 
         if (!this.animate) { addClass(this.expcontainer, 'pop'); }
@@ -224,15 +261,15 @@ class ExperiencePanel extends Panel {
 
         if (this.number === prognumber) {
             addClass(this.expcontainer, 'active');
-            this.experience.innerHTML = this.page.app.options.svgs.flask;
+            this.svg.innerHTML = this.page.app.options.svgs.flask;
         }
         else if (this.number < prognumber) {
             addClass(this.expcontainer, 'finished');
-            this.experience.innerHTML = this.page.app.options.svgs.check;
+            this.svg.innerHTML = this.page.app.options.svgs.check;
         }
         else if (this.number > prognumber) {
             addClass(this.expcontainer, 'remaining');
-            this.experience.innerHTML = this.page.app.options.svgs.lock;
+            this.svg.innerHTML = this.page.app.options.svgs.lock;
         }
 
         if (this.animate) {
@@ -257,8 +294,16 @@ class ExperiencePanel extends Panel {
                 });
             }
         }
+
         this.experience.addEventListener('click', startExperience);
-        this.callback();
+
+        if (this.update) {
+            this.progress(() => {
+                this.callback(this);
+            });
+        } else {
+            this.callback(this);
+        }
     }
 
     hide(callback) {
@@ -283,8 +328,21 @@ class ExperiencePanel extends Panel {
         wait(500, callback);
     }
 
-    update(callback) {
+    progress(callback) {
         callback = callback || function () { };
+        removeClass(this.expcontainer, 'active');
+        wait(500, () => {
+            addClass(this.svg, 'hide');
+            wait(300, () => {
+                this.svg.remove();
+                this.svg = makeDiv(null, 'levels-experience-svg shrink');
+                this.svg.innerHTML = this.page.app.options.svgs.check;
+                this.experience.append(this.svg);
+                this.svg.offsetHeight;
+                removeClass(this.svg, 'shrink');
+                wait(300, callback);
+            });
+        });
     }
 }
 
@@ -299,6 +357,7 @@ class NavigationBar {
         this.options = options;
         this.page = this.options.page;
         this.params = this.options.page.params;
+        this.listen = false;
 
         const nb = this.page.getNumber();
         const pos = this.page.getPosition();
@@ -328,6 +387,7 @@ class NavigationBar {
         this.container.offsetHeight;
 
         addClass(this.container, 'pop');
+        wait(300, () => { this.listen = true; });
     }
 
     hide(callback) {
@@ -338,74 +398,78 @@ class NavigationBar {
 
     slide(direction, callback) {
         callback = callback || function () { };
-        const isPrevious = direction === 'previous';
+        if (this.listen) {
+            this.listen = false;
+            const isPrevious = direction === 'previous';
 
-        // Remove old events
-        if (this.previous) { this.previous.removeEventListener('click', this.previousListener); }
-        if (this.next) { this.next.removeEventListener('click', this.nextListener); }
-        removeClass(this.current, 'current');
-        this.current.innerHTML = '';
+            // Remove old events
+            if (this.previous) { this.previous.removeEventListener('click', this.previousListener); }
+            if (this.next) { this.next.removeEventListener('click', this.nextListener); }
+            removeClass(this.current, 'current');
+            this.current.innerHTML = '';
 
-        // Update class conditionally
-        if (isPrevious && this.next) { addClass(this.next, 'shrink'); }
-        if (!isPrevious && this.previous) { addClass(this.previous, 'shrink'); }
+            // Update class conditionally
+            if (isPrevious && this.next) { addClass(this.next, 'shrink'); }
+            if (!isPrevious && this.previous) { addClass(this.previous, 'shrink'); }
 
-        if (isPrevious && this.previous) {
-            removeClass(this.previous, 'previous');
-            addClass(this.previous, 'current');
-        }
-        if (!isPrevious && this.next) {
-            removeClass(this.next, 'next');
-            addClass(this.next, 'current');
-        }
-
-        if (isPrevious && this.previous) { removeClass(this.previous, 'previous'); }
-        if (!isPrevious && this.next) { removeClass(this.next, 'next'); }
-
-        addClass(this.current, isPrevious ? 'next' : 'previous');
-
-        // Update name
-        if (isPrevious && this.previous) { this.previous.innerHTML = this.page.getTierContent().name; }
-        if (!isPrevious && this.next) { this.next.innerHTML = this.page.getTierContent().name; }
-
-        const nb = this.page.getNumber();
-        const pos = this.page.getPosition();
-        const element = makeDiv(null, `levels-navigation-entry ${isPrevious ? 'previous' : 'next'} shrink`, this.params.svgs[isPrevious ? 'arrowleft' : 'arrowright']);
-        if (pos > 0 && pos < nb - 1) {
-            // Insertion in the dom
-            if (isPrevious) { this.container.insertBefore(element, this.container.firstChild); }
-            else { this.container.append(element); }
-            element.offsetHeight;
-            removeClass(element, 'shrink');
-        }
-
-        // Add new svg arrow
-        this.current.innerHTML = this.params.svgs[isPrevious ? 'arrowright' : 'arrowleft'];
-
-        wait(500, () => {
-            if (isPrevious && this.next) { this.next.remove(); }
-            if (!isPrevious && this.previous) { this.previous.remove(); }
-
-            // Reassign new buttons
-            if (isPrevious) {
-                this.next = this.current;
-                this.current = this.previous;
-                if (pos > 0) { this.previous = element; }
-                else { this.previous = undefined; }
-            } else {
-                this.previous = this.current;
-                this.current = this.next;
-                this.next = element;
-                if (pos < nb) { this.next = element; }
-                else { this.next = undefined; }
+            if (isPrevious && this.previous) {
+                removeClass(this.previous, 'previous');
+                addClass(this.previous, 'current');
+            }
+            if (!isPrevious && this.next) {
+                removeClass(this.next, 'next');
+                addClass(this.next, 'current');
             }
 
-            // Remake new listeners
-            if (this.previous) { this.previous.addEventListener('click', this.previousListener); }
-            if (this.next) { this.next.addEventListener('click', this.nextListener); }
+            if (isPrevious && this.previous) { removeClass(this.previous, 'previous'); }
+            if (!isPrevious && this.next) { removeClass(this.next, 'next'); }
 
-            callback();
-        });
+            addClass(this.current, isPrevious ? 'next' : 'previous');
+
+            // Update name
+            if (isPrevious && this.previous) { this.previous.innerHTML = this.page.getTierContent().name; }
+            if (!isPrevious && this.next) { this.next.innerHTML = this.page.getTierContent().name; }
+
+            const nb = this.page.getNumber();
+            const pos = this.page.getPosition();
+            const element = makeDiv(null, `levels-navigation-entry ${isPrevious ? 'previous' : 'next'} shrink`, this.params.svgs[isPrevious ? 'arrowleft' : 'arrowright']);
+            if (pos > 0 && pos < nb - 1) {
+                // Insertion in the dom
+                if (isPrevious) { this.container.insertBefore(element, this.container.firstChild); }
+                else { this.container.append(element); }
+                element.offsetHeight;
+                removeClass(element, 'shrink');
+            }
+
+            // Add new svg arrow
+            this.current.innerHTML = this.params.svgs[isPrevious ? 'arrowright' : 'arrowleft'];
+
+            wait(500, () => {
+                if (isPrevious && this.next) { this.next.remove(); }
+                if (!isPrevious && this.previous) { this.previous.remove(); }
+
+                // Reassign new buttons
+                if (isPrevious) {
+                    this.next = this.current;
+                    this.current = this.previous;
+                    if (pos > 0) { this.previous = element; }
+                    else { this.previous = undefined; }
+                } else {
+                    this.previous = this.current;
+                    this.current = this.next;
+                    this.next = element;
+                    if (pos < nb) { this.next = element; }
+                    else { this.next = undefined; }
+                }
+
+                // Remake new listeners
+                if (this.previous) { this.previous.addEventListener('click', this.previousListener); }
+                if (this.next) { this.next.addEventListener('click', this.nextListener); }
+
+                this.listen = true;
+                callback();
+            });
+        }
     }
 }
 

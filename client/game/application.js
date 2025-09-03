@@ -161,6 +161,37 @@ class Application {
     loaded() {
         addClass(this.mask, 'loaded');
     }
+
+    getProgression(previous) {
+        if (previous) {
+            if (this.progression.level === 0) {
+                return { tier: this.progression.tier - 1, level: 0 }
+            } else {
+                return { tier: this.progression.tier, level: this.progression.level - 1 }
+            }
+        } else {
+            return this.progression;
+        }
+    }
+
+    progress() {
+        let t = this.progression.tier;
+        let l = this.progression.level;
+        const tier = this.options.levels[t];
+        if (tier.type === 'tier') {
+            if (l >= tier.content.length - 1) {
+                this.progression.tier = t + 1;
+                this.progression.level = 0;
+            } else {
+                this.progression.level = l + 1;
+            }
+        } else {
+            this.progression.tier = t + 1;
+            this.progression.level = 0;
+        }
+        localStorage.setItem('tier', this.progression.tier);
+        localStorage.setItem('level', this.progression.level);
+    }
 }
 
 export default Application;

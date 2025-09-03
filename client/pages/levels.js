@@ -16,26 +16,34 @@ class Levels extends Page {
         addClass(this.container, 'page-levels');
         this.levels = this.app.options.levels;
 
-        this.progression = this.app.progression;
+        this.progression = this.app.getProgression(this.update);
         // DEBUGGING
-        this.progression = { tier: 0, level: 0 };
+        // this.progression = { tier: 0, level: 0 };
 
         this.position = this.progression.tier;
         this.level = this.progression.level;
-
-        this.current = this.createTier({
-            type: this.getTierContent().type,
-            position: 'current',
-            animate: this.init
-        }, () => {
-            if (this.update) {
-                this.update(() => { this.listen = true; });
-            } else {
-                this.listen = true;
-            }
-        });
+        this.tier = this.getTierContent();
+        this.type = this.tier.type;
 
         this.navigation = new NavigationBar({ page: this });
+
+        this.current = this.createTier({
+            type: this.type,
+            position: 'current',
+            animate: this.init,
+            update: this.update
+        }, (t) => {
+            this.listen = true;
+            if (this.update) {
+                if (this.isLast()) {
+                    this.slide('next');
+                } else {
+                    if (this.type === 'tier') {
+                        t.progress();
+                    }
+                }
+            }
+        });
 
         // Create the back button to get back to the title screen
         this.back = makeDiv(null, 'header-button left', this.params.svgs.arrowleft);
@@ -90,6 +98,17 @@ class Levels extends Page {
         return this.levels[this.position];
     }
 
+    isLast() {
+        if (this.type !== 'tier') { return true; }
+        else {
+            if (this.getTierContent().content.length - 1 === this.progression.level) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     slide(direction) {
         if (this.listen) {
             // Flag to know direction
@@ -101,16 +120,13 @@ class Levels extends Page {
 
             this.listen = false;
 
-            if (this.current.getType() === 'tier') {
-                this.current.loading();
-                this.current.unobserveSize();
-            }
-
+            if (this.current.getType() === 'tier') { this.current.unobserveSize(); }
             this.position = isPrevious ? this.position - 1 : this.position + 1;
             const obj = this.createTier({
                 type: this.getTierContent().type,
                 position: direction,
-                animate: false
+                animate: false,
+                update: false
             });
             obj.slideIn();
 
@@ -125,30 +141,31 @@ class Levels extends Page {
 
     createTier(options, callback) {
         callback = callback || function () { };
+        this.progression = this.app.getProgression(options.update);
         if (options.type === 'tier') {
-            return new TierPanel({
+            let tier = new TierPanel({
                 page: this,
                 tier: this.position,
                 level: this.level,
                 animate: options.animate,
-                position: options.position
-            }, callback);
+                position: options.position,
+                update: options.update
+            }, (t) => { callback(t); });
+            return tier;
         }
-        else if (options.type === 'test') {
-            return new ExperiencePanel({
+        else if (options.type === 'experience') {
+            let experience = new ExperiencePanel({
                 page: this,
                 number: this.position,
                 animate: options.animate,
-                position: options.position
-            }, callback);
+                position: options.position,
+                update: options.update
+            }, (e) => { callback(e); });
+            return experience;
         }
         else if (options.type === 'tutorial') {
 
         }
-    }
-
-    update(callback) {
-        this.current.update(callback);
     }
 }
 

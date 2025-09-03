@@ -56,7 +56,7 @@ game:
   visibility:
     helpers: 2500
   speed:
-    travel: 4000 # in km/h
+    travel: 50000 # in km/h
     roaming: 20 # in px/s
     enemies: 10 # in px/s
   invulnerability: 3000
@@ -177,7 +177,7 @@ tutorial:
 #### LEVELS DEFINITION ####
 ###########################
 levels:
-  - type: test
+  - type: experience
     name: "Expérience 1"
     index: "SBSOD"
     start:
@@ -243,7 +243,7 @@ levels:
       - target: [ 1.9150105563803137,48.02224855414998 ]
       - target: [ 4.742646559356173,45.9924037536202 ]
       - target: [ -0.38898848432943517,45.10183756639063 ]
-  - type: test
+  - type: experience
     name: "Expérience 2"
   - type: tier
     name: "Phase 2"
@@ -304,7 +304,7 @@ levels:
           - [-1.6168512534698447,49.63338616536307]
           - [-1.6423392955582643,49.646578527429426]
           - [-1.6063771152243906,49.63881753504038]
-  - type: test
+  - type: experience
     name: "Expérience 3"
   - type: tier
     name: "Phase 3"
@@ -313,7 +313,7 @@ levels:
       - target: [6.089149305028605,45.91959117838756]
       - target: [1.361450712000182,45.950810067261486]
       - target: [-1.5260220720508781,49.5499857870286]
-  - type: test
+  - type: experience
     name: "Expérience 4"
   - type: tier
     name: "Phase 4"

@@ -147,6 +147,9 @@ class SantaBarbara extends Page {
             if (end) { addClass(this.continue, 'pop'); }
             addClass(this.back, 'pop');
 
+            // DEBUG
+            addClass(this.continue, 'pop');
+
             this.observer = new ResizeObserver(() => {
                 if (isOverflown(questions)) {
                     addClass(this.scrollindicator, 'active');
@@ -184,6 +187,7 @@ class SantaBarbara extends Page {
             }, { once: true });
 
             this.continue.addEventListener('click', () => {
+                this.app.progress();
                 removeClass(this.content, 'pop');
                 wait(300, () => {
                     this.destroy();
