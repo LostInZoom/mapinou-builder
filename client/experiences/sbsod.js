@@ -147,8 +147,10 @@ class SantaBarbara extends Page {
             if (end) { addClass(this.continue, 'pop'); }
             addClass(this.back, 'pop');
 
-            // DEBUG
-            addClass(this.continue, 'pop');
+            // Allow continuing if debug mode is active
+            if (this.app.debug) {
+                addClass(this.continue, 'pop');
+            }
 
             this.observer = new ResizeObserver(() => {
                 if (isOverflown(questions)) {

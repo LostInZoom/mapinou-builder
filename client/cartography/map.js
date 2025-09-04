@@ -248,7 +248,6 @@ class Basemap {
         callback = callback || function () { };
         this.map.easeTo(options);
         this.map.once('moveend', () => {
-            this.render();
             if (callback) callback();
         });
     }
@@ -259,7 +258,6 @@ class Basemap {
         options.speed = options.curve ?? this.animationSpeed;
         this.map.flyTo(options);
         this.map.once('moveend', () => {
-            this.render();
             if (callback) callback();
         });
     }
@@ -273,7 +271,6 @@ class Basemap {
             speed: options.speed ?? this.animationSpeed
         });
         this.map.once('moveend', () => {
-            this.render();
             if (callback) callback();
         });
     }
@@ -403,8 +400,7 @@ class Basemap {
         callback = callback || function () { };
 
         const movement = (e) => {
-            // RESTORE ROUTABILITY HERE
-            if (true) {
+            if (this.routable) {
                 let destination = e.lngLat.toArray();
                 this.player.travel(destination, callback);
             }

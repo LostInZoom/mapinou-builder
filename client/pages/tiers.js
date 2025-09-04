@@ -104,7 +104,8 @@ class TierPanel extends Panel {
                             app: this.page.app,
                             levels: this.page,
                             position: 'current',
-                            params: level
+                            tier: this.page.getPosition(),
+                            level: i
                         });
                     });
                 }

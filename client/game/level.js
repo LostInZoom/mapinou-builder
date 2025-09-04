@@ -9,19 +9,20 @@ import Target from '../characters/target';
 import Levels from '../pages/levels';
 import { ajaxPost } from '../utils/ajax';
 import Basemap from '../cartography/map';
-import { easeInOutSine, easeOutExpo } from '../utils/math';
+import { easeInOutSine, easeOutExpo, easeOutSine } from '../utils/math';
 import Rabbits from '../layers/rabbits';
 
 class Level extends Page {
     constructor(options, callback) {
         super(options, callback);
         this.params = this.options.app.options;
-        this.level = this.options.params;
         this.levels = this.options.levels;
-        this.basemap = this.options.app.basemap;
+
+        this.tier = this.options.tier;
+        this.level = this.options.level;
+        this.parameters = this.app.options.levels[this.tier].content[this.level];
 
         this.options.app.forbidRabbits();
-
         this.score = new Score({
             level: this,
             parent: this.options.app.header,
@@ -46,7 +47,9 @@ class Level extends Page {
 
         // this.phase1(() => {
         //     this.phase2(() => {
-        //         this.ending();
+        //         wait(300, () => {
+        //             this.ending();
+        //         });
         //     });
         // });
 
@@ -65,7 +68,7 @@ class Level extends Page {
         this.score.setState('default');
         this.score.start();
 
-        this.hints = this.level.hints;
+        this.hints = this.parameters.hints;
 
         this.hint = makeDiv(null, 'level-hint-container');
         this.hintext = makeDiv(null, 'level-hint');
@@ -75,7 +78,7 @@ class Level extends Page {
 
         this.basemap.enableInteractions();
 
-        let player = this.level.player;
+        let player = this.parameters.player;
 
         const hintListener = () => {
             let visible = this.basemap.isVisible(player);
@@ -130,7 +133,7 @@ class Level extends Page {
 
         this.phase = 2;
         this.basemap.disableInteractions();
-        this.basemap.createCharacters(this, this.level);
+        this.basemap.createCharacters(this, this.parameters);
 
         this.canceler = makeDiv(null, 'level-cancel-button', this.params.svgs.helm);
         this.container.append(this.canceler);
@@ -158,7 +161,7 @@ class Level extends Page {
             this.dataExtent = this.basemap.getExtentForData();
             this.basemap.fit(this.dataExtent, {
                 duration: 500,
-                easing: inAndOut,
+                easing: easeInOutSine,
                 padding: { top: 100, bottom: 50, left: 50, right: 50 }
             }, () => {
                 this.basemap.setMinZoom(this.basemap.getZoom());
@@ -186,8 +189,8 @@ class Level extends Page {
 
         let results = {
             session: this.params.session.index,
-            tier: this.levels.progression.tier,
-            level: this.levels.progression.level,
+            tier: this.tier,
+            level: this.level,
             score: this.endScore,
         }
 
@@ -204,8 +207,10 @@ class Level extends Page {
 
         this.basemap.fit(this.dataExtent, {
             duration: 500,
-            easing: inAndOut,
-            padding: { top: 100, bottom: 50, left: 50, right: 50 }
+            easing: easeInOutSine,
+            padding: { top: 100, bottom: 50, left: 50, right: 50 },
+            curve: 1.42,
+            speed: 1.2
         }, toLeaderBoard);
     }
 
@@ -227,7 +232,7 @@ class Level extends Page {
         this.highscoreContainer.offsetWidth;
         addClass(this.highscoreContainer, 'pop');
 
-        let c = this.level.target;
+        let c = this.parameters.target;
         let r = this.params.game.tolerance.target;
         let hsmap = new Basemap({
             app: this.app,
