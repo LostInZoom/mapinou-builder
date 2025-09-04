@@ -1,5 +1,6 @@
+import Levels from "../pages/levels";
 import Page from "../pages/page";
-import { addClass, addClassList, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
+import { addClass, addClassList, clearElement, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
 import { easeInOutSine, generateRandomInteger } from "../utils/math";
 
 class Piaget extends Page {
@@ -34,17 +35,34 @@ class Piaget extends Page {
             zoom: this.app.options.interface.map.start.zoom
         }, () => {
             addClass(this.toptext, 'pop');
-
             wait(300, () => {
-                addClass(this.back, 'pop');
                 addClass(this.bottomtext, 'pop');
+                wait(300, () => {
+                    addClass(this.back, 'pop');
+                });
             });
         });
+
+        this.back.addEventListener('click', () => {
+            removeClass(this.topcontent, 'pop');
+            removeClass(this.bottomcontent, 'pop');
+            wait(500, () => {
+                this.destroy();
+                this.basemap.fit(this.params.interface.map.levels, {
+                    duration: 500,
+                    easing: easeInOutSine
+                }, () => {
+                    this.app.page = new Levels({ app: this.app, position: 'current' });
+                });
+            });
+        }, true);
     }
 
     createBottomPanel(index) {
         let pursue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
         this.bottomtext = makeDiv(null, 'piaget-text bottom');
+        if (index > 1) { addClass(this.bottomtext, 'pop'); }
+
         this.bottomcontent.append(this.bottomtext, pursue);
         let bottomlabel = makeDiv(null, 'piaget-tutorial', this.elements.bottom);
         let bottombottle = makeDiv(null, 'piaget-bottle draw', this.app.options.svgs['piaget' + index]);
@@ -55,6 +73,10 @@ class Piaget extends Page {
         let svg = document.createElementNS(namespace, 'svg');
         svgcontainer.append(svg);
         bottombottle.append(svgcontainer);
+
+        if (index > 1) {
+            addClass(this.bottomcontent, 'pop');
+        }
 
         const vb = bottombottle.querySelector('svg').viewBox.baseVal;
         svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
@@ -142,6 +164,34 @@ class Piaget extends Page {
         }
 
         bottombottle.addEventListener('touchstart', down);
+
+        pursue.addEventListener('click', () => {
+            if (index >= 5) {
+                removeClass(this.bottomcontent, 'pop');
+                wait(300, () => {
+                    removeClass(this.topcontent, 'pop');
+                    wait(500, () => {
+                        this.destroy();
+                        this.basemap.fit(this.params.interface.map.levels, {
+                            duration: 500,
+                            easing: easeInOutSine
+                        }, () => {
+                            this.app.page = new Levels({
+                                app: this.app,
+                                position: 'current',
+                                update: true
+                            });
+                        });
+                    });
+                });
+            } else {
+                removeClass(this.bottomcontent, 'pop');
+                wait(500, () => {
+                    clearElement(this.bottomcontent);
+                    this.createBottomPanel(++index);
+                });
+            }
+        }, true);
     }
 
     getRelativeCoordinates(container, event) {

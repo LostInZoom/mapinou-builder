@@ -100,13 +100,15 @@ class TierPanel extends Panel {
                     minimapcontainer.removeEventListener('click', startLevel);
                     this.page.listen = false;
                     this.page.hide(() => {
-                        this.page.destroy();
-                        this.page.app.page = new Level({
-                            app: this.page.app,
-                            levels: this.page,
-                            position: 'current',
-                            tier: this.page.getPosition(),
-                            level: i
+                        wait(100, () => {
+                            this.page.destroy();
+                            this.page.app.page = new Level({
+                                app: this.page.app,
+                                levels: this.page,
+                                position: 'current',
+                                tier: this.page.getPosition(),
+                                level: i
+                            });
                         });
                     });
                 }
@@ -283,21 +285,23 @@ class ExperiencePanel extends Panel {
                 this.experience.removeEventListener('click', startExperience);
                 this.page.listen = false;
                 this.page.hide(() => {
-                    this.page.destroy();
-                    if (content.index === 'SBSOD') {
-                        this.page.app.page = new SantaBarbara({
-                            app: this.page.app,
-                            position: 'current',
-                            elements: content,
-                            stage: 'tutorial'
-                        });
-                    } else if (content.index === 'piaget') {
-                        this.page.app.page = new Piaget({
-                            app: this.page.app,
-                            position: 'current',
-                            elements: content
-                        });
-                    }
+                    wait(100, () => {
+                        this.page.destroy();
+                        if (content.index === 'SBSOD') {
+                            this.page.app.page = new SantaBarbara({
+                                app: this.page.app,
+                                position: 'current',
+                                elements: content,
+                                stage: 'tutorial'
+                            });
+                        } else if (content.index === 'piaget') {
+                            this.page.app.page = new Piaget({
+                                app: this.page.app,
+                                position: 'current',
+                                elements: content
+                            });
+                        }
+                    });
                 });
             }
         }

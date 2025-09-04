@@ -23,7 +23,6 @@ class Levels extends Page {
         this.type = this.tier.type;
 
         this.navigation = new NavigationBar({ page: this });
-
         this.current = this.createTier({
             type: this.type,
             position: 'current',

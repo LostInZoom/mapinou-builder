@@ -55,7 +55,7 @@ class SantaBarbara extends Page {
 
             this.back.addEventListener('click', () => {
                 removeClass(this.content, 'pop');
-                wait(300, () => {
+                wait(500, () => {
                     this.destroy();
                     this.basemap.fit(this.params.interface.map.levels, {
                         duration: 500,
@@ -122,7 +122,11 @@ class SantaBarbara extends Page {
 
                     let end = this.answers.every(v => v !== undefined);
                     if (end) { addClass(this.continue, 'pop'); }
-                    else { removeClass(this.continue, 'pop'); }
+                    else {
+                        if (!this.app.debug) {
+                            removeClass(this.continue, 'pop');
+                        }
+                    }
                 });
             }
 
@@ -194,7 +198,7 @@ class SantaBarbara extends Page {
             this.continue.addEventListener('click', () => {
                 this.app.progress();
                 removeClass(this.content, 'pop');
-                wait(300, () => {
+                wait(500, () => {
                     this.destroy();
                     this.basemap.fit(this.params.interface.map.levels, {
                         duration: 500,
