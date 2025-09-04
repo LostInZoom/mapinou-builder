@@ -136,8 +136,12 @@
     }
 
     &.remaining {
-        &>.levels-minimap>.levels-state {
+        &>.levels-minimap {
             opacity: 0.7;
+        }
+
+        &>.levels-minimap>.levels-state {
+            opacity: 1;
         }
     }
 
@@ -239,6 +243,7 @@
 }
 
 .levels-experience-container {
+    position: relative;
     transform: scale(0);
     transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
 
@@ -257,6 +262,7 @@
 }
 
 .levels-experience {
+    position: relative;
     pointer-events: all;
 
     max-height: 10rem;
@@ -266,13 +272,28 @@
     border-radius: 50%;
     border: solid .5rem colors.$main-color-dark;
     overflow: hidden;
-    background-color: colors.$main-color-light;
 
     box-shadow: 0 0 1rem grey;
+
+}
+
+.levels-experience-background {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: all;
+
+    background-color: colors.$main-color-light;
     opacity: .8;
 }
 
 .levels-experience-svg {
+    position: absolute;
+    z-index: 3;
+
     &>svg {
         height: 100%;
         width: 100%;

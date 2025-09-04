@@ -178,7 +178,7 @@ tutorial:
 ###########################
 levels:
   - type: experience
-    name: "Expérience 1"
+    name: "Niveau 1"
     index: "SBSOD"
     start:
       center: [-4.48543194405423, 48.392941224531135]
@@ -206,7 +206,7 @@ levels:
       - "Je peux généralement me rappeler un nouveau trajet après ne l’avoir suivi qu’une fois."
       - "Je n’ai pas une très bonne carte mentale de mon environnement."
   - type: tier
-    name: "Phase 1"
+    name: "Niveau 2"
     content:
       - start:
           zoom: 5
@@ -244,9 +244,9 @@ levels:
       - target: [ 4.742646559356173,45.9924037536202 ]
       - target: [ -0.38898848432943517,45.10183756639063 ]
   - type: experience
-    name: "Expérience 2"
+    name: "Niveau 3"
   - type: tier
-    name: "Phase 2"
+    name: "Niveau 4"
     content:
       - target: [ 1.2866479982915493,43.885279168322626 ]
       - target: [ 6.089149305028605,45.91959117838756 ]
@@ -305,18 +305,18 @@ levels:
           - [-1.6423392955582643,49.646578527429426]
           - [-1.6063771152243906,49.63881753504038]
   - type: experience
-    name: "Expérience 3"
+    name: "Niveau 5"
   - type: tier
-    name: "Phase 3"
+    name: "Niveau 6"
     content:
       - target: [1.2866479982915493,43.885279168322626]
       - target: [6.089149305028605,45.91959117838756]
       - target: [1.361450712000182,45.950810067261486]
       - target: [-1.5260220720508781,49.5499857870286]
   - type: experience
-    name: "Expérience 4"
+    name: "Niveau 7"
   - type: tier
-    name: "Phase 4"
+    name: "Niveau 8"
     content:
       - target: [1.2866479982915493,43.885279168322626]
       - target: [6.089149305028605,45.91959117838756]

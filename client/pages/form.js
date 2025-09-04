@@ -121,7 +121,7 @@ class Form extends Page {
                 duration: 500,
                 easing: easeInOutSine
             }, () => {
-                this.app.page = new Levels({ app: this.app, position: 'current' });
+                this.app.page = new Levels({ app: this.app, position: 'current', init: true });
             });
         });
     }

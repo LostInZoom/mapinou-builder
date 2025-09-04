@@ -117,23 +117,31 @@ class TierPanel extends Panel {
                     }
                     if (i === this.level) {
                         addClass(minimapcontainer, 'active');
-                        const startLevel = () => {
-                            if (this.page.listening()) {
-                                minimapcontainer.removeEventListener('click', startLevel);
-                                this.page.listen = false;
-                                this.page.hide(() => {
-                                    this.page.destroy();
-                                    this.page.app.page = new Level({
-                                        app: this.page.app,
-                                        levels: this.page,
-                                        position: 'current',
-                                        params: level
-                                    });
-                                });
-                            }
-                        }
-                        minimapcontainer.addEventListener('click', startLevel);
                     }
+                }
+
+                const startLevel = () => {
+                    if (this.page.listening()) {
+                        minimapcontainer.removeEventListener('click', startLevel);
+                        this.page.listen = false;
+                        this.page.hide(() => {
+                            this.page.destroy();
+                            this.page.app.page = new Level({
+                                app: this.page.app,
+                                levels: this.page,
+                                position: 'current',
+                                params: level
+                            });
+                        });
+                    }
+                }
+
+                if (!this.update && i === this.level) {
+                    minimapcontainer.addEventListener('click', startLevel);
+                }
+
+                if (this.update && i === this.level + 1) {
+                    minimapcontainer.addEventListener('click', startLevel);
                 }
             }
             else if (this.tier < progtier) {
@@ -252,8 +260,9 @@ class ExperiencePanel extends Panel {
 
         this.expcontainer = makeDiv(null, 'levels-experience-container');
         this.experience = makeDiv(null, 'levels-experience');
+        this.background = makeDiv(null, 'levels-experience-background');
         this.svg = makeDiv(null, 'levels-experience-svg');
-        this.experience.append(this.svg);
+        this.experience.append(this.svg, this.background);
         this.expcontainer.append(this.experience);
 
         if (!this.animate) { addClass(this.expcontainer, 'pop'); }
@@ -295,7 +304,9 @@ class ExperiencePanel extends Panel {
             }
         }
 
-        this.experience.addEventListener('click', startExperience);
+        if (!this.update && this.number === prognumber) {
+            this.experience.addEventListener('click', startExperience);
+        }
 
         if (this.update) {
             this.progress(() => {
