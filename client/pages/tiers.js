@@ -94,6 +94,31 @@ class TierPanel extends Panel {
                 addClass(minimapcontainer, 'pop');
             }
 
+            const startLevel = () => {
+                if (this.page.listening()) {
+                    minimapcontainer.removeEventListener('click', startLevel);
+                    this.page.listen = false;
+                    this.page.hide(() => {
+                        this.page.destroy();
+                        this.page.app.page = new Level({
+                            app: this.page.app,
+                            levels: this.page,
+                            position: 'current',
+                            params: level
+                        });
+                    });
+                }
+            }
+
+            if (this.page.app.debug) {
+                addClass(minimapcontainer, 'active-debug');
+                minimapcontainer.addEventListener('click', startLevel);
+                if (i < tier.content.length - 1) {
+                    let nextpx = this.page.app.basemap.getPixelAtCoordinates(tier.content[i + 1].target);
+                    this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1], i, i + 1);
+                }
+            }
+
             this.minimapscontainer.push(minimapcontainer);
             this.minimaps.push(new Basemap({
                 app: this.page.app,
@@ -106,64 +131,50 @@ class TierPanel extends Panel {
 
             const progtier = this.page.getProgression().tier
 
-            if (this.tier === progtier) {
-                if (i > this.level) {
+            if (!this.page.app.debug) {
+                if (this.tier === progtier) {
+                    if (i > this.level) {
+                        addClass(minimapcontainer, 'remaining');
+                        state.innerHTML = this.page.app.options.svgs.lock;
+                    } else {
+                        if (i < this.level) {
+                            addClass(minimapcontainer, 'finished');
+                            state.innerHTML = this.page.app.options.svgs.check;
+                        }
+                        if (i === this.level) {
+                            addClass(minimapcontainer, 'active');
+                        }
+                    }
+
+                    if (!this.update && i === this.level) {
+                        minimapcontainer.addEventListener('click', startLevel);
+                    }
+
+                    if (this.update && i === this.level + 1) {
+                        minimapcontainer.addEventListener('click', startLevel);
+                    }
+                }
+                else if (this.tier < progtier) {
+                    addClass(minimapcontainer, 'finished');
+                    state.innerHTML = this.page.app.options.svgs.check;
+                }
+                else {
                     addClass(minimapcontainer, 'remaining');
                     state.innerHTML = this.page.app.options.svgs.lock;
-                } else {
-                    if (i < this.level) {
-                        addClass(minimapcontainer, 'finished');
-                        state.innerHTML = this.page.app.options.svgs.check;
-                    }
-                    if (i === this.level) {
-                        addClass(minimapcontainer, 'active');
-                    }
                 }
 
-                const startLevel = () => {
-                    if (this.page.listening()) {
-                        minimapcontainer.removeEventListener('click', startLevel);
-                        this.page.listen = false;
-                        this.page.hide(() => {
-                            this.page.destroy();
-                            this.page.app.page = new Level({
-                                app: this.page.app,
-                                levels: this.page,
-                                position: 'current',
-                                params: level
-                            });
-                        });
-                    }
+                if (!this.update && this.animate && i <= this.level) { await waitPromise(300); }
+
+                let drawLine = false;
+                if (this.tier === progtier && i < this.level) { drawLine = true; }
+                if (this.tier < progtier && i < tier.content.length - 1) { drawLine = true; }
+                if (drawLine) {
+                    let nextpx = this.page.app.basemap.getPixelAtCoordinates(tier.content[i + 1].target);
+                    this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1], i, i + 1);
                 }
 
-                if (!this.update && i === this.level) {
-                    minimapcontainer.addEventListener('click', startLevel);
-                }
-
-                if (this.update && i === this.level + 1) {
-                    minimapcontainer.addEventListener('click', startLevel);
-                }
+                if (!this.update && this.animate && i < this.level) { await waitPromise(300); }
             }
-            else if (this.tier < progtier) {
-                addClass(minimapcontainer, 'finished');
-                state.innerHTML = this.page.app.options.svgs.check;
-            }
-            else {
-                addClass(minimapcontainer, 'remaining');
-                state.innerHTML = this.page.app.options.svgs.lock;
-            }
-
-            if (!this.update && this.animate && i <= this.level) { await waitPromise(300); }
-
-            let drawLine = false;
-            if (this.tier === progtier && i < this.level) { drawLine = true; }
-            if (this.tier < progtier && i < tier.content.length - 1) { drawLine = true; }
-            if (drawLine) {
-                let nextpx = this.page.app.basemap.getPixelAtCoordinates(tier.content[i + 1].target);
-                this.svg.addLine(px[0], px[1], nextpx[0], nextpx[1], i, i + 1);
-            }
-
-            if (!this.update && this.animate && i < this.level) { await waitPromise(300); }
         }
     }
 
@@ -265,27 +276,6 @@ class ExperiencePanel extends Panel {
         this.experience.append(this.svg, this.background);
         this.expcontainer.append(this.experience);
 
-        if (!this.animate) { addClass(this.expcontainer, 'pop'); }
-        this.container.append(this.expcontainer);
-
-        if (this.number === prognumber) {
-            addClass(this.expcontainer, 'active');
-            this.svg.innerHTML = this.page.app.options.svgs.flask;
-        }
-        else if (this.number < prognumber) {
-            addClass(this.expcontainer, 'finished');
-            this.svg.innerHTML = this.page.app.options.svgs.check;
-        }
-        else if (this.number > prognumber) {
-            addClass(this.expcontainer, 'remaining');
-            this.svg.innerHTML = this.page.app.options.svgs.lock;
-        }
-
-        if (this.animate) {
-            this.expcontainer.offsetHeight;
-            addClass(this.expcontainer, 'pop');
-        }
-
         const startExperience = () => {
             if (this.page.listening()) {
                 this.experience.removeEventListener('click', startExperience);
@@ -304,16 +294,47 @@ class ExperiencePanel extends Panel {
             }
         }
 
-        if (!this.update && this.number === prognumber) {
+        if (this.page.app.debug) {
+            this.container.append(this.expcontainer);
+            this.expcontainer.offsetHeight;
+            addClass(this.expcontainer, 'pop');
+            addClass(this.expcontainer, 'active-debug');
+            this.svg.innerHTML = this.page.app.options.svgs.flask;
             this.experience.addEventListener('click', startExperience);
-        }
-
-        if (this.update) {
-            this.progress(() => {
-                this.callback(this);
-            });
-        } else {
             this.callback(this);
+        } else {
+            if (!this.animate) { addClass(this.expcontainer, 'pop'); }
+            this.container.append(this.expcontainer);
+
+            if (this.number === prognumber) {
+                addClass(this.expcontainer, 'active');
+                this.svg.innerHTML = this.page.app.options.svgs.flask;
+            }
+            else if (this.number < prognumber) {
+                addClass(this.expcontainer, 'finished');
+                this.svg.innerHTML = this.page.app.options.svgs.check;
+            }
+            else if (this.number > prognumber) {
+                addClass(this.expcontainer, 'remaining');
+                this.svg.innerHTML = this.page.app.options.svgs.lock;
+            }
+
+            if (this.animate) {
+                this.expcontainer.offsetHeight;
+                addClass(this.expcontainer, 'pop');
+            }
+
+            if (!this.update && this.number === prognumber) {
+                this.experience.addEventListener('click', startExperience);
+            }
+
+            if (this.update) {
+                this.progress(() => {
+                    this.callback(this);
+                });
+            } else {
+                this.callback(this);
+            }
         }
     }
 

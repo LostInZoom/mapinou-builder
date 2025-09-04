@@ -135,6 +135,21 @@
             3s scale-breathing ease-in-out infinite .3s;
     }
 
+    &.active-debug>.levels-minimap {
+        border: solid .5rem #0000;
+        background: conic-gradient(from var(--angle),
+                colors.$main-color-medium,
+                colors.$main-color-dark,
+                colors.$main-color-dark,
+                colors.$main-color-medium,
+                colors.$main-color-dark,
+                colors.$main-color-dark,
+                colors.$main-color-medium ) border-box;
+
+        animation:
+            6s border-rotation linear infinite;
+    }
+
     &.remaining {
         &>.levels-minimap {
             opacity: 0.7;

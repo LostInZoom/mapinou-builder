@@ -5,9 +5,6 @@ import { generateRandomInteger } from '../utils/math.js';
 import { Header } from '../interface/elements.js';
 
 import Title from '../pages/title.js';
-import Consent from '../pages/consent.js';
-import Form from '../pages/form.js';
-import Levels from '../pages/levels.js';
 import Roamer from '../characters/roamer.js';
 import { Music, SoundEffects } from '../utils/soundbuttons.js';
 import Rabbits from '../layers/rabbits.js';
@@ -16,6 +13,9 @@ class Application {
     constructor(options) {
         this.options = options;
         this.progression = options.progression;
+
+        this.debug = true;
+        // this.progression = { tier: 1, level: 2 };
 
         // Create the DOM Element
         this.container = makeDiv('application', null);
@@ -163,6 +163,7 @@ class Application {
     }
 
     getProgression(previous) {
+        if (this.debug) { return { tier: 0, level: 0 }; }
         if (previous) {
             if (this.progression.level === 0) {
                 return { tier: this.progression.tier - 1, level: 0 }

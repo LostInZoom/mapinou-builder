@@ -15,10 +15,7 @@ class Levels extends Page {
         this.app.forbidRabbits();
         addClass(this.container, 'page-levels');
         this.levels = this.app.options.levels;
-
         this.progression = this.app.getProgression(this.update);
-        // DEBUGGING
-        // this.progression = { tier: 1, level: 2 };
 
         this.position = this.progression.tier;
         this.level = this.progression.level;
@@ -34,7 +31,7 @@ class Levels extends Page {
             update: this.update
         }, (t) => {
             this.listen = true;
-            if (this.update) {
+            if (this.update && !this.app.debug) {
                 if (this.isLast()) {
                     this.slide('next');
                 } else {
