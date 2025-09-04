@@ -179,32 +179,9 @@ tutorial:
 levels:
   - type: experience
     name: "Niveau 1"
-    index: "SBSOD"
-    start:
-      center: [-4.48543194405423, 48.392941224531135]
-      zoom: 6
-    tutorial:
-      - 'Cette expérience est un simple questionnaire, dans lequel vous
-        devez répondre à quinze questions sur vos habitudes et votre aisance à
-        manipuler des cartes.'
-      - 'Merci de répondre le plus honnêtement possible,
-        sur une échelle de 1 (pas du tout d''accord) à 7 (tout à fait d''accord).'
-    content:
-      - "Je suis très doué·e pour indiquer une direction."
-      - "J’ai généralement une mauvaise mémoire de l’endroit où je laisse un objet."
-      - "Je suis très doué·e pour évaluer les distances."
-      - "J’ai un très bon sens de l’orientation."
-      - "J’ai tendance à penser à mon environnement en termes de directions Nord, Sud, Est, Ouest."
-      - "Je me perds très facilement dans une nouvelle ville."
-      - "J’aime lire des cartes."
-      - "J’ai des difficultés à comprendre les indications directionnelles."
-      - "Je suis très doué·e pour lire les cartes."
-      - "Je ne mémorise pas très bien la route lorsque je voyage en voiture en tant que passager·ère."
-      - "Je n’aime pas indiquer une direction."
-      - "Ce n’est pas important pour moi de savoir où je suis."
-      - "Je laisse généralement quelqu’un d’autre planifier l’itinéraire pour les longs voyages."
-      - "Je peux généralement me rappeler un nouveau trajet après ne l’avoir suivi qu’une fois."
-      - "Je n’ai pas une très bonne carte mentale de mon environnement."
+    index: "piaget"
+    top: 'Voici une bouteille, la ligne bleue indique le niveau d''eau.'
+    bottom: 'Dessinez le même niveau dans cette bouteille pivotée.'
   - type: tier
     name: "Niveau 2"
     content:
@@ -245,6 +222,32 @@ levels:
       - target: [ -0.38898848432943517,45.10183756639063 ]
   - type: experience
     name: "Niveau 3"
+    index: "SBSOD"
+    start:
+      center: [-4.48543194405423, 48.392941224531135]
+      zoom: 6
+    tutorial:
+      - 'Cette expérience est un simple questionnaire, dans lequel vous
+        devez répondre à quinze questions sur vos habitudes et votre aisance à
+        manipuler des cartes.'
+      - 'Merci de répondre le plus honnêtement possible,
+        sur une échelle de 1 (pas du tout d''accord) à 7 (tout à fait d''accord).'
+    content:
+      - "Je suis très doué·e pour indiquer une direction."
+      - "J’ai généralement une mauvaise mémoire de l’endroit où je laisse un objet."
+      - "Je suis très doué·e pour évaluer les distances."
+      - "J’ai un très bon sens de l’orientation."
+      - "J’ai tendance à penser à mon environnement en termes de directions Nord, Sud, Est, Ouest."
+      - "Je me perds très facilement dans une nouvelle ville."
+      - "J’aime lire des cartes."
+      - "J’ai des difficultés à comprendre les indications directionnelles."
+      - "Je suis très doué·e pour lire les cartes."
+      - "Je ne mémorise pas très bien la route lorsque je voyage en voiture en tant que passager·ère."
+      - "Je n’aime pas indiquer une direction."
+      - "Ce n’est pas important pour moi de savoir où je suis."
+      - "Je laisse généralement quelqu’un d’autre planifier l’itinéraire pour les longs voyages."
+      - "Je peux généralement me rappeler un nouveau trajet après ne l’avoir suivi qu’une fois."
+      - "Je n’ai pas une très bonne carte mentale de mon environnement."
   - type: tier
     name: "Niveau 4"
     content:

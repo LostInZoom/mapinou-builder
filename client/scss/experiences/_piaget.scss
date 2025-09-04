@@ -1,0 +1,128 @@
+@use '../colors';
+
+$water-color: #90b2d1;
+$stroke-width: .4rem;
+$circle-radius: .6rem;
+
+.piaget-content {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    transform: scale(0);
+    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
+
+    &.pop {
+        transform: scale(1);
+        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &.top {
+        margin-bottom: 1rem;
+    }
+}
+
+.piaget-text {
+    width: 100%;
+    pointer-events: all;
+
+    background-color: colors.$secondary-color-dark;
+    color: colors.$main-color-light;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+
+    transform: scale(0);
+    transition: transform .3s cubic-bezier(0.36, 0, 0.66, -0.56);
+
+    &.pop {
+        transform: scale(1);
+        transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &.top {
+        border-radius: 0 .4rem .4rem .4rem;
+    }
+
+    &.bottom {
+        border-radius: .4rem .4rem 0 .4rem;
+    }
+}
+
+.piaget-tutorial {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+}
+
+.piaget-bottle {
+    position: relative;
+    margin-bottom: 1rem;
+    background-color: colors.$main-color-light;
+    border-radius: .4rem;
+
+    &>svg {
+        aspect-ratio: 1 / 1;
+        width: min(40vw, 20vh);
+        height: min(40vw, 20vh);
+        max-width: 15rem;
+        max-height: 15rem;
+        display: block;
+
+        &>.bottle {
+            color: transparent;
+            stroke: colors.$main-color-dark;
+            stroke-width: $stroke-width;
+        }
+
+        &>.level {
+            stroke: $water-color;
+            stroke-width: $stroke-width;
+        }
+    }
+
+    &.reference {}
+}
+
+.piaget-svg-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+
+    &>svg {
+        height: inherit;
+        width: inherit;
+
+        &>circle {
+            fill: $water-color;
+            r: $circle-radius;
+            transition: r .2s ease-in-out;
+
+            &.hide {
+                r: 0;
+            }
+        }
+
+        &>line {
+            stroke: $water-color;
+            stroke-width: $stroke-width;
+
+            transition: stroke-width .2s ease-in-out;
+
+            &.hide {
+                stroke-width: 0;
+            }
+        }
+    }
+}

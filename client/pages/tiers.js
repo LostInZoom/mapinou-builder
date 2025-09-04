@@ -1,4 +1,5 @@
 import Basemap from "../cartography/map";
+import Piaget from "../experiences/piaget";
 import SantaBarbara from "../experiences/sbsod";
 import Level from "../game/level";
 import { addClass, hasClass, makeDiv, removeClass, wait, waitPromise } from "../utils/dom";
@@ -289,6 +290,12 @@ class ExperiencePanel extends Panel {
                             position: 'current',
                             elements: content,
                             stage: 'tutorial'
+                        });
+                    } else if (content.index === 'piaget') {
+                        this.page.app.page = new Piaget({
+                            app: this.page.app,
+                            position: 'current',
+                            elements: content
                         });
                     }
                 });

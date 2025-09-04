@@ -1,7 +1,7 @@
 import Levels from "../pages/levels";
 import Page from "../pages/page";
-import { addClass, isOverflown, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
-import { easeInOutSine, remap } from "../utils/math";
+import { addClass, isOverflown, makeDiv, removeClass, wait } from "../utils/dom";
+import { easeInOutSine, generateRandomInteger, remap } from "../utils/math";
 
 class SantaBarbara extends Page {
     constructor(options, callback) {
@@ -19,12 +19,15 @@ class SantaBarbara extends Page {
         this.content.append(this.back, this.text, this.continue);
         this.container.append(this.content);
 
+        let centers = this.app.options.interface.map.start.centers;
+        let i = generateRandomInteger(0, centers.length - 1);
+
         if (this.stage === 'tutorial') {
             this.basemap.fly({
                 duration: 500,
                 easing: easeInOutSine,
-                center: this.elements.start.center,
-                zoom: this.elements.start.zoom
+                center: centers[i],
+                zoom: this.app.options.interface.map.start.zoom
             }, () => {
                 this.createTutorial();
             });
