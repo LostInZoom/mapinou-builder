@@ -77,6 +77,7 @@ class Levels extends Page {
                         addClass(chooserabbit, 'active');
                         this.image.src = src;
                         this.params.game.color = c;
+                        localStorage.setItem('color', c);
                     }
                 });
             });
