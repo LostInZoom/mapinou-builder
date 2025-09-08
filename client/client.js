@@ -2,6 +2,7 @@ import device from "current-device";
 
 import Application from "./game/application.js";
 import { ajaxGet, ajaxPost } from "./utils/ajax.js";
+import { generateRandomInteger } from "./utils/math.js";
 
 window.addEventListener("DOMContentLoaded", function () {
     function register(callback) {
@@ -58,8 +59,10 @@ window.addEventListener("DOMContentLoaded", function () {
             let tier = localStorage.getItem('tier');
             let level = localStorage.getItem('level');
             if (!tier) {
-                localStorage.setItem('tier', 0);
-                localStorage.setItem('level', 0);
+                tier = 0;
+                level = 0;
+                localStorage.setItem('tier', tier);
+                localStorage.setItem('level', level);
             }
 
             params.session = sessionId;
@@ -67,6 +70,15 @@ window.addEventListener("DOMContentLoaded", function () {
                 tier: parseInt(tier),
                 level: parseInt(level)
             };
+
+            let color = localStorage.getItem('color');
+            if (!color) {
+                // Create a random rabbit color if none is found
+                let colors = ['white', 'sand', 'brown', 'grey'];
+                color = colors[generateRandomInteger(0, colors.length - 1)];
+                localStorage.setItem('color', color);
+            }
+            params.game.color = color;
 
             new Application(params);
         });

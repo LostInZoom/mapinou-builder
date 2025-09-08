@@ -62,6 +62,11 @@ class Levels extends Page {
                 });
             }
         });
+
+        this.choose = makeDiv(null, 'header-button left');
+        this.app.header.insert(this.choose);
+        this.choose.offsetHeight;
+        addClass(this.back, 'pop');
     }
 
     hide(callback) {
