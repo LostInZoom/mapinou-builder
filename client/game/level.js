@@ -10,6 +10,7 @@ import { pointExtent, randomPointInCircle, within } from "../cartography/analysi
 import { addClass, easingIncrement, makeDiv, removeClass, wait } from "../utils/dom";
 import { ajaxPost } from '../utils/ajax';
 import { easeInOutSine, easeOutExpo } from '../utils/math';
+import Hint from './hint';
 
 class Level extends Page {
     constructor(options, callback) {
@@ -67,17 +68,17 @@ class Level extends Page {
         this.score.setState('default');
         this.score.start();
 
-        this.hints = this.parameters.hints;
-
-        this.hint = makeDiv(null, 'level-hint-container');
-        this.hintext = makeDiv(null, 'level-hint');
-        this.hint.append(this.hintext);
-        this.container.append(this.hint);
-        this.hint.offsetHeight;
+        // this.hint = makeDiv(null, 'level-hint-container');
+        // this.hintext = makeDiv(null, 'level-hint');
+        // this.hint.append(this.hintext);
+        // this.container.append(this.hint);
+        // this.hint.offsetHeight;
 
         this.basemap.enableInteractions();
 
         let player = this.parameters.player;
+
+        this.hint = new Hint({ level: this });
 
         const hintListener = () => {
             let visible = this.basemap.isVisible(player);
@@ -95,7 +96,7 @@ class Level extends Page {
             }
         }
 
-        this.basemap.addListener('render', hintListener);
+        // this.basemap.addListener('render', hintListener);
 
         let activeWrong = false;
         const selectionListener = (e) => {
@@ -111,14 +112,17 @@ class Level extends Page {
                 if (!activeWrong) {
                     activeWrong = true;
                     addClass(this.basemap.getContainer(), 'wrong');
+                    this.hint.injure(1500, 300);
+                    this.score.addModifier('position');
                     wait(500, () => {
                         removeClass(this.basemap.getContainer(), 'wrong');
                         activeWrong = false;
-                    })
+                    });
                 }
             }
         }
         this.basemap.addListener('click', selectionListener);
+
         this.basemap.render();
         this.listening = true;
     }

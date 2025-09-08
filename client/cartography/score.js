@@ -10,7 +10,7 @@ class Score {
 
         this.value = options.value || 0;
         this.states = options.states || ['stopped', 'default', 'movement'];
-        this.modifiers = options.modifiers || ['enemies', 'helpers']
+        this.modifiers = options.modifiers || ['enemies', 'helpers', 'position']
         this.state = options.state || 'stopped'
 
         this.running = false;

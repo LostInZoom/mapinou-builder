@@ -100,7 +100,7 @@ class Levels extends Page {
         this.choose.addEventListener('click', chooseRabbit);
 
         // Create the back button to get back to the title screen
-        this.back = makeDiv(null, 'header-button left', this.params.svgs.arrowleft);
+        this.back = makeDiv(null, 'header-button', this.params.svgs.arrowleft);
         this.app.header.insert(this.back);
         this.back.offsetHeight;
         addClass(this.back, 'pop');

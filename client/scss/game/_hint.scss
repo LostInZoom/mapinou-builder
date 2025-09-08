@@ -1,0 +1,34 @@
+@use '../colors';
+
+.level-hint-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+
+    pointer-events: all;
+    user-select: none;
+}
+
+.level-hint-character {
+    height: min(25vw, 25vh);
+    width: min(25vw, 25vh);
+    max-width: 10rem;
+    max-height: 10rem;
+    padding: 1rem;
+
+    transform: translateX(0);
+    transition: transform .6s ease-in-out;
+
+    &>img {
+        width: inherit;
+        height: inherit;
+        max-width: 10rem;
+        max-height: 10rem;
+        image-rendering: pixelated;
+    }
+
+    &.hidden {
+        transform: translateX(-100%);
+    }
+}

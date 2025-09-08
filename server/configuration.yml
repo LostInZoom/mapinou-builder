@@ -52,6 +52,7 @@ game:
       movement: 200
     modifier:
       enemies: 50
+      position: 5
       helpers: -20
   tolerance:
     flag: 500

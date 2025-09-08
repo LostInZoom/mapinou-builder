@@ -12,6 +12,7 @@
 
     transform: scale(0);
     transition: transform .2s cubic-bezier(0.36, 0, 0.66, -0.56);
+
     &.pop {
         transform: scale(1);
         transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -26,8 +27,17 @@
     display: flex;
     justify-content: center;
 
-    &.enemies { animation: score-enemies 1s linear; }
-    &.helpers { animation: score-helpers 1s linear; }
+    &.enemies {
+        animation: score-enemies 1s linear;
+    }
+
+    &.position {
+        animation: score-enemies 1s linear;
+    }
+
+    &.helpers {
+        animation: score-helpers 1s linear;
+    }
 }
 
 .score-text {
@@ -48,13 +58,23 @@
     transition: width .1s linear;
 
     &.default {
-        &.left { animation: score-default-left 1s linear; }
-        &.right { animation: score-default-right 1s linear; }
+        &.left {
+            animation: score-default-left 1s linear;
+        }
+
+        &.right {
+            animation: score-default-right 1s linear;
+        }
     }
 
     &.movement {
-        &.left { animation: score-movement-left 1s linear; }
-        &.right { animation: score-movement-right 1s linear; }
+        &.left {
+            animation: score-movement-left 1s linear;
+        }
+
+        &.right {
+            animation: score-movement-right 1s linear;
+        }
     }
 }
 
@@ -77,6 +97,15 @@
         transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    &.helpers { background-color: colors.$score-helpers-dark; }
-    &.enemies { background-color: colors.$score-enemies-dark; }
+    &.helpers {
+        background-color: colors.$score-helpers-dark;
+    }
+
+    &.enemies {
+        background-color: colors.$score-enemies-dark;
+    }
+
+    &.position {
+        background-color: colors.$score-enemies-dark;
+    }
 }
