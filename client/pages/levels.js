@@ -41,7 +41,7 @@ class Levels extends Page {
             }
         });
 
-        this.choose = makeDiv(null, 'header-button left');
+        this.choose = makeDiv(null, 'header-button rabbit-button left');
         this.image = document.createElement('img');
         this.image.src = this.params.sprites[`rabbits:${this.params.game.color}_idle_east_0`];
         this.image.alt = 'Lapinou';

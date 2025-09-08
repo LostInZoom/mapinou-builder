@@ -80,10 +80,17 @@
     }
 
     &>img {
-        width: calc(100% - .6rem);
-        height: calc(100% - .6rem);
-        padding: .3rem;
+        width: calc(100% - .2rem);
+        height: calc(100% - .2rem);
+        padding: .1rem;
     }
+}
+
+.rabbit-button {
+    height: 2rem;
+    width: 2rem;
+    border: solid .3rem colors.$secondary-color-dark;
+    background-color: colors.$main-color-light;
 }
 
 .page-button {
