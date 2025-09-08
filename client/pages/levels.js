@@ -1,5 +1,5 @@
 import Tutorial from "../game/tutorial";
-import { addClass, makeDiv, addClass, removeClass, wait } from "../utils/dom";
+import { addClass, makeDiv, addClass, removeClass, wait, hasClass } from "../utils/dom";
 import Page from "./page";
 import Title from "./title";
 import { easeInOutSine } from '../utils/math.js';
@@ -41,6 +41,63 @@ class Levels extends Page {
             }
         });
 
+        this.choose = makeDiv(null, 'header-button left');
+        this.image = document.createElement('img');
+        this.image.src = this.params.sprites[`rabbits:${this.params.game.color}_idle_east_0`];
+        this.image.alt = 'Lapinou';
+        this.choose.append(this.image);
+
+        this.app.header.insert(this.choose);
+        this.choose.offsetHeight;
+        addClass(this.choose, 'pop');
+
+        const chooseRabbit = () => {
+            this.choose.removeEventListener('click', chooseRabbit);
+            let choosecontainer = makeDiv(null, 'levels-rabbit-container');
+            let choosewindow = makeDiv(null, 'levels-rabbit-window');
+            choosecontainer.append(choosewindow);
+            let chooselabel = makeDiv(null, 'levels-rabbit-label', 'Choisissez votre lapin');
+            let chooserabbits = makeDiv(null, 'levels-rabbit-rabbits');
+
+            let rabbitlist = [];
+            this.params.game.colors.forEach(c => {
+                let chooserabbit = makeDiv(null, 'levels-rabbit-individual');
+                if (c === this.params.game.color) { addClass(chooserabbit, 'active'); }
+                let chooseimage = document.createElement('img');
+                let src = this.params.sprites[`rabbits:${c}_idle_east_0`]
+                chooseimage.src = src;
+                chooseimage.alt = 'Lapinou';
+                chooserabbit.append(chooseimage);
+                chooserabbits.append(chooserabbit);
+                rabbitlist.push(chooserabbit);
+
+                chooserabbit.addEventListener('click', () => {
+                    if (!hasClass(chooserabbit)) {
+                        rabbitlist.forEach(r => { removeClass(r, 'active'); })
+                        addClass(chooserabbit, 'active');
+                        this.image.src = src;
+                        this.params.game.color = c;
+                    }
+                });
+            });
+            let choosebutton = makeDiv(null, 'levels-rabbit-button', 'Valider');
+            choosewindow.append(chooselabel, chooserabbits, choosebutton);
+            this.app.container.append(choosecontainer);
+
+            choosewindow.offsetHeight;
+            addClass(choosewindow, 'pop');
+
+            choosebutton.addEventListener('click', () => {
+                removeClass(choosewindow, 'pop');
+                wait(300, () => {
+                    choosecontainer.remove();
+                    this.choose.addEventListener('click', chooseRabbit);
+                });
+            }, true);
+        }
+
+        this.choose.addEventListener('click', chooseRabbit);
+
         // Create the back button to get back to the title screen
         this.back = makeDiv(null, 'header-button left', this.params.svgs.arrowleft);
         this.app.header.insert(this.back);
@@ -61,20 +118,17 @@ class Levels extends Page {
                     });
                 });
             }
-        });
-
-        this.choose = makeDiv(null, 'header-button left');
-        this.app.header.insert(this.choose);
-        this.choose.offsetHeight;
-        addClass(this.back, 'pop');
+        }, true);
     }
 
     hide(callback) {
         removeClass(this.back, 'pop');
+        removeClass(this.choose, 'pop');
         this.navigation.hide();
         this.current.hide();
         wait(500, () => {
             this.back.remove();
+            this.choose.remove();
             callback();
         });
     }

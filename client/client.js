@@ -74,8 +74,7 @@ window.addEventListener("DOMContentLoaded", function () {
             let color = localStorage.getItem('color');
             if (!color) {
                 // Create a random rabbit color if none is found
-                let colors = ['white', 'sand', 'brown', 'grey'];
-                color = colors[generateRandomInteger(0, colors.length - 1)];
+                color = params.game.colors[generateRandomInteger(0, params.game.colors.length - 1)];
                 localStorage.setItem('color', color);
             }
             params.game.color = color;

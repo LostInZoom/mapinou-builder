@@ -38,6 +38,11 @@ interface:
 #### GAME PARAMETERS ####
 #########################
 game:
+  colors:
+    - white
+    - sand
+    - brown
+    - grey
   score:
     increment:
       default: 1

@@ -12,22 +12,20 @@
 
     &.pop {
         transform: scale(0.9);
-        & > .audio-button {
-            clip-path: polygon(
-                evenodd,
-                0% 0%, 0% 100%, 100% 100%, 100% 0%,0% 0%,
-                10% 0, 100% 90%, 90% 100%, 0 10%, 10% 0
-            );
+
+        &>.audio-button {
+            clip-path: polygon(evenodd,
+                    0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%,
+                    10% 0, 100% 90%, 90% 100%, 0 10%, 10% 0);
         }
 
         &.active {
             transform: scale(1);
-            & > .audio-button {
-                clip-path: polygon(
-                    evenodd,
-                    0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%,
-                    0% 0, 100% 100%, 100% 100%, 0 0%, 0% 0
-                );
+
+            &>.audio-button {
+                clip-path: polygon(evenodd,
+                        0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%,
+                        0% 0, 100% 100%, 100% 100%, 0 0%, 0% 0);
             }
         }
     }
@@ -46,7 +44,7 @@
 
     transition: clip-path .3s cubic-bezier(0.33, 1, 0.68, 1);
 
-    & > svg {
+    &>svg {
         color: colors.$main-color-light;
         height: inherit;
         width: inherit;
@@ -63,7 +61,7 @@
     background-color: colors.$secondary-color-dark;
     color: colors.$main-color-light;
 
-    & > svg {
+    &>svg {
         color: colors.$main-color-light;
         height: inherit;
         width: inherit;
@@ -77,8 +75,14 @@
         transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    &.left {
+    &.left:last-child {
         margin-right: auto;
+    }
+
+    &>img {
+        width: calc(100% - .6rem);
+        height: calc(100% - .6rem);
+        padding: .3rem;
     }
 }
 
@@ -86,7 +90,7 @@
     font-family: 'Vincendo';
     font-size: .9rem;
     pointer-events: all;
-    
+
     display: flex;
     justify-content: center;
     align-items: center;

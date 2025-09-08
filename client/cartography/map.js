@@ -485,6 +485,7 @@ class Basemap {
     }
 
     async addSprites(sprites) {
+        this.app.options.sprites = {};
         for (let name in sprites) {
             for (let i = 0; i < sprites[name].length; i++) {
                 const s = sprites[name][i];
@@ -495,6 +496,7 @@ class Basemap {
                         this.map.addImage(s.name, image, s.properties);
                     }
                 };
+                this.app.options.sprites[s.name] = s.image;
             }
         }
     }
