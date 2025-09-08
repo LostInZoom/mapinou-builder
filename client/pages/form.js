@@ -1,10 +1,11 @@
-import { ajaxPost } from "../utils/ajax";
-import { addClass, makeDiv, hasClass, addClass, removeClass, wait } from "../utils/dom";
-import { easeInOutSine } from "../utils/math";
 import Consent from "./consent";
 import Levels from "./levels";
 import Page from "./page";
 import Title from "./title";
+
+import { ajaxPost } from "../utils/ajax";
+import { addClass, makeDiv, hasClass, addClass, removeClass, wait } from "../utils/dom";
+import { easeInOutSine } from "../utils/math";
 
 class Form extends Page {
     constructor(options, callback) {

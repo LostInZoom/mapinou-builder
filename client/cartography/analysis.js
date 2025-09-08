@@ -1,6 +1,4 @@
 import * as turf from "@turf/turf";
-import { Polygon } from "ol/geom.js";
-
 import { LngLat } from "maplibre-gl";
 import proj4 from "proj4";
 
@@ -8,7 +6,7 @@ import proj4 from "proj4";
  * Calculate a buffer around the given coordinates.
  * @param {array} coordinates The coordinates of the point.
  * @param {integer} size      The size of the buffer in meters.
- * @return {Polygon}          OpenLayers Polygon geometry.
+ * @return {turf.Polygon}     turf.js Polygon geometry.
  */
 function buffer(coordinates, size) {
     // Calculate the buffer around the coordinates
@@ -19,7 +17,7 @@ function buffer(coordinates, size) {
  * Calculate a buffer around the given polygon.
  * @param {array} coordinates The coordinates of the point.
  * @param {integer} size      The size of the buffer in meters.
- * @return {Polygon}          OpenLayers Polygon geometry.
+ * @return {turf.Polygon}     turf.js Polygon geometry.
  */
 function bufferAroundPolygon(polygon, size) {
     let b = turf.buffer(polygon, size, { units: "meters", steps: 4 });

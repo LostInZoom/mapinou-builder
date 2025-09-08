@@ -1,4 +1,3 @@
-import Sprite from "../cartography/sprite";
 import Character from "./character";
 
 class Flower extends Character {

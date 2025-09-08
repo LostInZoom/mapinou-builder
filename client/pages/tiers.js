@@ -2,7 +2,8 @@ import Basemap from "../cartography/map";
 import Piaget from "../experiences/piaget";
 import SantaBarbara from "../experiences/sbsod";
 import Level from "../game/level";
-import { addClass, hasClass, makeDiv, removeClass, wait, waitPromise } from "../utils/dom";
+
+import { addClass, makeDiv, removeClass, wait, waitPromise } from "../utils/dom";
 import { LevelEdges } from "../utils/svg";
 
 class Panel {

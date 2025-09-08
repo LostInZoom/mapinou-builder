@@ -1,12 +1,5 @@
-import VectorLayer from "ol/layer/Vector.js";
-import VectorSource from "ol/source/Vector.js";
-
-import { angle, within } from "../cartography/analysis.js";
+import { angle } from "../cartography/analysis.js";
 import { wait } from "../utils/dom.js";
-import { unByKey } from "ol/Observable.js";
-import { Feature } from "ol";
-import { Point } from "ol/geom.js";
-import { easeInCubic, easeInQuint, easeOutCubic, easeOutQuint } from "../utils/math.js";
 
 /**
  * Base class to create a new character on the map.

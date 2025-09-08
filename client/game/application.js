@@ -2,7 +2,7 @@ import Page from '../pages/page.js';
 import { makeDiv, addClass, removeClass, wait } from '../utils/dom.js';
 import Basemap from '../cartography/map.js';
 import { generateRandomInteger } from '../utils/math.js';
-import { Header } from '../interface/elements.js';
+import { Header } from '../pages/elements.js';
 
 import Title from '../pages/title.js';
 import Roamer from '../characters/roamer.js';

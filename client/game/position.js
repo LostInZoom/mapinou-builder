@@ -1,7 +1,7 @@
 import { radiansToDegrees } from "@turf/turf";
 import { angle } from "../cartography/analysis";
 import { addClass, removeClass, hasClass, wait, makeDiv } from "../utils/dom";
-import { inAndOut } from "ol/easing";
+import { easeInOutSine } from "../utils/math";
 
 class Position {
     constructor(options) {
@@ -20,7 +20,7 @@ class Position {
                 this.basemap.ease({
                     center: this.player.getCoordinates(),
                     duration: 500,
-                    easing: inAndOut,
+                    easing: easeInOutSine,
                 }, () => {
                     this.listen = true;
                 });

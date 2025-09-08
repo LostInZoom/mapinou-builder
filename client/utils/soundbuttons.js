@@ -1,5 +1,5 @@
 import Sound from "./sounds";
-import { addClass, hasClass, makeDiv, removeClass, wait } from "../utils/dom";
+import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
 
 class SoundButton {
     constructor(options) {
@@ -13,8 +13,8 @@ class SoundButton {
         this.active = true;
     }
 
-    display(deactivate=true, callback) {
-        callback = callback || function() {};
+    display(deactivate = true, callback) {
+        callback = callback || function () { };
         addClass(this.button, 'pop');
         if (deactivate) {
             wait(300, () => {

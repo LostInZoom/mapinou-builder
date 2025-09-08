@@ -1,4 +1,4 @@
-import { Content, Footer, Header } from "../interface/elements.js";
+import { Content, Footer, Header } from "./elements.js";
 import { addClass, clearElement, makeDiv, removeClass } from "../utils/dom.js";
 
 class Page {

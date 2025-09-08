@@ -1,16 +1,15 @@
-import { unByKey } from 'ol/Observable.js';
+import Basemap from '../cartography/map';
+import Rabbits from '../layers/rabbits';
+
+import Page from "../pages/page";
+import Levels from '../pages/levels';
+import Score from "../cartography/score";
+import Target from '../characters/target';
 
 import { pointExtent, randomPointInCircle, within } from "../cartography/analysis";
-import Score from "../cartography/score";
-import Page from "../pages/page";
 import { addClass, easingIncrement, makeDiv, removeClass, wait } from "../utils/dom";
-import { inAndOut } from 'ol/easing';
-import Target from '../characters/target';
-import Levels from '../pages/levels';
 import { ajaxPost } from '../utils/ajax';
-import Basemap from '../cartography/map';
-import { easeInOutSine, easeOutExpo, easeOutSine } from '../utils/math';
-import Rabbits from '../layers/rabbits';
+import { easeInOutSine, easeOutExpo } from '../utils/math';
 
 class Level extends Page {
     constructor(options, callback) {

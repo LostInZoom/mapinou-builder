@@ -1,11 +1,4 @@
-import VectorLayer from "ol/layer/Vector.js";
-import VectorSource from "ol/source/Vector.js";
-import { Feature } from "ol";
-import { unByKey } from "ol/Observable.js";
-import { Fill, Style } from "ol/style.js";
-
 import Character from "./character.js";
-import Sprite from "../cartography/sprite.js";
 import { buffer, bufferAroundPolygon } from "../cartography/analysis.js";
 import { getColorsByClassNames } from "../utils/parse.js";
 

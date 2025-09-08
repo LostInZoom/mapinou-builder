@@ -1,4 +1,4 @@
-import { Header } from "../interface/elements";
+import { Header } from "../pages/elements";
 import { addClass, hasClass, makeDiv, removeClass, wait } from "../utils/dom";
 import { calculateTextSize } from "../utils/parse";
 
@@ -9,8 +9,8 @@ class Score {
         this.params = this.level.options.app.options;
 
         this.value = options.value || 0;
-        this.states = options.states || [ 'stopped', 'default', 'movement' ];
-        this.modifiers = options.modifiers || [ 'enemies', 'helpers' ]
+        this.states = options.states || ['stopped', 'default', 'movement'];
+        this.modifiers = options.modifiers || ['enemies', 'helpers']
         this.state = options.state || 'stopped'
 
         this.running = false;
@@ -106,19 +106,19 @@ class Score {
     }
 
     pop(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         addClass(this.container, 'pop');
         wait(200, callback);
     }
 
     unpop(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         removeClass(this.container, 'pop');
         wait(200, callback);
     }
 
     destroy(callback) {
-        callback = callback || function() {};
+        callback = callback || function () { };
         this.unpop(() => {
             this.stop();
             this.container.remove();

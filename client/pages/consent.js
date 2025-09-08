@@ -1,8 +1,9 @@
-import { ajaxPost } from "../utils/ajax";
-import { addClass, isOverflown, makeDiv, removeClass, wait } from "../utils/dom";
 import Form from "./form";
 import Page from "./page";
 import Title from "./title";
+
+import { ajaxPost } from "../utils/ajax";
+import { addClass, isOverflown, makeDiv, removeClass, wait } from "../utils/dom";
 
 class Consent extends Page {
     constructor(options, callback) {

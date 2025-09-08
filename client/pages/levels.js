@@ -1,7 +1,7 @@
-import Tutorial from "../game/tutorial";
-import { addClass, makeDiv, addClass, removeClass, wait, hasClass } from "../utils/dom";
 import Page from "./page";
 import Title from "./title";
+
+import { addClass, makeDiv, addClass, removeClass, wait, hasClass } from "../utils/dom";
 import { easeInOutSine } from '../utils/math.js';
 import { ExperiencePanel, NavigationBar, TierPanel } from "./tiers.js";
 

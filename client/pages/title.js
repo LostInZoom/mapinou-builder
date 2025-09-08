@@ -1,10 +1,11 @@
-import { addClass, addClassList, makeDiv, removeClass, removeClassList, wait, waitPromise } from "../utils/dom";
-import { remap, easeOutCubic, easeInOutSine } from "../utils/math";
-import { pxToRem } from "../utils/parse";
 import Consent from "./consent";
 import Form from "./form";
 import Levels from "./levels";
 import Page from "./page";
+
+import { addClass, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
+import { remap, easeOutCubic, easeInOutSine } from "../utils/math";
+import { pxToRem } from "../utils/parse";
 
 class Title extends Page {
     constructor(options, callback) {

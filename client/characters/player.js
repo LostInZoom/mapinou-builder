@@ -4,7 +4,6 @@ import { angle, within } from "../cartography/analysis.js";
 import Rabbit from "./rabbit.js";
 import Router from "../cartography/routing.js";
 import Flower from "./flower.js";
-import { wait } from "../utils/dom.js";
 
 class Player extends Rabbit {
     constructor(options) {

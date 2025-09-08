@@ -1,9 +1,9 @@
 import * as turf from "@turf/turf";
 
+import Characters from "./characters.js";
 import { wait } from "../utils/dom.js";
 import { weightedRandom } from "../utils/math.js";
 import { Bird, Hunter, Snake } from "../characters/enemy.js";
-import Characters from "./characters.js";
 import { within } from "../cartography/analysis.js";
 
 class Enemies extends Characters {
