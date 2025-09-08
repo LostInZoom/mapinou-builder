@@ -7,8 +7,8 @@ class Rabbit extends Character {
 
         this.speed = options.speed || 20;
         this.framenumber = 4;
-        this.colors = options.colors || ['white', 'sand', 'brown', 'grey'];
-        this.color = options.color || 'white';
+        this.colors = options.colors || this.params.game.colors;
+        this.color = options.color || this.params.game.color;
 
         if (this.color === 'random') {
             let i = generateRandomInteger(0, this.colors.length - 1);

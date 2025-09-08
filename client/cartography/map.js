@@ -366,7 +366,7 @@ class Basemap {
 
         this.target = new Target({
             layer: this.rabbits,
-            colors: ['brown', 'sand', 'grey'],
+            colors: this.params.game.colors.filter(c => c !== this.params.game.color),
             color: 'random',
             coordinates: options.target
         });
@@ -374,7 +374,7 @@ class Basemap {
         this.player = new Player({
             level: level,
             layer: this.rabbits,
-            color: 'brown',
+            color: this.params.game.color,
             coordinates: options.player
         });
         this.player.setOrientationFromCoordinates(options.target);
