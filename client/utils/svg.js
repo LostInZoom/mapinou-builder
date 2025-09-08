@@ -45,6 +45,8 @@ class LevelEdges {
         this.width = width;
         this.height = height;
         this.svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
+        this.svg.setAttribute('height', `${this.height}`);
+        this.svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
     }
 
     moveLineStart(i, x, y) {

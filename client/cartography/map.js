@@ -97,11 +97,11 @@ class Basemap {
             this.map.boxZoom.disable();
             this.map.dragRotate.disable();
             this.map.keyboard.disable();
-            this.map.doubleClickZoom.disable();
             this.map.touchPitch.disable();
 
             if (!this.options.interactive) {
                 this.map.scrollZoom.disable();
+                this.map.doubleClickZoom.disable();
                 this.map.dragPan.disable();
                 this.map.touchZoomRotate.disable();
                 this.map.touchZoomRotate.disableRotation();
@@ -294,6 +294,7 @@ class Basemap {
 
     enableInteractions() {
         this.map.scrollZoom.enable();
+        this.map.doubleClickZoom.enable();
         this.map.dragPan.enable();
         this.map.touchZoomRotate.enable();
         this.map.touchZoomRotate.disableRotation();
@@ -301,6 +302,7 @@ class Basemap {
 
     disableInteractions() {
         this.map.scrollZoom.disable();
+        this.map.doubleClickZoom.disable();
         this.map.dragPan.disable();
         this.map.touchZoomRotate.disable();
     }
