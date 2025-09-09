@@ -8,7 +8,7 @@ import Position from '../game/position.js';
 import { addClass, makeDiv, removeClass, wait } from '../utils/dom.js';
 import Rabbits from '../layers/rabbits.js';
 import { mergeExtents, project } from './analysis.js';
-import { easeInOutCubic } from '../utils/math.js';
+import { easeInOutCubic, easeInQuint, easeOutCirc, easeOutQuint, remap } from '../utils/math.js';
 import Flowers from '../layers/flowers.js';
 
 class Basemap {
@@ -18,6 +18,8 @@ class Basemap {
         this.app = this.options.app;
         this.params = this.app.options;
 
+        this.minAnimationDuration = 0;
+        this.maxAnimationDuration = 1500;
         this.animationCurve = 2;
         this.animationSpeed = 5;
 
@@ -246,6 +248,9 @@ class Basemap {
 
     ease(options, callback) {
         callback = callback || function () { };
+        if (options.duration === undefined) {
+            options.duration = this.getAnimationDurationFromZoom(options.zoom);
+        }
         this.map.easeTo(options);
         this.map.once('moveend', () => {
             if (callback) callback();
@@ -256,6 +261,9 @@ class Basemap {
         callback = callback || function () { };
         options.curve = options.curve ?? this.animationCurve;
         options.speed = options.curve ?? this.animationSpeed;
+        if (options.duration === undefined) {
+            options.duration = this.getAnimationDurationFromZoom(options.zoom);
+        }
         this.map.flyTo(options);
         this.map.once('moveend', () => {
             if (callback) callback();
@@ -263,9 +271,14 @@ class Basemap {
     }
 
     fit(extent, options, callback) {
+        let duration = options.duration;
+        if (duration === undefined) {
+            const view = this.map.cameraForBounds(extent);
+            duration = this.getAnimationDurationFromZoom(view.zoom);
+        }
         this.map.fitBounds(extent, {
             padding: options.padding ?? 0,
-            duration: options.duration ?? 1000,
+            duration: duration,
             easing: options.easing ?? (x => x),
             curve: options.curve ?? this.animationCurve,
             speed: options.speed ?? this.animationSpeed
@@ -482,6 +495,16 @@ class Basemap {
         ];
 
         tasks.forEach(task => task ? task(checkDone) : checkDone());
+    }
+
+    getAnimationDurationFromZoom(zoom) {
+        const [z1, z2] = [this.getZoom(), zoom];
+        const d = Math.abs(z1 - z2);
+        // Remap to [0, 1]
+        const r = remap(d, 0, 19, 0, 1);
+        // Apply easing so higher zoom levels don't have much impact
+        const eased = easeOutCirc(r);
+        return remap(eased, 0, 1, 0, this.maxAnimationDuration);
     }
 
     async addSprites(sprites) {

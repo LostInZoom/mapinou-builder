@@ -24,7 +24,6 @@ class SantaBarbara extends Page {
 
         if (this.stage === 'tutorial') {
             this.basemap.fly({
-                duration: 500,
                 easing: easeInOutSine,
                 center: centers[i],
                 zoom: this.app.options.interface.map.start.zoom
@@ -58,7 +57,6 @@ class SantaBarbara extends Page {
                 wait(500, () => {
                     this.destroy();
                     this.basemap.fit(this.params.interface.map.levels, {
-                        duration: 500,
                         easing: easeInOutSine
                     }, () => {
                         this.app.page = new Levels({ app: this.app, position: 'current' });
@@ -201,7 +199,6 @@ class SantaBarbara extends Page {
                 wait(500, () => {
                     this.destroy();
                     this.basemap.fit(this.params.interface.map.levels, {
-                        duration: 500,
                         easing: easeInOutSine
                     }, () => {
                         this.app.page = new Levels({

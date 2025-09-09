@@ -29,7 +29,6 @@ class Piaget extends Page {
         let i = generateRandomInteger(0, centers.length - 1);
 
         this.basemap.fly({
-            duration: 500,
             easing: easeInOutSine,
             center: centers[i],
             zoom: this.app.options.interface.map.start.zoom
@@ -49,7 +48,6 @@ class Piaget extends Page {
             wait(500, () => {
                 this.destroy();
                 this.basemap.fit(this.params.interface.map.levels, {
-                    duration: 500,
                     easing: easeInOutSine
                 }, () => {
                     this.app.page = new Levels({ app: this.app, position: 'current' });
@@ -173,7 +171,6 @@ class Piaget extends Page {
                     wait(500, () => {
                         this.destroy();
                         this.basemap.fit(this.params.interface.map.levels, {
-                            duration: 500,
                             easing: easeInOutSine
                         }, () => {
                             this.app.page = new Levels({

@@ -131,7 +131,6 @@ class Level extends Page {
         this.basemap.player.spawn(() => {
             this.dataExtent = this.basemap.getExtentForData();
             this.basemap.fit(this.dataExtent, {
-                duration: 500,
                 easing: easeInOutSine,
                 padding: { top: 100, bottom: 50, left: 50, right: 50 }
             }, () => {
@@ -177,7 +176,6 @@ class Level extends Page {
         });
 
         this.basemap.fit(this.dataExtent, {
-            duration: 500,
             easing: easeInOutSine,
             padding: { top: 100, bottom: 50, left: 50, right: 50 },
             curve: 1.42,
@@ -354,7 +352,6 @@ class Level extends Page {
         this.destroy();
 
         this.basemap.fit(this.params.interface.map.levels, {
-            duration: 1000,
             easing: easeInOutSine
         }, () => {
             this.app.page = new Levels({

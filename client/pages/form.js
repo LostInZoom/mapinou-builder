@@ -119,7 +119,6 @@ class Form extends Page {
         wait(300, () => {
             this.destroy();
             this.basemap.fit(this.params.interface.map.levels, {
-                duration: 500,
                 easing: easeInOutSine
             }, () => {
                 this.app.page = new Levels({ app: this.app, position: 'current', init: true });

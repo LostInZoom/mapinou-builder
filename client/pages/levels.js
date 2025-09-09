@@ -112,7 +112,6 @@ class Levels extends Page {
                     this.options.app.basemap.fly({
                         center: this.app.center,
                         zoom: this.params.interface.map.start.zoom,
-                        duration: 500,
                         easing: easeInOutSine
                     }, () => {
                         this.app.page = new Title({ app: this.app, position: 'current' });
