@@ -1,38 +1,50 @@
-import { makeDiv, removeClass, wait } from "../utils/dom";
-import { weightedRandom } from "../utils/math";
+import { addClass, makeDiv, removeClass, wait } from "../utils/dom";
+import { generateRandomInteger, weightedRandom } from "../utils/math";
 
 class Hint {
     constructor(options) {
         this.options = options;
         this.level = this.options.level;
+        this.basemap = this.level.basemap;
         this.params = this.level.params;
         this.hints = this.level.parameters.hints;
 
+        this.alive = true;
         this.state = 'move';
         this.idle = false;
         this.color = this.params.game.color;
         this.orientation = 'east';
         this.frame = 0;
         this.injured = false;
+        this.transition = 200;
 
-        this.hintcontainer = makeDiv(null, 'level-hint-container');
+        this.container = makeDiv(null, 'level-hint-container');
         this.character = makeDiv(null, 'level-hint-character hidden');
         this.charimage = document.createElement('img');
         this.charimage.src = this.params.sprites[`rabbits:${this.color}_${this.state}_${this.orientation}_${this.frame}`];
         this.charimage.alt = 'character';
         this.character.append(this.charimage);
 
-        this.hintcontainer.append(this.character);
-        this.level.container.append(this.hintcontainer);
-        this.hintcontainer.offsetWidth;
+        this.type = 'thought';
+        this.container.append(this.character);
+        this.createBubble(this.type, '');
+        this.level.container.append(this.container);
 
+        this.listen = false;
+
+        this.startBlinkAnimation = 0;
         this.startFrameAnimation = 0;
         this.animateFrame();
 
+        this.container.offsetWidth;
         removeClass(this.character, 'hidden');
         wait(600, () => {
             this.setState('idle');
             this.idle = true;
+            addClass(this.bubble, 'pop');
+            this.activateUpdate();
+            this.listen = true;
+            this.basemap.render();
         });
     }
 
@@ -60,35 +72,103 @@ class Hint {
         this.reload();
     }
 
-    injure(duration, blink, callback) {
+    createBubble(type, text) {
+        this.bubble = makeDiv(null, 'level-hint-bubble ' + type);
+        this.vector = makeDiv(null, 'level-hint-vector', this.params.svgs[`bubble${type}`]);
+        this.text = makeDiv(null, 'level-hint-text', text);
+        this.bubble.append(this.vector, this.text);
+        this.container.append(this.bubble);
+        this.container.offsetWidth;
+    }
+
+    update(type, text, callback) {
+        callback = callback || function () { };
+        if (type !== this.type) {
+            this.type = type;
+            removeClass(this.bubble, 'pop');
+            wait(this.transition, () => {
+                this.bubble.remove();
+                this.createBubble(type, text);
+                addClass(this.bubble, 'pop');
+                wait(this.transition, () => {
+                    callback();
+                });
+            });
+        } else {
+            if (this.type === 'thought') {
+                this.text.innerHTML = text;
+                callback();
+            }
+        }
+    }
+
+    activateUpdate() {
+        const updateListener = () => {
+            if (this.listen) {
+                let visible = this.basemap.isVisible(this.level.parameters.player, 0);
+                let zoom = this.basemap.getZoom();
+                let [u, t, v] = [false, undefined, ''];
+                for (let [m, h] of Object.entries(this.hints)) {
+                    if (!visible) {
+                        if (this.type !== 'lost') {
+                            let l = this.params.game.lost;
+                            u = true;
+                            t = 'lost';
+                            v = l[generateRandomInteger(0, l.length - 1)];
+                            break;
+                        }
+                    } else {
+                        if (zoom >= m) {
+                            u = true;
+                            t = 'thought';
+                            v = h;
+                        }
+                    }
+                }
+
+                if (u) {
+                    this.listen = false;
+                    this.update(t, v, () => { this.listen = true; });
+                }
+            }
+        }
+        this.basemap.addListener('render', updateListener);
+    }
+
+    injure(blink, callback) {
         callback = callback || function () { };
         const origin = this.color;
         const start = performance.now();
 
-        this.injured = true;
-        let lastBlink = start;
-
+        let pursue = true;
         this.setColor('red');
         let visible = false;
-
+        let lastBlink = start;
         const animate = (time) => {
-            if (this.injured) {
-                const elapsed = time - start;
-                if (elapsed >= duration) {
-                    this.injured = false;
-                    this.setColor(origin);
-                    callback();
-                } else {
-                    if (time - lastBlink >= blink) {
-                        visible = !visible;
-                        this.setColor(visible ? origin : 'red');
-                        lastBlink = time;
-                    }
-                    requestAnimationFrame(animate);
+            if (pursue) {
+                if (time - lastBlink >= blink) {
+                    visible = !visible;
+                    this.setColor(visible ? origin : 'red');
+                    lastBlink = time;
                 }
+                requestAnimationFrame(animate);
+            } else {
+                this.setColor(origin);
             }
         };
         requestAnimationFrame(animate);
+
+        let w = this.params.game.wrong;
+        let v = w[generateRandomInteger(0, w.length - 1)];
+        this.listen = false;
+        this.update('wrong', v, () => {
+            wait(1200, () => {
+                pursue = false;
+                this.listen = true;
+                this.basemap.render();
+                callback();
+            });
+        });
     }
 
     animateFrame() {
@@ -107,6 +187,26 @@ class Hint {
             });
         };
         requestAnimationFrame(animation);
+    }
+
+    end(callback) {
+        callback = callback || function () { };
+        if (this.alive) {
+            this.listen = false;
+            this.basemap.removeListeners();
+            removeClass(this.bubble, 'pop');
+            this.setFrame(0);
+            this.setOrientation('west');
+            this.setState('move');
+            addClass(this.character, 'hidden');
+            wait(600, () => {
+                this.container.remove();
+                this.alive = false;
+                callback();
+            });
+        } else {
+            callback();
+        }
     }
 }
 

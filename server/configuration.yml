@@ -68,17 +68,17 @@ game:
   invulnerability: 3000
   routing: 12.5
   wrong:
-    - Aïe, non, pas là !
-    - Non non, pas ici !
-    - Tu veux ma mort ?!
-    - Ouch, prend ton temps avant de cliquer n'importe où !
-    - La prochaine fois, on change de place...
+    - Aïe, non, pas là !
+    - Non non, pas ici !
+    - Ouch, Tu veux ma mort ?!
+    - Prend ton temps avant de cliquer n'importe où !
+    - Eh, tu veux que je te morde ?!
   lost:
-    - Tu t'égares, mon vieux...
-    - Non, c'est pas par là !
-    - Mais écoute-moi, tu vas te perdres !
-    - Mes indications sont pas assez claires ?
-    - Où tu vas comme ça ?
+    - Hé ho ! Tu t'égares...
+    - Non, c'est pas par là !
+    - Mais écoute-moi, tu vas te perdres !
+    - Mes indications sont pas assez claires ?
+    - Où tu vas comme ça ?
 ###########################
 #### FORM DEFINITION ######
 ###########################
@@ -208,11 +208,11 @@ levels:
         player: [ -3.1053235400638313,48.27263956517598 ]
         target: [ -2.9660401282860756,48.06515374496134 ]
         hints:
-          0: Il me semble que je suis à l'ouest de la ville de Rennes
-          6: Je crois être entre Lorient et St-Brieuc
-          8: Hmm... au nord de Pontivy ?
-          10: Ça me revient, je suis entre Gouarec et Corlay 
-          11: Ah oui, c'est ça ! À St-Igeaux !
+          0: Je pense que je suis à l'ouest de la ville de Rennes.
+          6: Je crois être entre Lorient et St-Brieuc.
+          8: Hmm... au nord de Pontivy ?
+          10: Ça me revient, je suis entre Gouarec et Corlay.
+          11: Ah oui, c'est ça ! À St-Igeaux !
         enemies:
           - [-3.180709285767183,48.22721521917229]
           - [-2.986731929810153,48.200448665578335]

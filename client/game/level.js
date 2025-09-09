@@ -68,54 +68,23 @@ class Level extends Page {
         this.score.setState('default');
         this.score.start();
 
-        // this.hint = makeDiv(null, 'level-hint-container');
-        // this.hintext = makeDiv(null, 'level-hint');
-        // this.hint.append(this.hintext);
-        // this.container.append(this.hint);
-        // this.hint.offsetHeight;
-
         this.basemap.enableInteractions();
 
-        let player = this.parameters.player;
-
         this.hint = new Hint({ level: this });
-
-        const hintListener = () => {
-            let visible = this.basemap.isVisible(player);
-            let zoom = this.basemap.getZoom();
-            for (let [m, h] of Object.entries(this.hints)) {
-                if (!visible) {
-                    let t = this.params.game.lost;
-                    this.hintext.innerHTML = t;
-                } else {
-                    if (zoom >= m) {
-                        addClass(this.hint, 'pop');
-                        this.hintext.innerHTML = h;
-                    }
-                }
-            }
-        }
-
-        // this.basemap.addListener('render', hintListener);
 
         let activeWrong = false;
         const selectionListener = (e) => {
             let target = e.lngLat.toArray();
+            let player = this.parameters.player;
             if (within(target, player, this.params.game.tolerance.target)) {
-                this.basemap.removeListeners();
-                removeClass(this.hint, 'pop');
-                wait(300, () => {
-                    this.hint.remove();
-                    callback();
-                });
+                this.hint.end(callback);
             } else {
                 if (!activeWrong) {
                     activeWrong = true;
                     addClass(this.basemap.getContainer(), 'wrong');
-                    this.hint.injure(1500, 300);
                     this.score.addModifier('position');
-                    wait(500, () => {
-                        removeClass(this.basemap.getContainer(), 'wrong');
+                    wait(500, () => { removeClass(this.basemap.getContainer(), 'wrong'); });
+                    this.hint.injure(300, () => {
                         activeWrong = false;
                     });
                 }
@@ -123,7 +92,6 @@ class Level extends Page {
         }
         this.basemap.addListener('click', selectionListener);
 
-        this.basemap.render();
         this.listening = true;
     }
 
@@ -353,29 +321,31 @@ class Level extends Page {
 
     clear(callback) {
         callback = callback || function () { };
-
         removeClass(this.back, 'pop');
-        if (this.hint) removeClass(this.hint, 'pop');
-
         this.basemap.disableInteractions();
         this.basemap.removeListeners();
 
+        const tasks = [
+            (cb) => wait(300, cb),
+            (cb) => this.score.destroy(cb),
+        ];
+
+        if (this.phase === 1) {
+            tasks.push((cb) => this.hint.end(cb));
+        }
+        else if (this.phase === 2) {
+            tasks.push((cb) => this.basemap.clear(cb));
+            tasks.push((cb) => this.basemap.makeUnroutable(cb));
+        }
+
         let cleared = 0;
-        const clearing = 4;
+        const clearing = tasks.length;
         const checkDone = () => {
             if (++cleared === clearing) {
                 this.back.remove();
                 callback();
             };
         };
-
-        const tasks = [
-            (cb) => wait(500, cb),
-            (cb) => this.basemap.clear(cb),
-            (cb) => this.score.destroy(cb),
-            (cb) => this.basemap.makeUnroutable(cb)
-        ];
-
         tasks.forEach(task => task(checkDone));
     }
 
