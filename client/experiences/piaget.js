@@ -11,9 +11,9 @@ class Piaget extends Page {
         this.content = makeDiv(null, 'page-content pop');
         this.container.append(this.content);
 
-        this.topcontent = makeDiv(null, 'piaget-content top pop');
+        this.topcontent = makeDiv(null, 'experience-content top pop');
         this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
-        this.toptext = makeDiv(null, 'piaget-text top');
+        this.toptext = makeDiv(null, 'experience-text top');
         this.topcontent.append(this.back, this.toptext);
         this.content.append(this.topcontent);
 
@@ -21,7 +21,7 @@ class Piaget extends Page {
         this.topbottle = makeDiv(null, 'piaget-bottle reference', this.app.options.svgs.piaget);
         this.toptext.append(toplabel, this.topbottle);
 
-        this.bottomcontent = makeDiv(null, 'piaget-content bottom pop');
+        this.bottomcontent = makeDiv(null, 'experience-content bottom pop');
         this.content.append(this.bottomcontent);
         this.createBottomPanel(1);
 
@@ -58,7 +58,7 @@ class Piaget extends Page {
 
     createBottomPanel(index) {
         let pursue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
-        this.bottomtext = makeDiv(null, 'piaget-text bottom');
+        this.bottomtext = makeDiv(null, 'experience-text bottom');
         if (index > 1) { addClass(this.bottomtext, 'pop'); }
 
         this.bottomcontent.append(this.bottomtext, pursue);

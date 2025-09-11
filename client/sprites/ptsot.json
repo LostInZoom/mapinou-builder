@@ -1,0 +1,9 @@
+{
+    "rabbit": { "x": 0, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "snake": { "x": 64, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "eagle": { "x": 128, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "hunter": { "x": 192, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "cat": { "x": 256, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "pigeon": { "x": 320, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 },
+    "zucchini": { "x": 384, "y": 0, "width": 64, "height": 64, "pixelRatio": 1 }
+}

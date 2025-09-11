@@ -18,12 +18,12 @@ class Basemap {
         this.app = this.options.app;
         this.params = this.app.options;
 
-        this.minAnimationDuration = 0;
-        this.maxAnimationDuration = 1500;
+        this.minAnimationDuration = this.params.interface.map.animation.minspeed;
+        this.maxAnimationDuration = this.params.interface.map.animation.maxspeed;
         this.animationCurve = 2;
         this.animationSpeed = 5;
 
-        this.spritesheets = ['rabbits', 'enemies', 'vegetables', 'flower'];
+        this.spritesheets = ['rabbits', 'enemies', 'vegetables', 'flower', 'ptsot'];
         this.protectedLayers = ['basemap'];
 
         this.parent = this.options.parent;
@@ -504,7 +504,7 @@ class Basemap {
         const r = remap(d, 0, 19, 0, 1);
         // Apply easing so higher zoom levels don't have much impact
         const eased = easeOutCirc(r);
-        return remap(eased, 0, 1, 0, this.maxAnimationDuration);
+        return remap(eased, 0, 1, this.minAnimationDuration, this.maxAnimationDuration);
     }
 
     async addSprites(sprites) {

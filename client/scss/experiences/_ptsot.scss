@@ -1,0 +1,110 @@
+@use '../colors';
+
+.ptsot-characters-container {
+    position: relative;
+    background-color: colors.$main-color-light;
+    border-radius: .4rem;
+
+    width: calc(100% - 2rem);
+    height: 25vh;
+
+    &:last-child {
+        margin-bottom: 1rem;
+    }
+
+    &:first-child {
+        margin-top: 1rem;
+    }
+}
+
+.ptsot-characters-text {
+    text-align: center;
+    padding: 0 1rem;
+
+    &:last-child {
+        margin-bottom: 1rem;
+    }
+
+    &:first-child {
+        margin-top: 1rem;
+    }
+}
+
+.ptsot-characters-character {
+    position: absolute;
+    transform: translate(-50%, -50%);
+
+    &.rabbit {
+        transform: translate(-38%, -50%);
+    }
+
+    &.eagle {
+        transform: translate(-50%, -50%);
+    }
+
+    &.hunter {
+        transform: translate(-36%, -76%);
+    }
+
+    &.snake {
+        transform: translate(-50%, -67%);
+    }
+
+    &.pigeon {
+        transform: translate(-56%, -45%);
+    }
+
+    &.zucchini {
+        transform: translate(-48%, -58%);
+    }
+
+    &.cat {
+        transform: translate(-48%, -58%);
+    }
+}
+
+.ptsot-characters-name {
+    position: absolute;
+    color: colors.$main-color-dark;
+
+    font-size: .9rem;
+    text-transform: capitalize;
+
+    &.rabbit {
+        transform: translate(-131%, -56%);
+    }
+
+    &.eagle {
+        transform: translate(-43%, 27%);
+    }
+
+    &.hunter {
+        transform: translate(-38%, 15%);
+    }
+
+    &.snake {
+        transform: translate(-73%, 21%);
+    }
+
+    &.pigeon {
+        transform: translate(-63%, -132%);
+    }
+
+    &.zucchini {
+        transform: translate(-34%, -134%);
+    }
+
+    &.cat {
+        transform: translate(-64%, 27%);
+    }
+}
+
+.ptsot-characters-point {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    height: .5rem;
+    width: .5rem;
+    background-color: white;
+    outline: solid .2rem colors.$grey-extradark;
+    border-radius: 50%;
+}

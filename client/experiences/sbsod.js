@@ -14,21 +14,20 @@ class SantaBarbara extends Page {
         this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
         this.continue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
 
-        this.text = makeDiv(null, 'sbsod-text');
+        this.text = makeDiv(null, 'experience-text');
         if (this.stage === 'form') { addClass(this.text, 'pop'); }
         this.content.append(this.back, this.text, this.continue);
         this.container.append(this.content);
 
-        let centers = this.app.options.interface.map.start.centers;
-        let i = generateRandomInteger(0, centers.length - 1);
-
-        if (this.stage === 'tutorial') {
+        if (this.stage === 'presentation') {
+            let centers = this.app.options.interface.map.start.centers;
+            let i = generateRandomInteger(0, centers.length - 1);
             this.basemap.fly({
                 easing: easeInOutSine,
                 center: centers[i],
                 zoom: this.app.options.interface.map.start.zoom
             }, () => {
-                this.createTutorial();
+                this.createPresentation();
             });
         }
         else if (this.stage === 'form') {
@@ -36,12 +35,12 @@ class SantaBarbara extends Page {
         }
     }
 
-    createTutorial() {
-        let tutorial = makeDiv(null, 'sbsod-tutorial');
-        this.elements.tutorial.forEach(t => {
-            tutorial.append(makeDiv(null, 'sbsod-tutorial-paragraph', t));
+    createPresentation() {
+        let presentation = makeDiv(null, 'experience-presentation');
+        this.elements.presentation.forEach(p => {
+            presentation.append(makeDiv(null, 'experience-presentation-paragraph', p));
         });
-        this.text.append(tutorial);
+        this.text.append(presentation);
 
         this.back.offsetWidth;
         this.text.offsetWidth;
@@ -186,7 +185,7 @@ class SantaBarbara extends Page {
             this.back.addEventListener('click', () => {
                 if (this.observer) this.observer.unobserve(this.container);
                 let o = this.options;
-                o.stage = 'tutorial';
+                o.stage = 'presentation';
                 o.position = 'previous';
                 o.answers = this.answers;
                 this.previous = new SantaBarbara(o);

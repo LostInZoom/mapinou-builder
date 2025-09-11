@@ -4,58 +4,6 @@ $water-color: #90b2d1;
 $stroke-width: .4rem;
 $circle-radius: .6rem;
 
-.piaget-content {
-    width: 100%;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    transform: scale(0);
-    transition: transform .3s cubic-bezier(0.545, -0.215, 1.000, 0.470);
-
-    &.pop {
-        transform: scale(1);
-        transition: transform .3s cubic-bezier(0.075, 0.495, 0.320, 1.225);
-    }
-
-    &.top {
-        margin-bottom: 1rem;
-    }
-}
-
-.piaget-text {
-    width: 100%;
-    pointer-events: all;
-
-    background-color: colors.$secondary-color-dark;
-    color: colors.$main-color-light;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    overflow: hidden;
-
-    transform: scale(0);
-    transition: transform .3s cubic-bezier(0.545, -0.215, 1.000, 0.470);
-
-    &.pop {
-        transform: scale(1);
-        transition: transform .3s cubic-bezier(0.075, 0.495, 0.320, 1.225);
-    }
-
-    &.top {
-        border-radius: 0 .4rem .4rem .4rem;
-    }
-
-    &.bottom {
-        border-radius: .4rem .4rem 0 .4rem;
-    }
-}
-
 .piaget-tutorial {
     padding: 1rem;
     display: flex;
@@ -66,7 +14,7 @@ $circle-radius: .6rem;
 
 .piaget-bottle {
     position: relative;
-    margin-bottom: 1rem;
+    margin: 0 1rem 1rem 1rem;
     background-color: colors.$main-color-light;
     border-radius: .4rem;
 

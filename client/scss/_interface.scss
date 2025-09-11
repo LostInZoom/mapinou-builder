@@ -14,8 +14,9 @@
 @use 'game/highscore';
 
 @use 'experiences/experience';
-@use 'experiences/sbsod';
 @use 'experiences/piaget';
+@use 'experiences/sbsod';
+@use 'experiences/ptsot';
 
 #application {
     position: absolute;
@@ -58,8 +59,9 @@
 }
 
 .page-content {
-    max-width: calc(100% - 20vw);
+    max-width: 30rem;
     max-height: calc(100% - 5rem);
+    width: calc(100% - 20vw);
 
     display: flex;
     flex-direction: column;

@@ -1,5 +1,6 @@
 import Basemap from "../cartography/map";
 import Piaget from "../experiences/piaget";
+import SpatialOrientation from "../experiences/ptsot";
 import SantaBarbara from "../experiences/sbsod";
 import Level from "../game/level";
 
@@ -293,13 +294,20 @@ class ExperiencePanel extends Panel {
                                 app: this.page.app,
                                 position: 'current',
                                 elements: content,
-                                stage: 'tutorial'
+                                stage: 'presentation'
                             });
                         } else if (content.index === 'piaget') {
                             this.page.app.page = new Piaget({
                                 app: this.page.app,
                                 position: 'current',
                                 elements: content
+                            });
+                        } else if (content.index === 'ptsot') {
+                            this.page.app.page = new SpatialOrientation({
+                                app: this.page.app,
+                                position: 'current',
+                                elements: content,
+                                stage: 'presentation'
                             });
                         }
                     });

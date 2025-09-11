@@ -12,6 +12,9 @@ interface:
     current: en
   map:
     levels: [ -5.13280186540815, 41.36591212487376, 9.559580918100119, 51.08754085980848 ]
+    animation:
+      minspeed: 300
+      maxspeed: 1500
     start:
       centers:
         - [-0.5810662583798712, 44.846338628363654]
@@ -240,10 +243,7 @@ levels:
   - type: experience
     name: "Niveau 3"
     index: "SBSOD"
-    start:
-      center: [-4.48543194405423, 48.392941224531135]
-      zoom: 6
-    tutorial:
+    presentation:
       - 'Cette expérience est un simple questionnaire, dans lequel vous
         devez répondre à quinze questions sur vos habitudes et votre aisance à
         manipuler des cartes.'
@@ -326,6 +326,37 @@ levels:
           - [-1.6063771152243906,49.63881753504038]
   - type: experience
     name: "Niveau 5"
+    index: "ptsot"
+    timelimit: 30
+    presentation:
+      - 'Cette expérience mesure votre habileté à imaginer
+        une orientation différente de celle proposée par une carte.'
+      - 'Faites attention, vous avez 30 secondes pour réaliser chaque
+        test.'
+    characters:
+      list:
+        cat:
+          name: 'Chat'
+          coordinates: [13.55, 27.41]
+        eagle:
+          name: 'Aigle'
+          coordinates: [43.86, 15.23]
+        hunter:
+          name: 'Chasseur'
+          coordinates: [68.19, 27.18]
+        snake:
+          name: 'Serpent'
+          coordinates: [87.74, 47.27]
+        rabbit:
+          name: 'Lapin'
+          coordinates: [52, 50.65]
+        pigeon:
+          name: 'Pigeon'
+          coordinates: [23.31, 78.9]
+        zucchini:
+          name: 'Courgette'
+          coordinates: [67.42, 84.01]
+      bottom: 'Voici les personnages de cette expérience. Prenez le temps d''associer leur image à leur nom.'
   - type: tier
     name: "Niveau 6"
     content:
