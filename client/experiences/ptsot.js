@@ -156,7 +156,8 @@ class SpatialOrientation extends Page {
             addClass(this.bottomcontent, 'pop');
         }
 
-        wait(this.app.options.interface.transition.page, () => {
+        const transition = this.tutorial && this.index === 0 ? this.app.options.interface.transition.page : 300;
+        wait(transition, () => {
             if (this.tutorial) {
                 addClass(this.back, 'pop');
                 addClass(this.continue, 'pop');
@@ -167,7 +168,7 @@ class SpatialOrientation extends Page {
             this.back.addEventListener('click', backListener);
             this.continue.addEventListener('click', () => {
                 if (!this.tutorial) {
-                    console.log(this.answer);
+                    this.answer.difference = Math.abs(this.answer.trueAngle - this.answer.drawAngle);
                     this.answers.push(this.answer);
                     this.answer = {};
                 }
