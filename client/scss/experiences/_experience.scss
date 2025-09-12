@@ -50,11 +50,15 @@
     overflow: hidden;
 
     transform: scale(0);
-    transition: transform .3s cubic-bezier(0.545, -0.215, 1.000, 0.470);
+    transition:
+        border-radius .1s ease-in-out,
+        transform .3s cubic-bezier(0.545, -0.215, 1.000, 0.470);
 
     &.pop {
         transform: scale(1);
-        transition: transform .3s cubic-bezier(0.075, 0.495, 0.320, 1.225);
+        transition:
+            border-radius .1s ease-in-out,
+            transform .3s cubic-bezier(0.075, 0.495, 0.320, 1.225);
     }
 
     &.top {
@@ -63,6 +67,10 @@
 
     &.bottom {
         border-radius: .4rem .4rem 0 .4rem;
+    }
+
+    &.nobutton {
+        border-radius: .4rem;
     }
 }
 

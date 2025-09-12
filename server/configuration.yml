@@ -329,34 +329,100 @@ levels:
     index: "ptsot"
     timelimit: 30
     presentation:
-      - 'Cette expérience mesure votre habileté à imaginer
-        une orientation différente de celle proposée par une carte.'
-      - 'Faites attention, vous avez 30 secondes pour réaliser chaque
-        test.'
+      - 'Cette expérience évalue votre capacité à imaginer une orientation différente de celle indiquée sur une carte.'
+      - 'Vous devrez vous mettre à la place d’un personnage, en regarder un autre,
+        puis estimez l’angle entre ce personnage et un troisième.'
+    top:
+      - type: characters
+        subtype: images
+    tutorial:
+      - content:
+        - type: characters
+          subtype: names
+        - text: Voici les personnages de cette expérience. Prenez le temps d'apprendre leur nom. Leur disposition ne changera pas.
+      - content:
+        - text: 'Un exemple de question : <b>Imaginez que vous êtes sur la courgette et que
+            vous faites face au pigeon. Pointez le lapin sur le cercle.</b> La réponse sera :'
+        - type: tutorial
+          character1: zucchini
+          character2: pigeon
+          character3: rabbit
+      - content:
+        - text: 'Maintenant, vous allez commencer l''expérience. Elle est composée de six tests.'
+        - text: 'Cliquez dans ou autour du cercle pour générer l''angle que vous jugez correct.'
+        - text: 'Attention, vous disposez de 30 secondes pour chaque test, une barre de temps est visible sous le cercle.'
+        - text: 'Bon courage !'
+    tests:
+      - content:
+        - text: 'Imaginez que vous êtes sur l''<b>aigle</b> et que
+            vous faites face au <b>chat</b>. Pointez le <b>chasseur</b> sur le cercle.'
+        - type: test
+          character1: eagle
+          character2: cat
+          character3: hunter
+        - type: timer
+      - content:
+        - text: 'Imaginez que vous êtes sur le <b>lapin</b> et que
+            vous faites face au <b>pigeon</b>. Montrez l''<b>aigle</b> sur le cercle.'
+        - type: test
+          character1: rabbit
+          character2: pigeon
+          character3: eagle
+        - type: timer
+      - content:
+        - text: 'Imaginez que vous êtes sur le <b>chasseur</b> et que
+            vous faites face au <b>lapin</b>. Montrez le <b>serpent</b> sur le cercle.'
+        - type: test
+          character1: hunter
+          character2: rabbit
+          character3: snake
+        - type: timer
+      - content:
+        - text: 'Imaginez que vous êtes sur le <b>lapin</b> et que
+            vous faites face à la <b>courgette</b>. Montrez l''<b>aigle</b> sur le cercle.'
+        - type: test
+          character1: rabbit
+          character2: zucchini
+          character3: eagle
+        - type: timer
+      - content:
+        - text: 'Imaginez que vous êtes sur le <b>chasseur</b> et que
+            vous faites face au <b>pigeon</b>. Montrez le <b>chat</b> sur le cercle.'
+        - type: test
+          character1: hunter
+          character2: pigeon
+          character3: cat
+        - type: timer
+      - content:
+        - text: 'Imaginez que vous êtes sur le <b>chat</b> et que
+            vous faites face au <b>serpent</b>. Montrez la <b>courgette</b> sur le cercle.'
+        - type: test
+          character1: cat
+          character2: snake
+          character3: zucchini
+        - type: timer
     characters:
-      list:
-        cat:
-          name: 'Chat'
-          coordinates: [13.55, 27.41]
-        eagle:
-          name: 'Aigle'
-          coordinates: [43.86, 15.23]
-        hunter:
-          name: 'Chasseur'
-          coordinates: [68.19, 27.18]
-        snake:
-          name: 'Serpent'
-          coordinates: [87.74, 47.27]
-        rabbit:
-          name: 'Lapin'
-          coordinates: [52, 50.65]
-        pigeon:
-          name: 'Pigeon'
-          coordinates: [23.31, 78.9]
-        zucchini:
-          name: 'Courgette'
-          coordinates: [67.42, 84.01]
-      bottom: 'Voici les personnages de cette expérience. Prenez le temps d''associer leur image à leur nom.'
+      cat:
+        name: 'Chat'
+        coordinates: [13.55, 27.41]
+      eagle:
+        name: 'Aigle'
+        coordinates: [43.86, 15.23]
+      hunter:
+        name: 'Chasseur'
+        coordinates: [68.19, 27.18]
+      snake:
+        name: 'Serpent'
+        coordinates: [87.74, 47.27]
+      rabbit:
+        name: 'Lapin'
+        coordinates: [52, 50.65]
+      pigeon:
+        name: 'Pigeon'
+        coordinates: [23.31, 78.9]
+      zucchini:
+        name: 'Courgette'
+        coordinates: [67.42, 84.01]
   - type: tier
     name: "Niveau 6"
     content:

@@ -75,4 +75,9 @@
         transform: scale(1);
         transition: transform .3s cubic-bezier(0.075, 0.495, 0.320, 1.225);
     }
+
+    &.ptsot {
+        height: calc(100% - 5rem);
+        justify-content: flex-start;
+    }
 }

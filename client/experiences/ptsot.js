@@ -1,7 +1,7 @@
 import Levels from "../pages/levels";
 import Page from "../pages/page";
-import { addClass, isOverflown, makeDiv, removeClass, wait } from "../utils/dom";
-import { easeInOutSine, generateRandomInteger, remap } from "../utils/math";
+import { addClass, addClassList, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
+import { easeInOutSine, generateRandomInteger } from "../utils/math";
 
 class SpatialOrientation extends Page {
     constructor(options, callback) {
@@ -9,8 +9,14 @@ class SpatialOrientation extends Page {
         this.elements = this.options.elements;
         this.stage = this.options.stage;
         this.answers = this.options.answers ?? [];
+        this.timelimit = this.elements.timelimit;
+        this.namespace = 'http://www.w3.org/2000/svg';
+        this.index = 0;
+        this.tutorial = true;
 
-        this.content = makeDiv(null, 'page-content ptsot-content pop');
+        this.answer = {};
+
+        this.content = makeDiv(null, 'page-content pop');
         this.container.append(this.content);
 
         if (this.stage === 'presentation') {
@@ -27,18 +33,20 @@ class SpatialOrientation extends Page {
         else {
             this.topcontent = makeDiv(null, 'experience-content top pop');
             this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
-            this.toptext = makeDiv(null, 'experience-text top pop');
+            this.toptext = makeDiv(null, 'experience-text top nobutton pop');
             this.topcontent.append(this.back, this.toptext);
+            this.content.append(this.topcontent);
 
-            this.bottomcontent = makeDiv(null, 'experience-content bottom pop');
-            this.continue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
-            this.bottomtext = makeDiv(null, 'experience-text bottom pop');
-            this.bottomcontent.append(this.bottomtext, this.continue);
-
-            this.content.append(this.topcontent, this.bottomcontent);
-
-            if (this.stage === 'characters') {
-                this.createCharacters();
+            if (this.stage === 'tutorial') {
+                this.elements.top.forEach(e => {
+                    if ('type' in e) {
+                        if (e.type === 'characters') {
+                            this.generateCharacters(this.toptext, e.subtype);
+                        }
+                    }
+                });
+                addClass(this.content, 'ptsot');
+                this.createBottomContent();
             }
         }
     }
@@ -61,52 +69,130 @@ class SpatialOrientation extends Page {
         wait(300, () => {
             addClass(back, 'pop');
             addClass(pursue, 'pop');
+            this.listen = true;
 
             back.addEventListener('click', () => {
-                removeClass(this.content, 'pop');
-                wait(500, () => {
-                    this.destroy();
-                    this.basemap.fit(this.params.interface.map.levels, {
-                        easing: easeInOutSine
-                    }, () => {
-                        this.app.page = new Levels({ app: this.app, position: 'current' });
-                    });
-                });
+                this.toLevels();
             }, { once: true });
 
             pursue.addEventListener('click', () => {
+                this.listen = false;
                 let o = this.options;
-                o.stage = 'characters';
+                o.stage = 'tutorial';
                 o.position = 'next';
                 o.answers = this.answers;
                 this.next = new SpatialOrientation(o);
                 this.slideNext();
-            }, { once: true })
+            }, { once: true });
         });
     }
 
-    createCharacters() {
-        let characters = this.generateCharacters('characters');
-        this.toptext.append(characters);
+    createBottomContent(forwards = true) {
+        let elements = this.elements[this.tutorial ? 'tutorial' : 'tests'];
+        let content = elements[this.index].content;
 
-        let names = this.generateCharacters('names');
-        this.bottomtext.append(names);
+        const backListener = () => {
+            this.back.removeEventListener('click', backListener);
+            if (this.index === 0) {
+                this.listen = false;
+                let o = this.options;
+                o.stage = 'presentation';
+                o.position = 'previous';
+                o.answers = this.answers;
+                this.previous = new SpatialOrientation(o);
+                this.slidePrevious();
+            } else {
+                if (this.tutorial) {
+                    --this.index;
+                    this.navigateBottom(false);
+                }
+            }
+        }
 
-        let bottom = makeDiv(null, 'ptsot-characters-text bottom', this.elements.characters.bottom);
-        this.bottomtext.append(bottom);
+        this.bottomcontent = makeDiv(null, 'experience-content bottom');
+        if (this.index === 0 && forwards && this.tutorial) { addClass(this.bottomcontent, 'pop'); }
+        this.continue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
+        this.bottomtext = makeDiv(null, 'experience-text bottom nobutton pop');
+        this.bottomcontent.append(this.bottomtext, this.continue);
+        this.content.append(this.bottomcontent);
+
+        content.forEach(e => {
+            if (e.type === 'characters') {
+                this.generateCharacters(this.bottomtext, e.subtype);
+            }
+            else if (e.type === 'tutorial') {
+                this.generateCircle(this.bottomtext, e);
+            }
+            else if (e.type === 'test') {
+                this.generateCircle(this.bottomtext, e);
+            }
+            else if (e.type === 'timer') {
+                this.generateTimer(this.bottomtext, () => {
+                    if (!this.tutorial) {
+                        this.answers.push(this.answer);
+                        this.answer = {};
+                    }
+                    this.back.removeEventListener('click', backListener);
+                    if (this.index === elements.length - 1) {
+                        this.toLevels();
+                    } else {
+                        ++this.index;
+                        this.navigateBottom();
+                    }
+                });
+            }
+            else {
+                let bottom = makeDiv(null, 'ptsot-characters-text bottom', e.text);
+                this.bottomtext.append(bottom);
+            }
+        });
+        if (!this.tutorial) {
+            removeClass(this.back, 'pop');
+            addClass(this.toptext, 'nobutton');
+        }
+
+        if (this.index > 0 || !forwards || !this.tutorial) {
+            this.bottomcontent.offsetHeight;
+            addClass(this.bottomcontent, 'pop');
+        }
 
         wait(this.app.options.interface.transition.page, () => {
-            addClass(this.back, 'pop');
-            addClass(this.continue, 'pop');
+            if (this.tutorial) {
+                addClass(this.back, 'pop');
+                addClass(this.continue, 'pop');
+                removeClassList([this.toptext, this.bottomtext], 'nobutton');
+            }
+            this.listen = true;
+
+            this.back.addEventListener('click', backListener);
+            this.continue.addEventListener('click', () => {
+                if (!this.tutorial) {
+                    console.log(this.answer);
+                    this.answers.push(this.answer);
+                    this.answer = {};
+                }
+
+                this.back.removeEventListener('click', backListener);
+                if (this.index === elements.length - 1) {
+                    if (this.tutorial) {
+                        this.index = 0;
+                        this.tutorial = false;
+                        this.navigateBottom();
+                    } else {
+                        this.toLevels();
+                    }
+                } else {
+                    ++this.index;
+                    this.navigateBottom();
+                }
+            }, { once: true });
         });
     }
 
-    generateCharacters(type) {
-        let container = makeDiv(null, 'ptsot-characters-container');
-        // let characters = makeDiv(null, 'ptsot-characters');
-
-        for (let [c, infos] of Object.entries(this.elements.characters.list)) {
-            if (type === 'characters') {
+    generateCharacters(container, type) {
+        let charcontainer = makeDiv(null, 'ptsot-characters-container');
+        for (let [c, infos] of Object.entries(this.elements.characters)) {
+            if (type === 'images') {
                 let character = makeDiv(null, 'ptsot-characters-character hidden ' + c);
                 let image = document.createElement('img');
                 image.src = this.params.sprites[`ptsot:${c}`];
@@ -114,22 +200,306 @@ class SpatialOrientation extends Page {
                 character.append(image);
                 character.style.left = infos.coordinates[0] + '%';
                 character.style.top = infos.coordinates[1] + '%';
-                container.append(character);
+                charcontainer.append(character);
             }
             else if (type === 'names') {
                 let name = makeDiv(null, 'ptsot-characters-name ' + c, infos.name);
                 name.style.left = infos.coordinates[0] + '%';
                 name.style.top = infos.coordinates[1] + '%';
-                container.append(name);
+                charcontainer.append(name);
             }
 
-            let point = makeDiv(null, 'ptsot-characters-point');
+            let point = makeDiv(null, 'ptsot-characters-point ' + c);
             point.style.left = infos.coordinates[0] + '%';
             point.style.top = infos.coordinates[1] + '%';
-            container.append(point);
+            charcontainer.append(point);
+        }
+        container.append(charcontainer);
+    }
+
+    generateCircle(container, options) {
+        const tutorial = options.type === 'tutorial' ? true : false;
+        let svgcontainer = makeDiv(null, 'ptsot-svg-container');
+        let svg = document.createElementNS(this.namespace, 'svg');
+        svgcontainer.append(svg);
+        container.append(svgcontainer);
+        container.offsetWidth;
+
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        svg.setAttribute('viewBox', `0 0 ${svgcontainer.offsetWidth} ${svgcontainer.offsetHeight}`);
+
+        // Set a padding of 20%
+        let padding = Math.min(20 * svgcontainer.offsetHeight / 100, 20 * svgcontainer.offsetWidth / 100);
+        let center = { x: svgcontainer.offsetWidth / 2, y: svgcontainer.offsetHeight / 2 }
+        let radius = Math.min(svgcontainer.offsetHeight / 2 - padding, svgcontainer.offsetWidth / 2 - padding);
+
+        let p1 = document.createElementNS(this.namespace, 'circle');
+        p1.setAttribute('class', 'point1');
+        p1.setAttribute('cx', center.x);
+        p1.setAttribute('cy', center.y);
+
+        let p2 = document.createElementNS(this.namespace, 'circle');
+        p2.setAttribute('class', 'point2');
+        p2.setAttribute('cx', center.x);
+        p2.setAttribute('cy', padding);
+
+        let circle = document.createElementNS(this.namespace, 'circle');
+        circle.setAttribute('class', 'circle');
+        circle.setAttribute('cx', center.x);
+        circle.setAttribute('cy', center.y);
+        circle.setAttribute('r', radius);
+
+        let line = document.createElementNS(this.namespace, 'line');
+        line.setAttribute('class', 'line1');
+        line.setAttribute('x1', center.x);
+        line.setAttribute('y1', center.y);
+        line.setAttribute('x2', center.x);
+        line.setAttribute('y2', padding);
+
+        svg.append(circle);
+
+        let angle = this.calculateNameAngles(options.character1, options.character2, options.character3)
+        if (tutorial) {
+            let p3 = document.createElementNS(this.namespace, 'circle');
+            p3.setAttribute('class', 'point3');
+            const rad = angle * Math.PI / 180;
+            const [p3x, p3y] = [center.x + radius * Math.sin(rad), center.y - radius * Math.cos(rad)]
+            p3.setAttribute('cx', p3x);
+            p3.setAttribute('cy', p3y);
+            let line2 = document.createElementNS(this.namespace, 'line');
+            line2.setAttribute('class', 'line2');
+            line2.setAttribute('x1', center.x);
+            line2.setAttribute('y1', center.y);
+            line2.setAttribute('x2', p3x);
+            line2.setAttribute('y2', p3y);
+            svg.append(line2, p3);
+        } else {
+            let lines = [];
+            let end = [];
+            let [x, y] = [0, 0];
+            const destroyElements = () => {
+                if (lines.length > 0) {
+                    let oldline = lines.pop();
+                    addClass(oldline, 'hide');
+                    wait(200, () => { oldline.remove(); })
+                }
+                if (end.length > 0) {
+                    let oldend = end.pop();
+                    addClass(oldend, 'hide');
+                    wait(200, () => { oldend.remove(); })
+                }
+                lines = [];
+                end = [];
+            }
+
+            const createElements = () => {
+                let l = document.createElementNS(this.namespace, 'line');
+                l.setAttribute('class', 'line2');
+                l.setAttribute('x1', center.x);
+                l.setAttribute('y1', center.y);
+                l.setAttribute('x2', x);
+                l.setAttribute('y2', y);
+                lines.push(l);
+                let p = document.createElementNS(this.namespace, 'circle');
+                p.setAttribute('class', 'point3');
+                p.setAttribute('cx', x);
+                p.setAttribute('cy', y);
+                end.push(p);
+                addClassList([p, l], 'hide');
+                svg.append(l, p);
+                svgcontainer.offsetHeight;
+                removeClassList([p, l], 'hide');
+            }
+
+            const down = (e) => {
+                e.preventDefault();
+                destroyElements();
+                svgcontainer.removeEventListener('touchstart', down);
+                [x, y] = this.getRelativeCoordinates(svgcontainer, e);
+                [x, y] = this.projectPointOnCircle(center.x, center.y, radius, x, y);
+                createElements(x, y);
+                svg.appendChild(p1);
+                svgcontainer.addEventListener('touchmove', move);
+                svgcontainer.addEventListener('touchend', up);
+            };
+
+            const move = (e) => {
+                e.preventDefault();
+                [x, y] = this.getRelativeCoordinates(svgcontainer, e);
+                [x, y] = this.projectPointOnCircle(center.x, center.y, radius, x, y);
+                lines[0].setAttribute('x2', x);
+                lines[0].setAttribute('y2', y);
+                end[0].setAttribute('cx', x);
+                end[0].setAttribute('cy', y);
+            };
+
+            const up = (e) => {
+                e.preventDefault();
+                svgcontainer.removeEventListener('touchmove', move);
+                svgcontainer.removeEventListener('touchend', up);
+                addClass(this.continue, 'pop');
+                removeClass(this.bottomtext, 'nobutton');
+                this.answer = {
+                    trueAngle: angle,
+                    drawAngle: 360 - this.calculateAngle(center, { x: center.x, y: padding }, { x: x, y: y })
+                };
+                svgcontainer.addEventListener('touchstart', down);
+            };
+            svgcontainer.addEventListener('touchstart', down);
         }
 
-        return container;
+        svg.append(line, p1, p2);
+
+        this.createCharactersLabels(svg, tutorial, {
+            center: center,
+            radius: radius + 10,
+            character1: options.character1,
+            character2: options.character2,
+            character3: options.character3,
+            angle: angle
+        });
+    }
+
+    generateTimer(container, callback) {
+        let timercontainer = makeDiv(null, 'ptsot-timer-container');
+        let timerdiv = makeDiv(null, 'ptsot-timer');
+        timercontainer.append(timerdiv);
+        container.append(timercontainer);
+        let index = this.index;
+        let start = performance.now();
+        const timer = () => {
+            if (index === this.index) {
+                let time = performance.now();
+                let elapsed = time - start;
+                if (elapsed >= this.timelimit * 1000) {
+                    callback();
+                } else {
+                    let perc = 100 - (elapsed * 100 / (this.timelimit * 1000));
+                    if (perc <= 50) {
+                        if (perc > 25) { addClass(timerdiv, 'half'); }
+                        else { addClass(timerdiv, 'quarter'); }
+                    }
+                    timerdiv.style.width = `${perc}%`;
+                    requestAnimationFrame(timer);
+                }
+            }
+        };
+        requestAnimationFrame(timer);
+    }
+
+    navigateBottom(forwards = true) {
+        this.listen = false;
+        removeClass(this.bottomcontent, 'pop');
+        wait(300, () => {
+            this.bottomcontent.remove();
+            this.createBottomContent(forwards);
+        });
+    }
+
+    toLevels() {
+        this.listen = false;
+        this.index = undefined;
+        if (this.topcontent) { removeClass(this.topcontent, 'pop'); }
+        if (this.bottomcontent) { removeClass(this.bottomcontent, 'pop'); }
+        else { removeClass(this.content, 'pop'); }
+        wait(500, () => {
+            this.destroy();
+            this.basemap.fit(this.params.interface.map.levels, {
+                easing: easeInOutSine
+            }, () => {
+                this.app.page = new Levels({ app: this.app, position: 'current' });
+            });
+        });
+    }
+
+    createCharactersLabels(svg, tutorial, options) {
+        let characters = this.elements.characters;
+        let c = options.center;
+        let r = options.radius;
+
+        let name1 = document.createElementNS(this.namespace, 'text');
+        name1.textContent = characters[options.character1].name;
+        name1.setAttribute('x', c.x);
+        name1.setAttribute('y', c.y + 18);
+        name1.setAttribute('text-anchor', 'middle');
+
+        const path = document.createElementNS(this.namespace, 'path');
+        path.setAttribute("id", 'circle-path');
+        path.setAttribute("d", `M ${c.x},${c.y} m -${r},0 a ${r},${r} 0 1,1 ${r * 2},0 a ${r},${r} 0 1,1 -${r * 2},0`);
+        let defs = document.createElementNS(this.namespace, 'defs');
+        svg.appendChild(defs);
+        defs.appendChild(path);
+
+        const text2 = document.createElementNS(this.namespace, 'text');
+        const textPat2 = document.createElementNS(this.namespace, 'textPath');
+        textPat2.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#circle-path');
+        textPat2.setAttribute('startOffset', tutorial ? '23%' : '25%');
+        textPat2.setAttribute('text-anchor', 'middle');
+        textPat2.textContent = characters[options.character2].name;
+        text2.append(textPat2);
+
+        svg.append(name1, text2);
+
+        if (tutorial) {
+            const text3 = document.createElementNS(this.namespace, 'text');
+            const textPath3 = document.createElementNS(this.namespace, 'textPath');
+            textPath3.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#circle-path');
+            textPath3.setAttribute('startOffset', 25 + (100 * options.angle / 360) + 2 + '%');
+            textPath3.setAttribute('text-anchor', 'middle');
+            textPath3.textContent = characters[options.character3].name;
+            text3.append(textPath3);
+            svg.append(text3);
+        }
+    }
+
+    calculateNameAngles(name1, name2, name3) {
+        let charactercontainer = this.toptext.querySelector('.ptsot-characters-container');
+        const width = charactercontainer.offsetWidth;
+        const height = charactercontainer.offsetHeight;
+        let e1 = charactercontainer.querySelector('.ptsot-characters-point.' + name1);
+        let e2 = charactercontainer.querySelector('.ptsot-characters-point.' + name2);
+        let e3 = charactercontainer.querySelector('.ptsot-characters-point.' + name3);
+        const p1 = { x: parseFloat(e1.style.left) * width / 100, y: (100 - parseFloat(e1.style.top)) * height / 100 };
+        const p2 = { x: parseFloat(e2.style.left) * width / 100, y: (100 - parseFloat(e2.style.top)) * height / 100 };
+        const p3 = { x: parseFloat(e3.style.left) * width / 100, y: (100 - parseFloat(e3.style.top)) * height / 100 };
+        return this.calculateAngle(p1, p2, p3);
+    }
+
+    calculateAngle(p1, p2, p3) {
+        const v1x = p2.x - p1.x;
+        const v1y = p2.y - p1.y;
+        const v2x = p3.x - p1.x;
+        const v2y = p3.y - p1.y;
+        const a1 = Math.atan2(v1y, v1x);
+        const a2 = Math.atan2(v2y, v2x);
+        let angle = a1 - a2;
+        if (angle < 0) angle += 2 * Math.PI;
+        return angle * 180 / Math.PI;
+    }
+
+    projectPointOnCircle(cx, cy, r, x, y) {
+        const vx = x - cx;
+        const vy = y - cy;
+        const len = Math.hypot(vx, vy);
+        // avoid dividing by zero
+        if (len === 0) return [cx + r, cy];
+        const ux = vx / len;
+        const uy = vy / len;
+        const x1 = cx + r * ux;
+        const y1 = cy + r * uy;
+        return [x1, y1];
+    }
+
+    getRelativeCoordinates(container, event) {
+        const touch = event.touches ? event.touches[0] : event;
+        const rect = container.getBoundingClientRect();
+        const xRel = touch.clientX - rect.left;
+        const yRel = touch.clientY - rect.top;
+        const vb = container.querySelector('svg').viewBox.baseVal;
+        const x = xRel / rect.width * vb.width + vb.x;
+        const y = yRel / rect.height * vb.height + vb.y;
+        return [x, y];
     }
 }
 

@@ -1,5 +1,11 @@
 @use '../colors';
 
+$answer-color: #90b2d1;
+
+$timer-color-normal: #bdcedd;
+$timer-color-half: #e2c297;
+$timer-color-quarter: #e69797;
+
 .ptsot-characters-container {
     position: relative;
     background-color: colors.$main-color-light;
@@ -43,7 +49,7 @@
     }
 
     &.hunter {
-        transform: translate(-36%, -76%);
+        transform: translate(-54%, -69%);
     }
 
     &.snake {
@@ -55,7 +61,7 @@
     }
 
     &.zucchini {
-        transform: translate(-48%, -58%);
+        transform: translate(-52%, -49%);
     }
 
     &.cat {
@@ -79,7 +85,7 @@
     }
 
     &.hunter {
-        transform: translate(-38%, 15%);
+        transform: translate(-30%, -136%);
     }
 
     &.snake {
@@ -91,7 +97,7 @@
     }
 
     &.zucchini {
-        transform: translate(-34%, -134%);
+        transform: translate(-74%, -138%);
     }
 
     &.cat {
@@ -107,4 +113,102 @@
     background-color: white;
     outline: solid .2rem colors.$grey-extradark;
     border-radius: 50%;
+}
+
+.ptsot-svg-container {
+    position: relative;
+    background-color: colors.$main-color-light;
+    border-radius: .4rem;
+
+    height: 25vh;
+    aspect-ratio: 1/1;
+
+    &.tutorial {
+        height: 25vh;
+    }
+
+    &:last-child {
+        margin-bottom: 1rem;
+    }
+
+    &:first-child {
+        margin-top: 1rem;
+    }
+
+    &>svg {
+        &>.line1 {
+            stroke: colors.$main-color-dark;
+        }
+
+        &>.line2 {
+            stroke: $answer-color;
+        }
+
+        &>.point1 {
+            r: .3rem;
+            fill: colors.$main-color-dark;
+        }
+
+        &>.point2 {
+            r: .3rem;
+            fill: colors.$main-color-dark;
+        }
+
+        &>.point3 {
+            r: .3rem;
+            fill: $answer-color;
+        }
+
+        &>.circle {
+            fill: transparent;
+            stroke-width: .2rem;
+            stroke: colors.$main-color-dark;
+        }
+
+        &>text {
+            font-size: 1rem;
+            fill: colors.$main-color-dark;
+        }
+
+        &>line {
+            stroke-width: .2rem;
+            transition: stroke-width .2s ease-in-out;
+
+            &.hide {
+                stroke-width: 0;
+            }
+        }
+
+        &>circle {
+            transition: r .2s ease-in-out;
+
+            &.hide {
+                r: 0;
+            }
+        }
+    }
+}
+
+.ptsot-timer-container {
+    height: .6rem;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+
+    background-color: colors.$secondary-color-dark;
+}
+
+.ptsot-timer {
+    height: inherit;
+    width: 100%;
+    background-color: $timer-color-normal;
+    transition: background .2s ease-in-out;
+
+    &.half {
+        background-color: $timer-color-half;
+    }
+
+    &.quarter {
+        background-color: $timer-color-quarter;
+    }
 }
