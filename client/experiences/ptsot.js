@@ -1,6 +1,6 @@
 import Levels from "../pages/levels";
 import Page from "../pages/page";
-import { addClass, addClassList, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
+import { addClass, addClassList, hasClass, makeDiv, removeClass, removeClassList, wait } from "../utils/dom";
 import { easeInOutSine, generateRandomInteger } from "../utils/math";
 
 class SpatialOrientation extends Page {
@@ -15,6 +15,7 @@ class SpatialOrientation extends Page {
         this.tutorial = true;
 
         this.answer = {};
+        this.texts = [];
 
         this.content = makeDiv(null, 'page-content pop');
         this.container.append(this.content);
@@ -60,6 +61,8 @@ class SpatialOrientation extends Page {
         this.content.offsetWidth;
 
         let presentation = makeDiv(null, 'experience-presentation');
+        let title = makeDiv(null, 'experience-presentation-paragraph experience-presentation-title', this.elements.title);
+        presentation.append(title);
         this.elements.presentation.forEach(t => {
             presentation.append(makeDiv(null, 'experience-presentation-paragraph', t));
         });
@@ -90,6 +93,8 @@ class SpatialOrientation extends Page {
     createBottomContent(forwards = true) {
         let elements = this.elements[this.tutorial ? 'tutorial' : 'tests'];
         let content = elements[this.index].content;
+        let first = this.index === 0 && forwards && this.tutorial;
+        this.texts = [];
 
         const backListener = () => {
             this.back.removeEventListener('click', backListener);
@@ -110,7 +115,7 @@ class SpatialOrientation extends Page {
         }
 
         this.bottomcontent = makeDiv(null, 'experience-content bottom');
-        if (this.index === 0 && forwards && this.tutorial) { addClass(this.bottomcontent, 'pop'); }
+        if (first) { addClass(this.bottomcontent, 'pop'); }
         this.continue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
         this.bottomtext = makeDiv(null, 'experience-text bottom nobutton pop');
         this.bottomcontent.append(this.bottomtext, this.continue);
@@ -142,6 +147,10 @@ class SpatialOrientation extends Page {
                 });
             }
             else {
+                if (!this.tutorial) {
+                    let title = makeDiv(null, 'ptsot-characters-text title bottom', `Test ${parseInt(this.index) + 1}/${this.elements.tests.length}`);
+                    this.bottomtext.append(title);
+                }
                 let bottom = makeDiv(null, 'ptsot-characters-text bottom', e.text);
                 this.bottomtext.append(bottom);
             }
@@ -156,7 +165,7 @@ class SpatialOrientation extends Page {
             addClass(this.bottomcontent, 'pop');
         }
 
-        const transition = this.tutorial && this.index === 0 ? this.app.options.interface.transition.page : 300;
+        const transition = first ? this.app.options.interface.transition.page : 300;
         wait(transition, () => {
             if (this.tutorial) {
                 addClass(this.back, 'pop');
@@ -164,6 +173,7 @@ class SpatialOrientation extends Page {
                 removeClassList([this.toptext, this.bottomtext], 'nobutton');
             }
             this.listen = true;
+            this.displayTexts();
 
             this.back.addEventListener('click', backListener);
             this.continue.addEventListener('click', () => {
@@ -219,7 +229,6 @@ class SpatialOrientation extends Page {
     }
 
     generateCircle(container, options) {
-        const tutorial = options.type === 'tutorial' ? true : false;
         let svgcontainer = makeDiv(null, 'ptsot-svg-container');
         let svg = document.createElementNS(this.namespace, 'svg');
         svgcontainer.append(svg);
@@ -260,34 +269,41 @@ class SpatialOrientation extends Page {
 
         svg.append(circle);
 
-        let angle = this.calculateNameAngles(options.character1, options.character2, options.character3)
-        if (tutorial) {
+        let angle = this.calculateNameAngles(options.character1, options.character2, options.character3);
+        let tutoelements = [];
+        if (this.tutorial) {
             let p3 = document.createElementNS(this.namespace, 'circle');
-            p3.setAttribute('class', 'point3');
+            p3.setAttribute('class', 'point-solution');
             const rad = angle * Math.PI / 180;
             const [p3x, p3y] = [center.x + radius * Math.sin(rad), center.y - radius * Math.cos(rad)]
             p3.setAttribute('cx', p3x);
             p3.setAttribute('cy', p3y);
             let line2 = document.createElementNS(this.namespace, 'line');
-            line2.setAttribute('class', 'line2');
+            line2.setAttribute('class', 'line-solution');
             line2.setAttribute('x1', center.x);
             line2.setAttribute('y1', center.y);
             line2.setAttribute('x2', p3x);
             line2.setAttribute('y2', p3y);
+            if (options.type === 'test') {
+                tutoelements = [line2, p3];
+                addClassList(tutoelements, 'hidden');
+            }
             svg.append(line2, p3);
-        } else {
+        }
+
+        if (options.type === 'test') {
             let lines = [];
             let end = [];
             let [x, y] = [0, 0];
             const destroyElements = () => {
                 if (lines.length > 0) {
                     let oldline = lines.pop();
-                    addClass(oldline, 'hide');
+                    addClass(oldline, 'hidden');
                     wait(200, () => { oldline.remove(); })
                 }
                 if (end.length > 0) {
                     let oldend = end.pop();
-                    addClass(oldend, 'hide');
+                    addClass(oldend, 'hidden');
                     wait(200, () => { oldend.remove(); })
                 }
                 lines = [];
@@ -296,21 +312,21 @@ class SpatialOrientation extends Page {
 
             const createElements = () => {
                 let l = document.createElementNS(this.namespace, 'line');
-                l.setAttribute('class', 'line2');
+                l.setAttribute('class', 'line-answer');
                 l.setAttribute('x1', center.x);
                 l.setAttribute('y1', center.y);
                 l.setAttribute('x2', x);
                 l.setAttribute('y2', y);
                 lines.push(l);
                 let p = document.createElementNS(this.namespace, 'circle');
-                p.setAttribute('class', 'point3');
+                p.setAttribute('class', 'point-answer');
                 p.setAttribute('cx', x);
                 p.setAttribute('cy', y);
                 end.push(p);
-                addClassList([p, l], 'hide');
+                addClassList([p, l], 'hidden');
                 svg.append(l, p);
                 svgcontainer.offsetHeight;
-                removeClassList([p, l], 'hide');
+                removeClassList([p, l], 'hidden');
             }
 
             const down = (e) => {
@@ -341,10 +357,15 @@ class SpatialOrientation extends Page {
                 svgcontainer.removeEventListener('touchend', up);
                 addClass(this.continue, 'pop');
                 removeClass(this.bottomtext, 'nobutton');
-                this.answer = {
-                    trueAngle: angle,
-                    drawAngle: 360 - this.calculateAngle(center, { x: center.x, y: padding }, { x: x, y: y })
-                };
+                if (this.tutorial) {
+                    removeClassList(tutoelements, 'hidden');
+                    this.displayTextSolution();
+                } else {
+                    this.answer = {
+                        trueAngle: angle,
+                        drawAngle: 360 - this.calculateAngle(center, { x: center.x, y: padding }, { x: x, y: y })
+                    };
+                }
                 svgcontainer.addEventListener('touchstart', down);
             };
             svgcontainer.addEventListener('touchstart', down);
@@ -352,7 +373,7 @@ class SpatialOrientation extends Page {
 
         svg.append(line, p1, p2);
 
-        this.createCharactersLabels(svg, tutorial, {
+        this.createCharactersLabels(svg, options.type, {
             center: center,
             radius: radius + 10,
             character1: options.character1,
@@ -414,13 +435,14 @@ class SpatialOrientation extends Page {
         });
     }
 
-    createCharactersLabels(svg, tutorial, options) {
+    createCharactersLabels(svg, type, options) {
         let characters = this.elements.characters;
         let c = options.center;
         let r = options.radius;
 
         let name1 = document.createElementNS(this.namespace, 'text');
         name1.textContent = characters[options.character1].name;
+        name1.setAttribute('class', 'hidden');
         name1.setAttribute('x', c.x);
         name1.setAttribute('y', c.y + 18);
         name1.setAttribute('text-anchor', 'middle');
@@ -433,25 +455,47 @@ class SpatialOrientation extends Page {
         defs.appendChild(path);
 
         const text2 = document.createElementNS(this.namespace, 'text');
+        text2.setAttribute('class', 'hidden');
         const textPat2 = document.createElementNS(this.namespace, 'textPath');
         textPat2.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#circle-path');
-        textPat2.setAttribute('startOffset', tutorial ? '23%' : '25%');
+        textPat2.setAttribute('startOffset', '25%');
         textPat2.setAttribute('text-anchor', 'middle');
         textPat2.textContent = characters[options.character2].name;
         text2.append(textPat2);
 
         svg.append(name1, text2);
+        this.texts = [name1, text2];
 
-        if (tutorial) {
+        if (this.tutorial) {
             const text3 = document.createElementNS(this.namespace, 'text');
+            text3.setAttribute('class', 'hidden');
+            addClass(text3, 'text-solution');
+            addClass(text3, type);
             const textPath3 = document.createElementNS(this.namespace, 'textPath');
             textPath3.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#circle-path');
-            textPath3.setAttribute('startOffset', 25 + (100 * options.angle / 360) + 2 + '%');
+            textPath3.setAttribute('startOffset', 25 + (100 * options.angle / 360) + '%');
             textPath3.setAttribute('text-anchor', 'middle');
             textPath3.textContent = characters[options.character3].name;
             text3.append(textPath3);
             svg.append(text3);
+            this.texts.push(text3);
         }
+    }
+
+    displayTexts() {
+        this.texts.forEach(text => {
+            if (!hasClass(text, 'test')) {
+                removeClass(text, 'hidden');
+            }
+        });
+    }
+
+    displayTextSolution() {
+        this.texts.forEach(text => {
+            if (hasClass(text, 'test')) {
+                removeClass(text, 'hidden');
+            }
+        });
     }
 
     calculateNameAngles(name1, name2, name3) {

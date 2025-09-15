@@ -1,6 +1,7 @@
 @use '../colors';
 
-$answer-color: #90b2d1;
+$answer-color: #b9b9b9;
+$solution-color: #90b2d1;
 
 $timer-color-normal: #bdcedd;
 $timer-color-half: #e2c297;
@@ -33,6 +34,11 @@ $timer-color-quarter: #e69797;
 
     &:first-child {
         margin-top: 1rem;
+    }
+
+    &.title {
+        font-family: 'Vincendo';
+        font-size: .9rem;
     }
 }
 
@@ -140,23 +146,28 @@ $timer-color-quarter: #e69797;
             stroke: colors.$main-color-dark;
         }
 
-        &>.line2 {
+        &>.line-answer {
             stroke: $answer-color;
         }
 
-        &>.point1 {
-            r: .3rem;
-            fill: colors.$main-color-dark;
+        &>.line-solution {
+            stroke: $solution-color;
         }
 
+        &>.point1,
         &>.point2 {
             r: .3rem;
             fill: colors.$main-color-dark;
         }
 
-        &>.point3 {
+        &>.point-answer {
             r: .3rem;
             fill: $answer-color;
+        }
+
+        &>.point-solution {
+            r: .3rem;
+            fill: $solution-color;
         }
 
         &>.circle {
@@ -168,13 +179,32 @@ $timer-color-quarter: #e69797;
         &>text {
             font-size: 1rem;
             fill: colors.$main-color-dark;
+            opacity: 1;
+            transition: opacity .2s linear;
+
+            &>textPath {
+                opacity: 1;
+                transition: opacity .2s linear;
+            }
+
+            &.hidden {
+                opacity: 0;
+
+                &>textPath {
+                    opacity: 0;
+                }
+            }
+
+            &.text-solution {
+                fill: $solution-color;
+            }
         }
 
         &>line {
             stroke-width: .2rem;
             transition: stroke-width .2s ease-in-out;
 
-            &.hide {
+            &.hidden {
                 stroke-width: 0;
             }
         }
@@ -182,7 +212,7 @@ $timer-color-quarter: #e69797;
         &>circle {
             transition: r .2s ease-in-out;
 
-            &.hide {
+            &.hidden {
                 r: 0;
             }
         }

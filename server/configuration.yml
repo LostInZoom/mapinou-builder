@@ -200,6 +200,7 @@ levels:
   - type: experience
     name: "Niveau 1"
     index: "piaget"
+    title: les bouteilles
     top: 'Voici une bouteille, la ligne bleue indique le niveau d''eau.'
     bottom: 'Dessinez le même niveau dans cette bouteille pivotée.'
   - type: tier
@@ -243,6 +244,7 @@ levels:
   - type: experience
     name: "Niveau 3"
     index: "SBSOD"
+    title: Questionnaire
     presentation:
       - 'Cette expérience est un simple questionnaire, dans lequel vous
         devez répondre à quinze questions sur vos habitudes et votre aisance à
@@ -328,30 +330,35 @@ levels:
     name: "Niveau 5"
     index: "ptsot"
     timelimit: 30
+    title: 'Expérience 1 :<br>Angles et orientation'
     presentation:
-      - 'Cette expérience évalue votre capacité à imaginer une orientation différente de celle indiquée sur une carte.'
-      - 'Vous devrez vous mettre à la place d’un personnage, en regarder un autre,
-        puis estimez l’angle entre ce personnage et un troisième.'
+      - 'Vous incarnez un personnage, vous faites face à un
+        second personnage et vous devrez estimez sur un cercle la position d''un troisième.'
     top:
       - type: characters
         subtype: images
     tutorial:
       - content:
+        - text: Voici les personnages. Prenez le temps d'apprendre leur nom. Leur disposition ne changera pas.
         - type: characters
           subtype: names
-        - text: Voici les personnages de cette expérience. Prenez le temps d'apprendre leur nom. Leur disposition ne changera pas.
       - content:
-        - text: 'Un exemple de question : <b>Imaginez que vous êtes sur la courgette et que
-            vous faites face au pigeon. Pointez le lapin sur le cercle.</b> La réponse sera :'
+        - text: 'Voici un exemple pour commencer.<br>Vous êtes sur le pigeon et vous faites face au chat.
+            Cliquez sur le cercle pour placer le lapin.'
         - type: tutorial
-          character1: zucchini
-          character2: pigeon
+          character1: pigeon
+          character2: cat
           character3: rabbit
       - content:
-        - text: 'Maintenant, vous allez commencer l''expérience. Elle est composée de six tests.'
-        - text: 'Cliquez dans ou autour du cercle pour générer l''angle que vous jugez correct.'
-        - text: 'Attention, vous disposez de 30 secondes pour chaque test, une barre de temps est visible sous le cercle.'
-        - text: 'Bon courage !'
+        - text: 'Vous avez compris ? Alors essayez !'
+        - text: 'Vous êtes sur le lapin et vous faites face au chat.
+            Cliquez sur le cercle pour placer le serpent.'
+        - type: test
+          character1: rabbit
+          character2: cat
+          character3: snake
+      - content:
+        - text: 'C''est parti ! Attention, cette fois vous avez 30 secondes par test.'
     tests:
       - content:
         - text: 'Imaginez que vous êtes sur l''<b>aigle</b> et que
@@ -432,6 +439,9 @@ levels:
       - target: [-1.5260220720508781,49.5499857870286]
   - type: experience
     name: "Niveau 7"
+    index: "purdue"
+    timelimit: 30
+    title: Rotation en 3D
   - type: tier
     name: "Niveau 8"
     content:
