@@ -37,9 +37,13 @@ class SantaBarbara extends Page {
 
     createPresentation() {
         let presentation = makeDiv(null, 'experience-presentation');
+        let title = makeDiv(null, 'experience-presentation-paragraph experience-presentation-title', this.elements.title);
+        presentation.append(title);
+
         this.elements.presentation.forEach(p => {
             presentation.append(makeDiv(null, 'experience-presentation-paragraph', p));
         });
+
         this.text.append(presentation);
 
         this.back.offsetWidth;

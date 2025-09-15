@@ -347,8 +347,8 @@
 .levels-rabbit-label {
     align-self: start;
 
-    background-color: colors.$main-color-light;
-    color: colors.$main-color-dark;
+    background-color: colors.$secondary-color-dark;
+    color: colors.$main-color-light;
     padding: .5rem .8rem;
     text-align: center;
 
@@ -402,8 +402,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: colors.$main-color-light;
-    color: colors.$main-color-dark;
+    background-color: colors.$secondary-color-dark;
+    color: colors.$main-color-light;
     padding: .5rem .8rem;
 
     border-bottom-left-radius: .4rem;
