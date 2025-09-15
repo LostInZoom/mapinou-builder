@@ -430,7 +430,7 @@ class SpatialOrientation extends Page {
             this.basemap.fit(this.params.interface.map.levels, {
                 easing: easeInOutSine
             }, () => {
-                this.app.page = new Levels({ app: this.app, position: 'current' });
+                this.app.page = new Levels({ app: this.app, position: 'current', update: true });
             });
         });
     }

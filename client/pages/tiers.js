@@ -289,7 +289,7 @@ class ExperiencePanel extends Panel {
                 this.page.hide(() => {
                     wait(100, () => {
                         this.page.destroy();
-                        if (content.index === 'SBSOD') {
+                        if (content.index === 'sbsod') {
                             this.page.app.page = new SantaBarbara({
                                 app: this.page.app,
                                 position: 'current',
@@ -300,7 +300,8 @@ class ExperiencePanel extends Panel {
                             this.page.app.page = new Piaget({
                                 app: this.page.app,
                                 position: 'current',
-                                elements: content
+                                elements: content,
+                                stage: 'presentation'
                             });
                         } else if (content.index === 'ptsot') {
                             this.page.app.page = new SpatialOrientation({

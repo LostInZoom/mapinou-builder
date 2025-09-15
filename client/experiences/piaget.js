@@ -7,64 +7,95 @@ class Piaget extends Page {
     constructor(options, callback) {
         super(options, callback);
         this.elements = this.options.elements;
+        this.stage = this.options.stage;
+        this.answers = {};
+        this.answers = [];
+        this.testnumber = 5;
 
         this.content = makeDiv(null, 'page-content pop');
         this.container.append(this.content);
 
-        this.topcontent = makeDiv(null, 'experience-content top pop');
-        this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
-        this.toptext = makeDiv(null, 'experience-text top');
-        this.topcontent.append(this.back, this.toptext);
-        this.content.append(this.topcontent);
+        if (this.stage === 'presentation') {
+            let centers = this.app.options.interface.map.start.centers;
+            let i = generateRandomInteger(0, centers.length - 1);
+            this.basemap.fly({
+                easing: easeInOutSine,
+                center: centers[i],
+                zoom: this.app.options.interface.map.start.zoom
+            }, () => {
+                this.createPresentation();
+            });
+        }
+        else {
+            this.topcontent = makeDiv(null, 'experience-content top pop');
+            this.back = makeDiv(null, 'page-button page-button-back', 'Retour');
+            this.toptext = makeDiv(null, 'experience-text top nobutton pop');
+            this.topcontent.append(this.back, this.toptext);
+            this.content.append(this.topcontent);
 
-        let toplabel = makeDiv(null, 'piaget-tutorial', this.elements.top);
-        this.topbottle = makeDiv(null, 'piaget-bottle reference', this.app.options.svgs.piaget);
-        this.toptext.append(toplabel, this.topbottle);
+            let toplabel = makeDiv(null, 'piaget-tutorial', this.elements.top);
+            this.topbottle = makeDiv(null, 'piaget-bottle reference', this.app.options.svgs.piaget);
+            this.toptext.append(toplabel, this.topbottle);
 
-        this.bottomcontent = makeDiv(null, 'experience-content bottom pop');
-        this.content.append(this.bottomcontent);
-        this.createBottomPanel(1);
+            this.bottomcontent = makeDiv(null, 'experience-content bottom pop');
+            this.content.append(this.bottomcontent);
+            this.createBottomPanel(1);
 
-        let centers = this.app.options.interface.map.start.centers;
-        let i = generateRandomInteger(0, centers.length - 1);
-
-        this.basemap.fly({
-            easing: easeInOutSine,
-            center: centers[i],
-            zoom: this.app.options.interface.map.start.zoom
-        }, () => {
-            addClass(this.toptext, 'pop');
-            wait(300, () => {
+            wait(this.app.options.interface.transition.page, () => {
                 addClass(this.bottomtext, 'pop');
-                wait(300, () => {
-                    addClass(this.back, 'pop');
-                });
             });
-        });
+        }
+    }
 
-        this.back.addEventListener('click', () => {
-            removeClass(this.topcontent, 'pop');
-            removeClass(this.bottomcontent, 'pop');
-            wait(500, () => {
-                this.destroy();
-                this.basemap.fit(this.params.interface.map.levels, {
-                    easing: easeInOutSine
-                }, () => {
-                    this.app.page = new Levels({ app: this.app, position: 'current' });
-                });
-            });
-        }, true);
+    createPresentation() {
+        let back = makeDiv(null, 'page-button page-button-back', 'Retour');
+        let pursue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
+
+        let text = makeDiv(null, 'experience-text nobutton');
+        this.content.append(back, text, pursue);
+        this.content.offsetWidth;
+
+        let presentation = makeDiv(null, 'experience-presentation');
+        let title = makeDiv(null, 'experience-presentation-paragraph experience-presentation-title', this.elements.title);
+        presentation.append(title);
+        this.elements.presentation.forEach(t => {
+            presentation.append(makeDiv(null, 'experience-presentation-paragraph', t));
+        });
+        text.append(presentation);
+
+        addClass(text, 'pop');
+        wait(300, () => {
+            removeClass(text, 'nobutton');
+            addClass(back, 'pop');
+            addClass(pursue, 'pop');
+            this.listen = true;
+
+            back.addEventListener('click', () => {
+                this.toLevels();
+            }, { once: true });
+
+            pursue.addEventListener('click', () => {
+                this.listen = false;
+                let o = this.options;
+                o.stage = 'tutorial';
+                o.position = 'next';
+                this.next = new Piaget(o);
+                this.slideNext();
+            }, { once: true });
+        });
     }
 
     createBottomPanel(index) {
         let pursue = makeDiv(null, 'page-button page-button-continue', 'Continuer');
-        this.bottomtext = makeDiv(null, 'experience-text bottom');
+        this.bottomtext = makeDiv(null, 'experience-text bottom nobutton');
         if (index > 1) { addClass(this.bottomtext, 'pop'); }
 
         this.bottomcontent.append(this.bottomtext, pursue);
         let bottomlabel = makeDiv(null, 'piaget-tutorial', this.elements.bottom);
         let bottombottle = makeDiv(null, 'piaget-bottle draw', this.app.options.svgs['piaget' + index]);
-        this.bottomtext.append(bottomlabel, bottombottle);
+        let title = makeDiv(null, 'piaget-title', `${index}/${this.testnumber}`);
+        this.bottomtext.append(title, bottomlabel, bottombottle);
+
 
         let namespace = 'http://www.w3.org/2000/svg';
         let svgcontainer = makeDiv(null, 'piaget-svg-container');
@@ -155,32 +186,30 @@ class Piaget extends Page {
             if (length < 10 * vb.width / 100) {
                 destroyElements();
                 removeClass(pursue, 'pop');
+                addClass(this.bottomtext, 'nobutton');
             } else {
                 addClass(pursue, 'pop');
+                removeClass(this.bottomtext, 'nobutton');
+                const [x1, y1] = [lines[0].getAttribute('x1'), lines[0].getAttribute('y1')];
+                const [x2, y2] = [lines[0].getAttribute('x2'), lines[0].getAttribute('y2')];
+                let angle = Math.abs(Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI);
+                if (angle > 180) angle = 360 - angle;
+                if (angle > 90) angle = 180 - angle;
+                this.answer = {
+                    difference: angle,
+                    heightPercentage: 100 - (((y1 * 100 / vb.height) + (y2 * 100 / vb.height)) / 2)
+                };
             }
             bottombottle.addEventListener('touchstart', down);
         }
 
+        this.answer = {};
         bottombottle.addEventListener('touchstart', down);
 
         pursue.addEventListener('click', () => {
-            if (index >= 5) {
-                removeClass(this.bottomcontent, 'pop');
-                wait(300, () => {
-                    removeClass(this.topcontent, 'pop');
-                    wait(500, () => {
-                        this.destroy();
-                        this.basemap.fit(this.params.interface.map.levels, {
-                            easing: easeInOutSine
-                        }, () => {
-                            this.app.page = new Levels({
-                                app: this.app,
-                                position: 'current',
-                                update: true
-                            });
-                        });
-                    });
-                });
+            this.answers.push(this.answer);
+            if (index >= this.testnumber) {
+                this.toLevels();
             } else {
                 removeClass(this.bottomcontent, 'pop');
                 wait(500, () => {
@@ -200,6 +229,21 @@ class Piaget extends Page {
         const x = xRel / rect.width * vb.width + vb.x;
         const y = yRel / rect.height * vb.height + vb.y;
         return [x, y];
+    }
+
+    toLevels() {
+        this.listen = false;
+        if (this.topcontent) { removeClass(this.topcontent, 'pop'); }
+        if (this.bottomcontent) { removeClass(this.bottomcontent, 'pop'); }
+        else { removeClass(this.content, 'pop'); }
+        wait(500, () => {
+            this.destroy();
+            this.basemap.fit(this.params.interface.map.levels, {
+                easing: easeInOutSine
+            }, () => {
+                this.app.page = new Levels({ app: this.app, position: 'current', update: true });
+            });
+        });
     }
 }
 

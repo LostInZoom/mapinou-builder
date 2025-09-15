@@ -200,7 +200,9 @@ levels:
   - type: experience
     name: "Niveau 1"
     index: "piaget"
-    title: les bouteilles
+    title: 'Expérience 1 :<br>Les bouteilles'
+    presentation:
+      - 'Vous devez dessiner le niveau d''eau dans différentes bouteilles.'
     top: 'Voici une bouteille, la ligne bleue indique le niveau d''eau.'
     bottom: 'Dessinez le même niveau dans cette bouteille pivotée.'
   - type: tier
@@ -243,8 +245,8 @@ levels:
       - target: [ -0.38898848432943517,45.10183756639063 ]
   - type: experience
     name: "Niveau 3"
-    index: "SBSOD"
-    title: Questionnaire
+    index: "sbsod"
+    title: 'Expérience 2 :<br>Questionnaire'
     presentation:
       - 'Cette expérience est un simple questionnaire, dans lequel vous
         devez répondre à quinze questions sur vos habitudes et votre aisance à
