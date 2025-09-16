@@ -332,7 +332,7 @@ levels:
     name: "Niveau 5"
     index: "ptsot"
     timelimit: 30
-    title: 'Expérience 1 :<br>Angles et orientation'
+    title: 'Expérience 3 :<br>Angles et orientation'
     presentation:
       - 'Vous incarnez un personnage, vous faites face à un
         second personnage et vous devrez estimez sur un cercle la position d''un troisième.'
@@ -443,7 +443,16 @@ levels:
     name: "Niveau 7"
     index: "purdue"
     timelimit: 30
-    title: Rotation en 3D
+    title: 'Expérience 4 :<br>Rotation en 3D'
+    presentation:
+      - 'Retrouver un objet en trois dimensions ayant subit une rotation.'
+    tutorial:
+      text1: 'Voici la rotation d''un solide en trois dimensions :'
+      text2: 'Voici un autre solide :'
+      text3: 'Appliquez la même rotation et trouvez le bon résultat pour continuer :'
+      solution: 1
+    tests:
+      - 1
   - type: tier
     name: "Niveau 8"
     content:

@@ -1,6 +1,7 @@
 import Basemap from "../cartography/map";
 import Piaget from "../experiences/piaget";
 import SpatialOrientation from "../experiences/ptsot";
+import Purdue from "../experiences/purdue";
 import SantaBarbara from "../experiences/sbsod";
 import Level from "../game/level";
 
@@ -305,6 +306,13 @@ class ExperiencePanel extends Panel {
                             });
                         } else if (content.index === 'ptsot') {
                             this.page.app.page = new SpatialOrientation({
+                                app: this.page.app,
+                                position: 'current',
+                                elements: content,
+                                stage: 'presentation'
+                            });
+                        } else if (content.index === 'purdue') {
+                            this.page.app.page = new Purdue({
                                 app: this.page.app,
                                 position: 'current',
                                 elements: content,

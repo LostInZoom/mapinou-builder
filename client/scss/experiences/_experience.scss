@@ -72,6 +72,14 @@
     &.nobutton {
         border-radius: .4rem;
     }
+
+    &.noback {
+        border-top-left-radius: .4rem;
+    }
+
+    &.nocontinue {
+        border-bottom-right-radius: .4rem;
+    }
 }
 
 .experience-presentation {
