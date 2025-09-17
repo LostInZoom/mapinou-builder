@@ -19,6 +19,8 @@
 @use 'experiences/ptsot';
 @use 'experiences/purdue';
 
+@use 'game/builder';
+
 #application {
     position: absolute;
     top: 0;

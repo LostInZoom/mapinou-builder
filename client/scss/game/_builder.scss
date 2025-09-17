@@ -1,0 +1,73 @@
+@use '../colors';
+
+$button-size: 4rem;
+$button-padding: .5rem;
+
+.builder-container {
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    pointer-events: none;
+}
+
+.builder-menu-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: calc(100% - 2rem);
+    margin: 1rem;
+
+    display: flex;
+    justify-content: space-around;
+}
+
+.builder-menu-button {
+    position: relative;
+    pointer-events: all;
+    background-color: colors.$secondary-color-dark;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    outline-width: 0;
+    outline-style: solid;
+    outline-color: colors.$main-color-light;
+
+    height: $button-size;
+    width: $button-size;
+
+    transform: scale(0);
+    transition:
+        transform .3s cubic-bezier(0.36, 0, 0.66, -0.56),
+        outline .1s linear;
+
+    &.pop {
+        transform: scale(1);
+        transition:
+            transform .3s cubic-bezier(0.34, 1.56, 0.64, 1),
+            outline .1s linear;
+    }
+
+    &>img {
+        pointer-events: none;
+        width: calc($button-size - ($button-padding * 2));
+        height: calc($button-size - ($button-padding * 2));
+    }
+
+    &.active {
+        outline-width: .4rem;
+    }
+}
+
+.builder-menu-enemies {
+    position: absolute;
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+
+    transform: translateY(calc(-100% - 1rem));
+}

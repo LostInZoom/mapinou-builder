@@ -8,14 +8,13 @@ import Title from '../pages/title.js';
 import Roamer from '../characters/roamer.js';
 import { Music, SoundEffects } from '../utils/soundbuttons.js';
 import Rabbits from '../layers/rabbits.js';
+import Builder from './builder.js';
 
 class Application {
     constructor(options) {
         this.options = options;
         this.progression = options.progression;
-
         this.debug = true;
-        // this.progression = { tier: 1, level: 2 };
 
         // Create the DOM Element
         this.container = makeDiv('application', null);
@@ -29,79 +28,24 @@ class Application {
         // Display the loader
         this.loading();
 
-        this.maxrabbit = 5;
-
         // Boolean to flag if the page is sliding
         this.sliding = false;
-
-        this.header = new Header(this);
-        this.header.setJustification('right');
-
-        this.music = new Music({
-            parent: this.header,
-            svg: this.options.svgs.music,
-            src: './sounds/theme',
-            format: 'mp3',
-        });
-
-        this.sounds = new SoundEffects({
-            parent: this.header,
-            svg: this.options.svgs.sound,
-        });
-
-        let centers = this.options.interface.map.start.centers;
-        let i = generateRandomInteger(0, centers.length - 1);
-        this.center = centers[i];
 
         this.basemap = new Basemap({
             app: this,
             parent: this.container,
             class: 'basemap',
             center: this.center,
-            zoom: this.options.interface.map.start.zoom,
-            interactive: false
+            extent: this.options.interface.map.start,
+            interactive: true
         }, () => {
             this.basemap.loadSprites().then(() => {
                 this.loaded();
                 this.allowed = true;
 
-                // Create the current page
-                this.page = new Title({
+                new Builder({
                     app: this,
-                    basemap: this.basemap,
-                    position: 'current',
-                    // init: true
-                }, () => {
-                    this.music.display(true);
-                    this.sounds.display(false);
-                });
-
-                this.rabbits = new Rabbits({
-                    id: 'menu-rabbits',
-                    basemap: this.basemap,
-                    protected: true
-                });
-
-                this.basemap.map.on('click', (e) => {
-                    if (this.allowed) {
-                        this.allowed = false;
-
-                        if (this.rabbits.getNumber() >= this.maxrabbit) {
-                            let first = this.rabbits.getCharacter(0);
-                            first.despawn(() => { first.destroy(); });
-                        }
-
-                        let roamer = new Roamer({
-                            layer: this.rabbits,
-                            coordinates: e.lngLat.toArray(),
-                            color: 'random',
-                        });
-
-                        roamer.spawn(() => {
-                            this.allowed = true;
-                            roamer.roam();
-                        });
-                    }
+                    basemap: this.basemap
                 });
             });
         });
