@@ -3,7 +3,7 @@ import * as turf from "@turf/turf";
 import Characters from "./characters.js";
 import { wait } from "../utils/dom.js";
 import { weightedRandom } from "../utils/math.js";
-import { Bird, Hunter, Snake } from "../characters/enemy.js";
+import { Eagle, Hunter, Snake } from "../characters/enemy.js";
 import { within } from "../cartography/analysis.js";
 
 class Enemies extends Characters {
@@ -43,18 +43,15 @@ class Enemies extends Characters {
 
         // This stores enemies that already stroke
         this.stroke = [];
-        this.weights = [1, 1, 1];
-        this.statespool = ['hunter', 'snake', 'bird'];
 
-        if (this.options.coordinates) {
-            this.options.coordinates.forEach((coords) => {
+        if (this.options.elements) {
+            this.options.elements.forEach(e => {
                 let o = this.options;
-                o.coordinates = coords;
+                o.coordinates = e.coordinates;
                 o.layer = this;
-                let choice = weightedRandom(this.statespool, this.weights.slice());
-                if (choice === 'hunter') { new Hunter(o); }
-                else if (choice === 'snake') { new Snake(o); }
-                else if (choice === 'bird') { new Bird(o); }
+                if (e.type === 'hunter') { new Hunter(o); }
+                else if (e.type === 'snake') { new Snake(o); }
+                else if (e.type === 'eagle') { new Eagle(o); }
             });
         }
     }
@@ -132,7 +129,7 @@ class Enemies extends Characters {
             let enemy = this.characters[i];
             enemy.setOrientationFromCoordinates(position);
 
-            if (within(position, enemy.getCoordinates(), this.params.game.tolerance.enemies)) {
+            if (within(position, enemy.getCoordinates(), this.params.game.tolerance.enemies[enemy.getType()])) {
                 // Check if the enemy has not already striked
                 if (!this.stroke.includes(enemy)) {
                     this.stroke.push(enemy);

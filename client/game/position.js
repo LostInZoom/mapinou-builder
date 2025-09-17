@@ -19,6 +19,7 @@ class Position {
                 this.listen = false;
                 this.basemap.ease({
                     center: this.player.getCoordinates(),
+                    duration: 500,
                     easing: easeInOutSine,
                 }, () => {
                     this.listen = true;

@@ -358,7 +358,7 @@ class Basemap {
             id: 'level-enemies',
             basemap: this,
             level: level,
-            coordinates: options.enemies
+            elements: options.enemies
         });
         this.enemies.setOrientationFromCoordinates(options.player);
         this.enemies.orderByDistance(options.player);

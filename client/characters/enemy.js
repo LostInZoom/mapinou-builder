@@ -14,10 +14,11 @@ class Enemy extends Character {
         this.feature.properties.frame = this.frame;
         this.feature.properties.scale = this.scale;
         this.feature.properties.opacity = this.opacity;
+    }
 
+    createAreas() {
         let colors = getColorsByClassNames('enemies-map', 'enemies-map-transparent');
-
-        let sizeArea = this.params.game.tolerance.enemies;
+        let sizeArea = this.params.game.tolerance.enemies[this.type];
         this.width1 = 40;
         this.width2 = 10;
 
@@ -51,6 +52,10 @@ class Enemy extends Character {
         };
 
         this.layer.addArea(this);
+    }
+
+    getType() {
+        return this.type;
     }
 
     revealArea(callback) {
@@ -107,6 +112,9 @@ class Enemy extends Character {
 class Hunter extends Enemy {
     constructor(options) {
         super(options);
+        this.type = 'hunter';
+        this.createAreas();
+
         this.orientable = false;
         this.framerate = 150;
         this.framenumber = 5;
@@ -121,25 +129,12 @@ class Hunter extends Enemy {
     }
 }
 
-class Snake extends Enemy {
+class Eagle extends Enemy {
     constructor(options) {
         super(options);
-        this.orientable = true;
-        this.framerate = 200;
-        this.framenumber = 3;
-        this.framescale = 0.8;
+        this.type = 'eagle';
+        this.createAreas();
 
-        this.feature.properties.type = 'snake';
-        this.feature.properties.offset = this.offset;
-
-        this.layer.addCharacter(this);
-        this.animateFrame();
-    }
-}
-
-class Bird extends Enemy {
-    constructor(options) {
-        super(options);
         this.orientable = false;
         this.framerate = 200;
         this.framenumber = 3;
@@ -153,4 +148,23 @@ class Bird extends Enemy {
     }
 }
 
-export { Enemy, Hunter, Snake, Bird };
+class Snake extends Enemy {
+    constructor(options) {
+        super(options);
+        this.type = 'snake';
+        this.createAreas();
+
+        this.orientable = true;
+        this.framerate = 200;
+        this.framenumber = 3;
+        this.framescale = 0.8;
+
+        this.feature.properties.type = 'snake';
+        this.feature.properties.offset = this.offset;
+
+        this.layer.addCharacter(this);
+        this.animateFrame();
+    }
+}
+
+export { Enemy, Hunter, Eagle, Snake };
