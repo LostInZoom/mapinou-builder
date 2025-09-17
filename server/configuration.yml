@@ -450,9 +450,14 @@ levels:
       text1: 'Voici la rotation d''un solide en trois dimensions :'
       text2: 'Voici un autre solide :'
       text3: 'Appliquez la même rotation et trouvez le bon résultat pour continuer :'
-      solution: 1
+      solution: 3
     tests:
+      - 2
+      - 3
       - 1
+      - 1
+      - 0
+      - 3
   - type: tier
     name: "Niveau 8"
     content:

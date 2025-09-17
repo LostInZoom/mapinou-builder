@@ -94,9 +94,9 @@ class Purdue extends Page {
         let examplescontainer = makeDiv(null, 'purdue-vector-container examples');
         let svg1 = this.app.options.svgs[`purdue${this.index}e0`];
         let example1 = makeDiv(null, 'purdue-vector example', svg1);
-        let rotationto1 = makeDiv(null, 'purdue-label', 'pivote<br>et devient');
+        let rotationto1 = makeDiv(null, 'purdue-label', 'pivote<br>et<br>devient');
         let svg2 = this.app.options.svgs[`purdue${this.index}e1`];
-        let example2 = makeDiv(null, 'purdue-vector example solution', svg2);
+        let example2 = makeDiv(null, 'purdue-vector example answer', svg2);
         examplescontainer.append(example1, rotationto1, example2);
         testcontainer.append(examplescontainer);
 
@@ -110,7 +110,7 @@ class Purdue extends Page {
 
         if (this.stage === 'test') {
             let label = makeDiv(null, 'purdue-label', 'comme');
-            let rotationto2 = makeDiv(null, 'purdue-label', 'pivote<br>et devient');
+            let rotationto2 = makeDiv(null, 'purdue-label', 'pivote<br>et<br>devient');
             modelscontainer.append(label, model, rotationto2);
         } else {
             modelscontainer.append(model);
@@ -139,7 +139,10 @@ class Purdue extends Page {
                 } else {
                     removeClassList(answers, 'active');
                     addClass(t, 'active');
-                    this.answer = value;
+                    this.answer = {
+                        value: value,
+                        right: this.elements.tests[this.index - 1] === value ? true : false
+                    };
                     if (this.stage === 'tutorial') {
                         if (value === this.elements.tutorial.solution) {
                             addClass(pursue, 'pop');
@@ -179,7 +182,6 @@ class Purdue extends Page {
 
         wait(this.app.options.interface.transition.page, () => {
             this.listen = true;
-
             if (this.stage !== 'test') {
                 addClass(back, 'pop');
                 removeClass(text, 'noback');

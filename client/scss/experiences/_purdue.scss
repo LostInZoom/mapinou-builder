@@ -54,17 +54,13 @@ $answer-color-light: #bed3e6;
     &>svg {
         height: 100%;
         width: 100%;
-        fill: $answer-color;
+        fill: $model-color;
         pointer-events: none;
 
         transition: fill .1s ease-in-out;
     }
 
     &.answer>svg {
-        fill: $answer-color;
-    }
-
-    &.solution>svg {
         fill: $answer-color;
     }
 
