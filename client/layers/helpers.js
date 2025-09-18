@@ -1,3 +1,5 @@
+import * as turf from "@turf/turf";
+
 import { within } from "../cartography/analysis";
 import Helper from "../characters/helper";
 import Characters from "./characters";
@@ -31,6 +33,12 @@ class Helpers extends Characters {
     hide() {
         this.visible = false;
         this.characters.forEach(c => { c.hide(); });
+    }
+
+    orderByDistance(coordinates) {
+        this.characters = this.characters.sort((a, b) => {
+            return turf.distance(a.getCoordinates(), coordinates) - turf.distance(b.getCoordinates(), coordinates);
+        });
     }
 
     handle(player) {

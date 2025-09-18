@@ -1,6 +1,7 @@
 @use '../colors';
 
-$button-size: 4rem;
+$button-size-big: 4rem;
+$button-size-small: 3rem;
 $button-padding: .5rem;
 
 .builder-container {
@@ -11,6 +12,16 @@ $button-padding: .5rem;
     height: 100%;
     width: 100%;
     pointer-events: none;
+}
+
+.builder-menu-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% - 2rem);
+    margin: 1rem;
+
+    display: flex;
 }
 
 .builder-menu-bottom {
@@ -24,42 +35,127 @@ $button-padding: .5rem;
     justify-content: space-around;
 }
 
-.builder-menu-button {
+.builder-clear-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    margin-right: auto;
+}
+
+.builder-play {
+    margin-left: auto;
+}
+
+.builder-zoom {
+    height: $button-size-small;
+    background-color: colors.$secondary-color-dark;
+    height: $button-size-small;
+    border-radius: $button-size-small;
+    line-height: $button-size-small;
+    padding: 0 .8rem;
+
+    color: colors.$main-color-light;
+    font-size: 1.2rem;
+    font-family: 'Vincendo';
+}
+
+.builder-top-button {
+    pointer-events: all;
+    height: $button-size-small;
+    width: $button-size-small;
+    background-color: colors.$secondary-color-dark;
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    outline-width: 0;
+    outline-style: solid;
+    outline-color: colors.$secondary-color-dark;
+
+    transform: scale(0);
+    transition:
+        transform .3s cubic-bezier(0.36, 0, 0.66, -0.56),
+        outline .2s linear,
+        background .1s ease-in-out;
+
+    &.pop {
+        transform: scale(1);
+        transition:
+            transform .3s cubic-bezier(0.34, 1.56, 0.64, 1),
+            outline .2s linear,
+            background .1s ease-in-out;
+    }
+
+    &>svg {
+        pointer-events: none;
+        height: inherit;
+        width: inherit;
+        fill: colors.$main-color-light;
+        transition: fill .2s ease-in-out;
+    }
+
+    &.active {
+        background-color: colors.$main-color-light;
+        outline-width: .4rem;
+
+        &>svg {
+            fill: colors.$main-color-dark;
+        }
+    }
+}
+
+.builder-bottom-button {
     position: relative;
+
     pointer-events: all;
     background-color: colors.$secondary-color-dark;
     border-radius: 50%;
+
     display: flex;
     justify-content: center;
     align-items: center;
 
     outline-width: 0;
     outline-style: solid;
-    outline-color: colors.$main-color-light;
+    outline-color: colors.$secondary-color-dark;
 
-    height: $button-size;
-    width: $button-size;
+    height: $button-size-big;
+    width: $button-size-big;
 
     transform: scale(0);
     transition:
         transform .3s cubic-bezier(0.36, 0, 0.66, -0.56),
-        outline .1s linear;
+        outline .2s linear,
+        background .1s ease-in-out;
 
     &.pop {
         transform: scale(1);
         transition:
             transform .3s cubic-bezier(0.34, 1.56, 0.64, 1),
-            outline .1s linear;
+            outline .2s linear,
+            background .1s ease-in-out;
     }
 
     &>img {
         pointer-events: none;
-        width: calc($button-size - ($button-padding * 2));
-        height: calc($button-size - ($button-padding * 2));
+        width: calc($button-size-big - ($button-padding * 2));
+        height: calc($button-size-big - ($button-padding * 2));
     }
 
     &.active {
+        background-color: colors.$main-color-light;
         outline-width: .4rem;
+    }
+
+    &.enemies {
+        height: $button-size-small;
+        width: $button-size-small;
+
+        &>img {
+            pointer-events: none;
+            width: calc($button-size-small - ($button-padding * 2));
+            height: calc($button-size-small - ($button-padding * 2));
+        }
     }
 }
 
@@ -67,7 +163,7 @@ $button-padding: .5rem;
     position: absolute;
     display: flex;
     justify-content: space-around;
-    gap: 1rem;
+    gap: .8rem;
 
-    transform: translateY(calc(-100% - 1rem));
+    transform: translateY(calc(-100% - 1.4rem));
 }
