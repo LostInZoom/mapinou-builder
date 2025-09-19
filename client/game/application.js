@@ -15,10 +15,16 @@ class Application {
         this.options = options;
         this.progression = options.progression;
         this.debug = true;
+        this.currentGame = {
+            player: [-3.1053235400638313, 48.27263956517598],
+            target: [-2.9660401282860756, 48.06515374496134]
+        };
 
         // Create the DOM Element
         this.container = makeDiv('application', null);
         document.body.append(this.container);
+
+        this.header = new Header(this);
 
         this.mask = makeDiv(null, 'mask');
         this.loader = makeDiv(null, 'loader');

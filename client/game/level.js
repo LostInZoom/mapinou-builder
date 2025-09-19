@@ -11,6 +11,7 @@ import { addClass, easingIncrement, makeDiv, removeClass, wait } from "../utils/
 import { ajaxPost } from '../utils/ajax';
 import { easeInOutSine, easeOutExpo } from '../utils/math';
 import Hint from './hint';
+import Builder from './builder';
 
 class Level extends Page {
     constructor(options, callback) {
@@ -19,8 +20,7 @@ class Level extends Page {
         this.levels = this.options.levels;
 
         this.tier = this.options.tier;
-        this.level = this.options.level;
-        this.parameters = this.app.options.levels[this.tier].content[this.level];
+        this.parameters = this.options.parameters;
 
         this.options.app.forbidRabbits();
         this.score = new Score({
@@ -45,17 +45,12 @@ class Level extends Page {
             }
         });
 
-        // this.phase1(() => {
-        //     this.phase2(() => {
-        //         wait(300, () => {
-        //             this.ending();
-        //         });
-        //     });
-        // });
-
-        this.phase2(() => {
-            wait(300, () => {
-                this.ending();
+        this.phase1(() => {
+            this.phase2(() => {
+                this.listening = false;
+                this.clear(() => {
+                    this.toLevels();
+                });
             });
         });
     }
@@ -350,15 +345,9 @@ class Level extends Page {
     toLevels() {
         this.basemap.unsetMinZoom();
         this.destroy();
-
-        this.basemap.fit(this.params.interface.map.levels, {
-            easing: easeInOutSine
-        }, () => {
-            this.app.page = new Levels({
-                app: this.app,
-                position: 'current',
-                update: true
-            });
+        new Builder({
+            app: this.app,
+            basemap: this.basemap
         });
     }
 }
