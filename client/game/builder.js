@@ -32,49 +32,65 @@ class Builder {
         this.container = makeDiv(null, 'builder-container');
         this.app.container.append(this.container);
 
-        this.dragindicator = makeDiv(null, 'builder-drag-indicator', 'Déposez un fichier YAML pour charger une partie.');
-        this.container.append(this.dragindicator);
-
         this.createLayers();
-
-        let game = this.app.currentGame;
-        if (game) {
-            if (game.player) { this.createPlayer(game.player); }
-            if (game.target) { this.createTarget(game.target); }
-            if (game.helpers) {
-                game.helpers.forEach(h => { this.createHelper(h); });
-            }
-            if (game.enemies) {
-                game.enemies.forEach(e => { this.createEnemy(e.type, e.coordinates); });
-            }
-
-            let extents = [];
-            if (this.rabbits) {
-                let re = this.rabbits.getLayerExtent();
-                if (re != null) extents.push(re);
-            }
-            if (this.enemies) {
-                let ee = this.enemies.getLayerExtent();
-                if (ee != null) extents.push(ee);
-            }
-            if (this.helpers) {
-                let he = this.helpers.getLayerExtent();
-                if (he != null) extents.push(he);
-            }
-            extents = mergeExtents(extents);
-
-            this.basemap.fit(extents, {
-                easing: easeInOutSine,
-                padding: 100
-            }, () => {
-
-            });
-        }
-
         this.createTopMenu();
         this.createLeftMenu();
         this.createBottomMenu();
         this.activateListeners();
+
+        this.loadGame(this.app.currentGame);
+
+        let extent = this.getDataExtent();
+        if (extent) {
+            this.fitMap(extent, 100);
+        } else {
+            this.fitMap(this.params.interface.map.start);
+        }
+    }
+
+    loadGame(game) {
+        if (game.player) { this.createPlayer(game.player); }
+        if (game.target) { this.createTarget(game.target); }
+        if (game.helpers) {
+            game.helpers.forEach(h => { this.createHelper(h); });
+        }
+        if (game.enemies) {
+            game.enemies.forEach(e => { this.createEnemy(e.type, e.coordinates); });
+        }
+        if (game.hints) {
+            for (let [zoom, hint] of Object.entries(game.hints)) {
+                this.loadHint(zoom, hint);
+            }
+        }
+
+        if (this.player && this.target) {
+            addClass(this.playButton, 'pop');
+            addClass(this.downloadButton, 'pop');
+        }
+    }
+
+    getDataExtent() {
+        let extents = [];
+        if (this.rabbits) {
+            let re = this.rabbits.getLayerExtent();
+            if (re != null) extents.push(re);
+        }
+        if (this.enemies) {
+            let ee = this.enemies.getLayerExtent();
+            if (ee != null) extents.push(ee);
+        }
+        if (this.helpers) {
+            let he = this.helpers.getLayerExtent();
+            if (he != null) extents.push(he);
+        }
+        return mergeExtents(extents);
+    }
+
+    fitMap(extent, padding = 0) {
+        this.basemap.fit(extent, {
+            easing: easeInOutSine,
+            padding: padding
+        });
     }
 
     createLayers() {
@@ -97,17 +113,24 @@ class Builder {
     createTopMenu() {
         this.topmenu = makeDiv(null, 'builder-menu-top');
 
+        let fileOpener = document.createElement("input");
+        fileOpener.type = "file";
+        fileOpener.accept = ".yml,.yaml";
+        fileOpener.style.display = "none";
+
         this.topleft = makeDiv(null, 'builder-top-container left hidden');
-        this.clearButton = makeDiv(null, 'builder-top-button builder-clear pop', this.params.svgs.cross);
-        this.deleteButton = makeDiv(null, 'builder-top-button builder-remove pop', this.params.svgs.trash);
-        this.topleft.append(this.clearButton, this.deleteButton);
+        this.uploadButton = makeDiv(null, 'builder-top-button builder-upload pop', this.params.svgs.upload);
+        this.downloadButton = makeDiv(null, 'builder-top-button builder-download', this.params.svgs.download);
+        this.playButton = makeDiv(null, 'builder-top-button builder-play', this.params.svgs.play);
+        this.topleft.append(this.uploadButton, this.downloadButton, this.playButton);
 
         this.zoom = makeDiv(null, 'builder-zoom hidden', this.basemap.getZoom().toFixed(2));
 
-        this.topright = makeDiv(null, 'builder-top-container right hidden')
-        this.downloadButton = makeDiv(null, 'builder-top-button builder-download', this.params.svgs.download);
-        this.playButton = makeDiv(null, 'builder-top-button builder-play', this.params.svgs.play);
-        this.topright.append(this.downloadButton, this.playButton);
+        this.topright = makeDiv(null, 'builder-top-container right hidden');
+        this.clearButton = makeDiv(null, 'builder-top-button builder-clear pop', this.params.svgs.cross);
+        this.deleteButton = makeDiv(null, 'builder-top-button builder-remove pop', this.params.svgs.trash);
+        this.topright.append(this.clearButton, this.deleteButton);
+
 
         this.topmenu.append(this.topleft, this.zoom, this.topright);
         this.container.append(this.topmenu);
@@ -124,11 +147,11 @@ class Builder {
         this.basemap.addListener('render', zoomListener);
 
         this.deleteButton.addEventListener('click', () => {
-            if (!hasClass(remove, 'active')) {
-                addClass(remove, 'active');
+            if (!hasClass(this.deleteButton, 'active')) {
+                addClass(this.deleteButton, 'active');
                 this.remove = true;
             } else {
-                removeClass(remove, 'active');
+                removeClass(this.deleteButton, 'active');
                 this.remove = false;
             }
         });
@@ -137,9 +160,43 @@ class Builder {
             this.clearGame();
         });
 
+        this.uploadButton.addEventListener('click', () => {
+            fileOpener.value = "";
+            fileOpener.click();
+        });
+
+        fileOpener.addEventListener("change", e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!(file.name.endsWith(".yml") || file.name.endsWith(".yaml"))) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = evt => {
+                let data = undefined;
+                try {
+                    const text = evt.target.result;
+                    data = yaml.load(text);
+                } catch (err) {
+                    console.log('Error loading YAML file.')
+                }
+
+                if (data) {
+                    this.clearGame(() => {
+                        this.loadGame(data);
+                        this.basemap.fit(this.getDataExtent(), {
+                            easing: easeInOutSine,
+                            padding: 50
+                        });
+                    });
+                }
+            };
+            reader.readAsText(file);
+        });
+
         this.downloadButton.addEventListener('click', () => {
             let game = this.createGame();
-
             const yamlText = yaml.dump(game);
             const blob = new Blob([yamlText], { type: "application/x-yaml;charset=utf-8" });
             const url = URL.createObjectURL(blob);
@@ -160,10 +217,14 @@ class Builder {
                     this.container.remove();
                     this.basemap.removeListeners();
 
-                    this.app.page = new Level({
-                        app: this.app,
-                        position: 'current',
-                        parameters: this.app.currentGame
+                    this.basemap.fit(this.params.interface.map.start, {
+                        easing: easeInOutSine
+                    }, () => {
+                        this.app.page = new Level({
+                            app: this.app,
+                            position: 'current',
+                            parameters: this.app.currentGame
+                        });
                     });
                 });
             });
@@ -334,22 +395,10 @@ class Builder {
                 }
             } else {
                 if (this.mode !== undefined) {
-                    // PLAYER
-                    if (this.mode === 'player') {
-                        this.createPlayer(t);
-                    }
-                    // TARGET
-                    else if (this.mode === 'target') {
-                        this.createTarget(t);
-                    }
-                    // ENEMIES
-                    else if (this.mode === 'enemies') {
-                        this.createEnemy(this.modeEnemies, t);
-                    }
-                    // HELPERS
-                    else if (this.mode === 'helpers') {
-                        this.createHelper(t);
-                    }
+                    if (this.mode === 'player') { this.createPlayer(t); }
+                    else if (this.mode === 'target') { this.createTarget(t); }
+                    else if (this.mode === 'enemies') { this.createEnemy(this.modeEnemies, t); }
+                    else if (this.mode === 'helpers') { this.createHelper(t); }
                 }
             }
 
@@ -362,20 +411,6 @@ class Builder {
             }
         }
         this.basemap.addListener('click', this.listener);
-
-        this.basemap.container.addEventListener('dragenter', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            addClass(this.dragindicator, 'active');
-        });
-        this.basemap.container.addEventListener('dragleave', (e) => {
-            removeClass(this.dragindicator, 'active');
-        });
-        this.basemap.container.addEventListener('dragover', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-        });
     }
 
     createPlayer(coordinates) {
@@ -441,7 +476,7 @@ class Builder {
     }
 
     createHint() {
-        let zoom = Math.round(this.basemap.getZoom());
+        let zoom = Object.keys(this.hints).length > 0 ? this.basemap.getZoom().toFixed(2) : 0;
         let already = false;
         for (let key in this.hints) { if (parseInt(key) === parseInt(zoom)) { already = true; break; } }
         if (!already) {
@@ -467,7 +502,7 @@ class Builder {
         }
     }
 
-    modifyHint(zoom, container) {
+    modifyHint(zoom) {
         let text = this.hints[zoom];
         let mask = makeDiv(null, 'builder-mask active');
         let modifycontainer = makeDiv(null, 'builder-modify-container collapse');
@@ -493,23 +528,48 @@ class Builder {
         cancel.addEventListener('click', () => {
             addClass(modifycontainer, 'collapse');
             mask.remove();
+            wait(300, () => {
+                modifycontainer.remove();
+            });
         });
         validate.addEventListener('click', () => {
             let str = input.innerHTML;
             this.hints[zoom] = str.replace(/\s+$/, '').replace('<br>', '');
             addClass(modifycontainer, 'collapse');
             mask.remove();
+            wait(300, () => {
+                modifycontainer.remove();
+            });
         });
         remove.addEventListener('click', () => {
             delete this.hints[zoom];
             addClass(modifycontainer, 'collapse');
-            addClass(container, 'collapse');
             mask.remove();
-            wait(100, () => {
-                container.remove();
+            wait(300, () => {
+                modifycontainer.remove();
             });
         });
+    }
 
+    loadHint(zoom, hint) {
+        let h = makeDiv(null, 'builder-hint-level collapse', zoom);
+        h.setAttribute('value', zoom);
+        let before;
+        for (let i = 0; i < this.hintselements.children.length; ++i) {
+            if (parseInt(this.hintselements.children[i].getAttribute('value')) < zoom) {
+                before = this.hintselements.children[i];
+                break;
+            }
+        }
+        if (before !== undefined) { this.hintselements.insertBefore(h, before); }
+        else { this.hintselements.append(h); }
+        wait(10, () => { removeClass(h, 'collapse'); });
+
+        this.hints[zoom] = hint;
+
+        h.addEventListener('click', () => {
+            this.modifyHint(zoom, h);
+        });
     }
 
     createGame() {
@@ -525,11 +585,6 @@ class Builder {
         this.helpers.getCharacters().forEach(h => {
             helpers.push(h.getCoordinates());
         });
-
-        let minzoom = Math.min(parseInt(Object.keys(this.hints)));
-        let value = this.hints[minzoom];
-        delete this.hints[minzoom];
-        this.hints['0'] = value;
 
         return {
             player: this.player.getCoordinates(),

@@ -18,32 +18,6 @@ $button-padding: .5rem;
     align-items: center;
 }
 
-.builder-drag-indicator {
-    position: absolute;
-    pointer-events: none;
-    z-index: 50;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-
-    background-color: colors.$secondary-color-dark;
-    transition: opacity .3s ease-in-out;
-
-    display: flex;
-    align-items: center;
-    text-align: center;
-
-    font-family: 'Vincendo';
-    font-size: 1.4rem;
-    color: colors.$main-color-light;
-
-    &.active {
-        opacity: .7;
-    }
-}
-
 .builder-menu-top {
     position: absolute;
     top: 0;
@@ -280,13 +254,14 @@ $button-padding: .5rem;
 
 .builder-hint-level {
     height: 2rem;
-    width: 2rem;
+    padding: 0 .5rem;
+    margin: 0 auto;
 
     font-family: 'Vincendo';
     line-height: 2rem;
     text-align: center;
 
-    border-radius: 50%;
+    border-radius: .4rem;
     overflow: hidden;
     background-color: colors.$secondary-color-dark;
     color: colors.$main-color-light;
@@ -378,7 +353,12 @@ $button-padding: .5rem;
 .builder-modify-button {
     padding: .3rem .6rem;
     border-radius: .3rem;
-    background-color: colors.$secondary-color-dark;
-    color: colors.$main-color-light;
+    background-color: colors.$main-color-light;
+    color: colors.$main-color-dark;
     transition: all .1s linear;
+}
+
+.builder-file-opener {
+    display: none;
+    pointer-events: none;
 }
